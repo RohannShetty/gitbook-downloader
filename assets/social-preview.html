@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=630">
+<title>GitBook Downloader — Social Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px;
+    background: linear-gradient(135deg, #08090a 0%, #0f1011 50%, #1a1b1c 100%);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .card {
+    width: 1120px; height: 550px;
+    border: 1px solid #23252a;
+    border-radius: 24px;
+    padding: 60px 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  .logo-line {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+  }
+  .hex {
+    font-size: 48px; color: #5e6ad2; line-height: 1;
+  }
+  .brand {
+    font-size: 28px; font-weight: 700; color: #f7f8f8; letter-spacing: -0.5px;
+  }
+  .version {
+    font-size: 14px; color: #8a8f98; background: #1a1b1c; padding: 4px 12px; border-radius: 6px;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 56px; font-weight: 800; color: #f7f8f8;
+    line-height: 1.15; letter-spacing: -1.5px; max-width: 800px;
+  }
+  h1 span { color: #5e6ad2; }
+  .subtitle {
+    font-size: 22px; color: #8a8f98; margin-top: 8px; font-weight: 400;
+    max-width: 700px; line-height: 1.4;
+  }
+  .features {
+    display: flex; gap: 24px; margin-top: 8px;
+  }
+  .feat {
+    display: flex; align-items: center; gap: 10px;
+    background: #191a1b; padding: 12px 22px; border-radius: 10px;
+    border: 1px solid #23252a;
+  }
+  .feat-icon { font-size: 22px; }
+  .feat-text { font-size: 16px; color: #d0d6e0; font-weight: 500; }
+  .bottom-bar {
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .url-line {
+    font-size: 18px; color: #5e6ad2; font-weight: 600; letter-spacing: 0.5px;
+  }
+  .url-line span { color: #8a8f98; font-weight: 400; }
+  .stats {
+    display: flex; gap: 32px;
+  }
+  .stat { text-align: center; }
+  .stat-val { font-size: 32px; font-weight: 800; color: #f7f8f8; }
+  .stat-label { font-size: 12px; color: #8a8f98; text-transform: uppercase; letter-spacing: 1px; }
+  .accent-dot {
+    position: absolute; width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(94,106,210,0.15) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .accent-dot.tl { top: -40px; left: -40px; }
+  .accent-dot.br { bottom: -60px; right: -60px; width: 280px; height: 280px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="accent-dot tl"></div>
+    <div class="accent-dot br"></div>
+
+    <div>
+      <div class="logo-line">
+        <span class="hex">⬡</span>
+        <span class="brand">GitBook Downloader</span>
+        <span class="version">v3.1</span>
+      </div>
+
+      <h1>Turn any GitBook docs into <span>AI-ready</span> markdown chunks</h1>
+      <p class="subtitle">Download complete docs → single .md file → split by token count. Built for developers feeding docs to LLMs.</p>
+
+      <div class="features">
+        <div class="feat">
+          <span class="feat-icon">🔍</span>
+          <span class="feat-text">Sitemap + sidebar discovery</span>
+        </div>
+        <div class="feat">
+          <span class="feat-icon">📥</span>
+          <span class="feat-text">Parallel + retry downloads</span>
+        </div>
+        <div class="feat">
+          <span class="feat-icon">✂️</span>
+          <span class="feat-text">Token-aware splitting</span>
+        </div>
+        <div class="feat">
+          <span class="feat-icon">🖥️</span>
+          <span class="feat-text">Dark GUI dashboard</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="url-line">github.com<span>/RohannShetty/gitbook-downloader</span></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val">MIT</div><div class="stat-label">License</div></div>
+        <div class="stat"><div class="stat-val">3.8+</div><div class="stat-label">Python</div></div>
+        <div class="stat"><div class="stat-val">CLI+GUI</div><div class="stat-label">Interfaces</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
