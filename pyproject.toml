@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "3.1.1"
+version = "3.2.0"
 description = "Download complete GitBook documentation sites and split into AI-friendly chunks."
 readme = "README.md"
 license = {text = "MIT"}
