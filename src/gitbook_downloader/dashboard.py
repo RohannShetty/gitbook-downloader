@@ -15,8 +15,12 @@ from datetime import timedelta
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
-from .engine import download_docs
-from .splitter import split_markdown
+try:
+    from .engine import download_docs
+    from .splitter import split_markdown
+except ImportError:
+    from engine import download_docs
+    from splitter import split_markdown
 
 # ── Design System ─────────────────────────────────────────
 ctk.set_appearance_mode("dark")

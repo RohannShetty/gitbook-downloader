@@ -13,8 +13,12 @@ import sys
 import time
 from datetime import timedelta
 
-from .engine import download_docs
-from .splitter import split_file
+try:
+    from .engine import download_docs
+    from .splitter import split_file
+except ImportError:
+    from engine import download_docs
+    from splitter import split_file
 
 
 def cmd_download(args):
