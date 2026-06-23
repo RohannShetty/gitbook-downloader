@@ -1,5 +1,3 @@
-"""GitBook Downloader — Download complete GitBook docs and split for AI."""
+"""GitBook Downloader v4.0 — Streaming download, incremental updates, Stripe UI."""
 
-__version__ = "3.2.0"
-__author__ = "Rohan Shetty"
-__license__ = "MIT"
+__version__ = "4.0.0"

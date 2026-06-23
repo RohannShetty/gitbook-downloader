@@ -14,17 +14,17 @@ import time
 from datetime import timedelta
 
 try:
-    from .engine import download_docs
+    from .engine import stream_download
     from .splitter import split_file
 except ImportError:
-    from engine import download_docs
+    from engine import stream_download
     from splitter import split_file
 
 
 def cmd_download(args):
     """Download a GitBook documentation site."""
     print(f"\n{'═' * 50}")
-    print(f"  GitBook Downloader v3.2")
+    print(f"  GitBook Downloader v4.0")
     print(f"  URL:     {args.url}")
     print(f"  Output:  {args.output}")
     print(f"  Max:     {args.max_pages} pages")
@@ -35,15 +35,15 @@ def cmd_download(args):
     out = os.path.abspath(args.output)
 
     try:
-        pages, errors = download_docs(
+        result = stream_download(
             args.url, out,
             max_pages=args.max_pages,
             workers=args.workers,
         )
         elapsed = round(time.time() - t0, 1)
         print(f"\n{'═' * 50}")
-        print(f"  ✅ {pages} pages | {len(errors)} errors | {timedelta(seconds=int(elapsed))}")
-        print(f"  📄 {os.path.basename(out)}")
+        print(f"  ✅ {result['pages']} pages | {len(result['errors'])} errors | {elapsed}s")
+        print(f"  📄 {os.path.basename(out)} ({result['size_kb']/1024:.1f} MB)")
         print(f"{'═' * 50}\n")
     except KeyboardInterrupt:
         print("\n⏹ Cancelled")
@@ -79,7 +79,7 @@ def main():
         prog="gitbook-downloader",
         description="Download complete GitBook documentation sites and split into AI-friendly chunks.",
     )
-    parser.add_argument("--version", action="version", version="gitbook-downloader 3.2.0")
+    parser.add_argument("--version", action="version", version="gitbook-downloader 4.0.0")
     sub = parser.add_subparsers(dest="command", help="Available commands")
 
     dl = sub.add_parser("download", help="Download a GitBook documentation site")
