@@ -37,50 +37,14 @@ gitbook-dl split downloaded_docs.md --max-tokens 8000
 
 ## ✨ Features
 
-<table>
-<tr>
-<td width="50%">
-
-### 🔍 Smart Discovery
-- Recursive sitemap parsing (handles sitemap indexes)
-- Sidebar navigation crawling for complete coverage
-- Finds pages that sitemaps miss
-- Saturation detection — stops when all pages found
-
-</td>
-<td width="50%">
-
-### 📥 Robust Downloads
-- Parallel downloads (1–10 concurrent workers)
-- Retries with exponential backoff (1s → 3s → 8s)
-- Rate-limit handling (429 auto-wait)
-- Failed page tracking + `_failed.json` output
-- Page-size tracking in real-time
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### ✂️ AI-Optimized Splitter
-- Header-boundary aware (never cuts mid-section)
-- Token-count splitting (via `tiktoken` — Claude/GPT encoding)
-- Byte-size splitting as fallback
-- Zero-config: detects the best strategy
-
-</td>
-<td width="50%">
-
-### 🖥️ Beautiful GUI
-- Linear-inspired dark theme
-- Live stats: Discovered, Downloaded, Failed, Elapsed
-- Real-time progress bar + activity log
-- Two tabs: Download & Split
-- Built with `customtkinter`
-
-</td>
-</tr>
-</table>
+| | |
+|---|---|
+| 🔍 **Complete discovery** | BFS crawler finds every page — follows all internal links |
+| 📄 **Clean markdown** | HTML → markdown conversion with header preservation |
+| 🔗 **Anchor dedup** | Smart URL normalization — no duplicate pages from `#fragments` |
+| ✂️ **Header-boundary split** | Chunks start at `#` headers — never break mid-section |
+| 🖥️ **Beautiful GUI** | Linear-inspired dark theme with live stats + activity log |
+| 🏠 **Offline archive** | Single `.md` file — searchable, version-controllable, portable |
 
 ---
 
@@ -112,18 +76,6 @@ pip install -e .
 pip install gitbook-downloader[gui]
 ```
 
-### Want token-aware splitting?
-
-```bash
-pip install gitbook-downloader[tokens]
-```
-
-### Or everything:
-
-```bash
-pip install gitbook-downloader[all]
-```
-
 ---
 
 ## 📖 Usage
@@ -139,8 +91,7 @@ gitbook-dl download https://docs.example.com/ -p 1000 -w 8
 # ── Split ─────────────────────────────────────────
 gitbook-dl split downloaded_docs.md
 gitbook-dl split downloaded_docs.md -s 2.0           # 2 MB chunks
-gitbook-dl split downloaded_docs.md -t 8000           # 8K token chunks
-gitbook-dl split downloaded_docs.md -o ./my_chunks/   # custom output dir
+gitbook-dl split downloaded_docs.md -o ./my_chunks/  # custom output dir
 
 # ── GUI ───────────────────────────────────────────
 gitbook-dl gui
@@ -152,8 +103,7 @@ gitbook-dl gui
 |------|-------------|---------|
 | `url` | GitBook site URL | *(required)* |
 | `-o, --output` | Output markdown file | `downloaded_docs.md` |
-| `-p, --max-pages` | Maximum pages to download | `5000` |
-| `-w, --workers` | Parallel download workers (1–10) | `5` |
+| `-p, --max-pages` | Maximum pages to download | `500` |
 
 ### CLI Options — `split`
 
@@ -162,7 +112,6 @@ gitbook-dl gui
 | `file` | Input markdown file | *(required)* |
 | `-o, --output-dir` | Output directory for chunks | `<file>_chunks/` |
 | `-s, --max-mb` | Max MB per chunk | `1.0` |
-| `-t, --max-tokens` | Max tokens per chunk *(overrides -s)* | `0` (disabled) |
 
 ### GUI Mode
 
@@ -178,42 +127,52 @@ gitbook-dl gui
 
 ## 🧠 How It Works
 
-```mermaid
-flowchart LR
-    A[🌐 GitBook URL] --> B{🔍 Phase 1: Discovery}
-    B --> C[sitemap.xml]
-    B --> D[Sidebar &lt;nav&gt; crawl]
-    C --> E[All URLs found]
-    D --> E
-    E --> F{📥 Phase 2: Download}
-    F --> G[Parallel workers]
-    G --> H[Retry on failure]
-    H --> I[Convert to Markdown]
-    I --> J[📄 Single .md file]
-    J --> K{✂️ Splitter}
-    K --> L[Header-boundary split]
-    L --> M[Token-count or size-based]
-    M --> N[🧩 AI-ready chunks]
+```
+┌─────────────────────────────────────────────────────┐
+│                  🌐 GitBook Site                     │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│             🔍 BFS Crawler                          │
+│  Start at root → follow every internal link          │
+│  Strip nav/footer/sidebar → extract main content    │
+│  HTML → clean Markdown (markdownify)                │
+│  Dedup: normalize URLs, skip #fragments             │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+             📄 Single .md file
+        (title + source URL + content + --- separator)
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│             ✂️  Header-Boundary Splitter             │
+│  Split on `#` headers → preserve section integrity   │
+│  Each chunk fits within size limit (default 1 MB)   │
+│  Never breaks mid-paragraph or mid-code-block       │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+             🧩 AI-ready chunks
+          (doc_part_01.md … doc_part_NN.md)
 ```
 
-### Phase 1 — Discovery
+### Download Engine
 
-1. **Sitemap parsing** — Recursively fetches `sitemap.xml`, handles sitemap indexes, extracts all canonical URLs
-2. **Sidebar crawling** — Crawls `<nav>` elements on GitBook pages to find pages the sitemap might miss
-3. **Saturation detection** — Stops when no new links are found for 5 consecutive pages
-
-### Phase 2 — Download
-
-1. **Parallel workers** — Downloads pages concurrently with configurable threads
-2. **Retry logic** — 3 attempts with exponential backoff for transient failures
-3. **Content extraction** — Strips navigation, footers, sidebars, scripts; preserves main content
-4. **Markdown conversion** — HTML → clean markdown with ATX headers
+1. **Start at the root URL** — fetch the homepage
+2. **Extract content** — strip `nav`, `footer`, `aside`, `script`, `style`
+3. **Convert to markdown** — HTML → clean markdown with preserved header hierarchy
+4. **Discover links** — collect every internal `<a href>` on the page
+5. **Repeat** — visit each discovered URL (BFS), skip already-seen pages
+6. **Write output** — all pages concatenated into one `.md` file with `Source:` attribution
 
 ### Splitter
 
-1. **Header-boundary awareness** — Splits on `#` headers so chunks never break mid-section
-2. **Token counting** — Uses `tiktoken` (GPT-4/Claude encoding) when available
-3. **Byte-size fallback** — Falls back to MB-based splitting without `tiktoken`
+1. **Read the file** — load the complete markdown
+2. **Split on `#` headers** — each chunk starts at a markdown heading
+3. **Stay within size limit** — when adding a section would exceed 1 MB (default), start a new chunk
+4. **Write numbered files** — `doc_part_01.md`, `doc_part_02.md`, …
 
 ---
 

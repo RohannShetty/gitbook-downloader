@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "3.1.0"
+version = "3.1.1"
 description = "Download complete GitBook documentation sites and split into AI-friendly chunks."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
     {name = "Rohan Shetty", email = "shettyrohan2@gmail.com"},
 ]
-keywords = ["gitbook", "documentation", "markdown", "downloader", "ai", "llm", "chunks", "splitter"]
+keywords = ["gitbook", "documentation", "markdown", "downloader", "ai", "llm", "chunks", "splitter", "web-scraping"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -38,8 +38,7 @@ dependencies = [
 
 [project.optional-dependencies]
 gui = ["customtkinter>=5.2.0"]
-tokens = ["tiktoken>=0.5.0"]
-all = ["customtkinter>=5.2.0", "tiktoken>=0.5.0"]
+all = ["customtkinter>=5.2.0"]
 
 [project.scripts]
 gitbook-downloader = "gitbook_downloader.cli:main"

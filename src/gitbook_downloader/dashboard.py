@@ -2,21 +2,20 @@
 Dashboard GUI — Linear-inspired dark theme for GitBook Downloader.
 
 Provides two tabs:
-  📥 Download — Two-phase engine with live stats, progress, and activity log
-  ✂️ Split   — Markdown chunker with file picker and results viewer
+  📥 Download — BFS crawler with live progress
+  ✂️ Split   — Markdown chunker with file picker
 """
 
 import os
-import sys
-import json
 import queue
 import threading
+import time
 from datetime import timedelta
 
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
-from .engine import SmartEngine
+from .engine import download_docs
 from .splitter import split_markdown
 
 # ── Appearance ──────────────────────────────────────────────
@@ -41,6 +40,109 @@ C = {
 FONT = {}
 
 
+class DownloadThread(threading.Thread):
+    """Runs download in background, feeds log entries to a queue."""
+
+    def __init__(self, url, output, max_pages, log_queue):
+        super().__init__(daemon=True)
+        self.url = url
+        self.output = output
+        self.max_pages = max_pages
+        self.log_queue = log_queue
+        self._stop = threading.Event()
+        self.result = None
+
+    def run(self):
+        visited = set()
+        to_visit = [self.url]
+        all_markdown = []
+        base_domain = __import__("urllib.parse", fromlist=["urlparse"]).urlparse(self.url).netloc
+        import requests
+        from bs4 import BeautifulSoup
+        from markdownify import markdownify as md
+        from urllib.parse import urljoin, urlparse as uparse
+        import re
+
+        count = 0
+        started = time.time()
+
+        while to_visit and len(visited) < self.max_pages and not self._stop.is_set():
+            url = to_visit.pop(0)
+            if url in visited:
+                continue
+            count += 1
+
+            self.log_queue.put({
+                "level": "info", "msg": f"  [{count}] {url}",
+                "downloaded": len(visited), "discovered": len(visited) + len(to_visit),
+                "elapsed": int(time.time() - started), "phase": "download",
+            })
+
+            try:
+                resp = requests.get(url, timeout=15)
+                if resp.status_code != 200:
+                    self.log_queue.put({
+                        "level": "error", "msg": f"  ⚠  HTTP {resp.status_code}: {url}",
+                        "downloaded": len(visited), "discovered": len(visited) + len(to_visit),
+                        "elapsed": int(time.time() - started), "phase": "download",
+                    })
+                    continue
+
+                visited.add(url)
+                soup = BeautifulSoup(resp.text, "html.parser")
+
+                for tag in soup.find_all(["nav", "footer", "aside", "script", "style"]):
+                    tag.decompose()
+
+                main = (
+                    soup.find("main")
+                    or soup.find("article")
+                    or soup.find("div", class_="content")
+                    or soup.body
+                )
+                html = str(main) if main else resp.text
+                markdown = md(html, heading_style="ATX")
+                markdown = re.sub(r"\n\s*\n\s*\n", "\n\n", markdown)
+
+                title = soup.find("h1")
+                title_text = title.get_text().strip() if title else os.path.basename(url.rstrip("/")) or "Home"
+
+                all_markdown.append(f"# {title_text}\n\nSource: {url}\n\n{markdown}\n\n---\n\n")
+
+                self.log_queue.put({
+                    "level": "success", "msg": f"  ✓ [{len(visited)}] {title_text}",
+                    "downloaded": len(visited), "discovered": len(visited) + len(to_visit),
+                    "elapsed": int(time.time() - started), "phase": "download",
+                })
+
+                for link in soup.find_all("a", href=True):
+                    href = link["href"]
+                    full_url = urljoin(url, href)
+                    parsed = uparse(full_url)
+                    if parsed.netloc == base_domain and full_url not in visited and full_url not in to_visit:
+                        to_visit.append(full_url)
+
+            except Exception as e:
+                self.log_queue.put({
+                    "level": "error", "msg": f"  ✕ {url}: {e}",
+                    "downloaded": len(visited), "discovered": len(visited) + len(to_visit),
+                    "elapsed": int(time.time() - started), "phase": "download",
+                })
+
+        # Write output
+        try:
+            with open(self.output, "w", encoding="utf-8") as f:
+                f.write("\n".join(all_markdown))
+        except Exception as e:
+            self.log_queue.put({"level": "error", "msg": f"Write error: {e}", "downloaded": len(visited), "discovered": len(visited), "elapsed": int(time.time() - started), "phase": "done"})
+
+        self.result = (len(visited), time.time() - started)
+        self.log_queue.put({"level": "highlight", "msg": "", "downloaded": len(visited), "discovered": len(visited), "elapsed": int(time.time() - started), "phase": "done"})
+
+    def stop(self):
+        self._stop.set()
+
+
 class Dashboard(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -50,7 +152,7 @@ class Dashboard(ctk.CTk):
         self.configure(fg_color=C["bg"])
         self.minsize(860, 660)
 
-        self.engine = None
+        self._thread = None
         self._poll_job = None
         self._stat_labels = {}
         self._build()
@@ -76,7 +178,6 @@ class Dashboard(ctk.CTk):
         lbl.pack(pady=(0, 8))
         return lbl
 
-    # ── Build ────────────────────────────────────────────────
     def _build(self):
         # Header
         hdr = ctk.CTkFrame(self, fg_color=C["panel"], height=56, corner_radius=0)
@@ -86,7 +187,7 @@ class Dashboard(ctk.CTk):
                      width=40).pack(side="left", padx=(16, 4), pady=10)
         ctk.CTkLabel(hdr, text="GitBook Downloader", font=FONT["h2"],
                      text_color=C["text"]).pack(side="left", pady=10)
-        ctk.CTkLabel(hdr, text="v3.1 — sitemaps + retries + token-aware split",
+        ctk.CTkLabel(hdr, text="v3.1 — simple BFS crawler + smart split",
                      font=FONT["sm"], text_color=C["muted"]).pack(side="left", padx=12, pady=10)
         ver = ctk.CTkLabel(hdr, text="v3.1", font=FONT["xs"], text_color=C["muted"],
                            fg_color=C["card"], corner_radius=4, width=36, height=22)
@@ -110,7 +211,7 @@ class Dashboard(ctk.CTk):
     def _build_download(self):
         t = self.tab_dl
 
-        # URL
+        # URL input
         uf = ctk.CTkFrame(t, fg_color=C["panel"], corner_radius=10)
         uf.pack(fill="x", padx=8, pady=(8, 4))
         ctk.CTkLabel(uf, text="Target URL", font=FONT["h3"], text_color=C["text2"]).pack(anchor="w", padx=14, pady=(10, 0))
@@ -139,8 +240,7 @@ class Dashboard(ctk.CTk):
         opt.pack(fill="x", padx=8, pady=4)
         for i, (label, var, default, w) in enumerate([
             ("Output file", "fname_in", "downloaded_docs.md", 220),
-            ("Max pages", "maxpg_in", "5000", 80),
-            ("Parallel", "concurrency_in", "5", 60),
+            ("Max pages", "maxpg_in", "500", 80),
         ]):
             ctk.CTkLabel(opt, text=label, font=FONT["sm"], text_color=C["muted"]).grid(
                 row=0, column=i, sticky="w", padx=14, pady=(10, 0))
@@ -150,7 +250,6 @@ class Dashboard(ctk.CTk):
             entry.insert(0, default)
             entry.grid(row=1, column=i, sticky="w", padx=14, pady=(2, 10))
             setattr(self, var, entry)
-        opt.grid_columnconfigure(2, weight=1)
 
         # Stats
         st = ctk.CTkFrame(t, fg_color=C["panel"], corner_radius=10)
@@ -160,16 +259,9 @@ class Dashboard(ctk.CTk):
         for k, col, color in [
             ("discovered", 0, C["amber"]),
             ("downloaded", 1, C["green"]),
-            ("failed", 2, C["red"]),
-            ("retries", 3, C["amber"]),
-            ("elapsed", 4, C["muted"]),
+            ("elapsed", 2, C["muted"]),
         ]:
             self._stat_labels[k] = self._make_stat(grid, k.title(), "0" if k != "elapsed" else "0s", col, color)
-
-        # Phase
-        self.phase_lbl = ctk.CTkLabel(t, text="Ready", font=FONT["sm"], text_color=C["muted"],
-                                      fg_color=C["surface"], corner_radius=4, width=240, height=24)
-        self.phase_lbl.pack(pady=(4, 2))
 
         # Progress
         self.prog = ctk.CTkProgressBar(t, fg_color=C["surface"], progress_color=C["accent"], height=8, corner_radius=4)
@@ -200,7 +292,6 @@ class Dashboard(ctk.CTk):
             ("success", C["green"]),
             ("error", C["red"]),
             ("highlight", C["accent_h"]),
-            ("phase", C["amber"]),
         ]:
             self.log.tag_config(tag, foreground=color)
 
@@ -224,10 +315,8 @@ class Dashboard(ctk.CTk):
         # Options
         opt = ctk.CTkFrame(t, fg_color=C["panel"], corner_radius=10)
         opt.pack(fill="x", padx=8, pady=4)
-        ctk.CTkLabel(opt, text="Chunk size (MB)", font=FONT["sm"], text_color=C["muted"]).grid(
-            row=0, column=0, sticky="w", padx=14, pady=(10, 0))
-        ctk.CTkLabel(opt, text="Output folder", font=FONT["sm"], text_color=C["muted"]).grid(
-            row=0, column=1, sticky="w", padx=14, pady=(10, 0))
+        ctk.CTkLabel(opt, text="Chunk size (MB)", font=FONT["sm"], text_color=C["muted"]).grid(row=0, column=0, sticky="w", padx=14, pady=(10, 0))
+        ctk.CTkLabel(opt, text="Output folder", font=FONT["sm"], text_color=C["muted"]).grid(row=0, column=1, sticky="w", padx=14, pady=(10, 0))
         self.sp_size = ctk.CTkEntry(opt, font=FONT["body"], height=34, width=80,
                                     fg_color=C["surface"], border_color=C["border"],
                                     text_color=C["text"], corner_radius=6)
@@ -277,100 +366,83 @@ class Dashboard(ctk.CTk):
         try:
             mp = int(self.maxpg_in.get())
         except ValueError:
-            mp = 5000
-        try:
-            cc = int(self.concurrency_in.get())
-            SmartEngine.CONCURRENCY = max(1, min(cc, 10))
-        except ValueError:
-            SmartEngine.CONCURRENCY = 5
+            mp = 500
 
         out = os.path.join(os.getcwd(), fname)
+        self._log_queue = queue.Queue()
 
         self.log.delete("1.0", "end")
-        self.log.insert("end", (
-            f"╔══ DOWNLOAD ══╗\n"
-            f"║ URL:  {url}\n"
-            f"║ File: {fname}\n"
-            f"║ Max:  {mp} pages\n"
-            f"║ Workers: {SmartEngine.CONCURRENCY}\n"
-            f"╚{'═'*14}╝\n\n"
-        ), "highlight")
+        self.log.insert("end", f"╔══ DOWNLOAD ══╗\n║ URL:  {url}\n║ File: {fname}\n║ Max:  {mp} pages\n╚{'═'*14}╝\n\n", "highlight")
 
         self.prog.set(0)
-        self.prog_lbl.configure(text="Phase 1: Discovery…")
-        self.phase_lbl.configure(text="🔍 Discovery Phase", text_color=C["amber"])
+        self.prog_lbl.configure(text="Downloading…")
         self.cur_lbl.configure(text="")
 
-        for k in ("discovered", "downloaded", "failed", "retries"):
+        for k in ("discovered", "downloaded"):
             self._stat_labels[k].configure(text="0")
         self._stat_labels["elapsed"].configure(text="0s")
 
         self.btn_go.configure(state="disabled")
         self.btn_stop.configure(state="normal")
-        for w in (self.url_in, self.fname_in, self.maxpg_in, self.concurrency_in):
+        for w in (self.url_in, self.fname_in, self.maxpg_in):
             w.configure(state="disabled")
 
-        self.engine = SmartEngine(url, out, mp)
-        threading.Thread(target=self.engine.run, daemon=True).start()
+        self._thread = DownloadThread(url, out, mp, self._log_queue)
+        self._thread.start()
         self._dl_poll()
 
     def _dl_poll(self):
-        if self.engine is None:
+        if self._thread is None:
             return
         try:
             while True:
-                e = self.engine.log.get_nowait()
-                self.log.insert("end", e["msg"] + "\n", e["level"])
-                self.log.see("end")
-                s = e["stats"]
-                self._stat_labels["discovered"].configure(text=str(s["discovered"]))
-                self._stat_labels["downloaded"].configure(text=str(s["downloaded"]))
-                self._stat_labels["failed"].configure(text=str(s["failed"]))
-                self._stat_labels["retries"].configure(text=str(s.get("retries", 0)))
-                el = s.get("elapsed", 0)
+                e = self._log_queue.get_nowait()
+                if e["msg"]:
+                    self.log.insert("end", e["msg"] + "\n", e["level"])
+                    self.log.see("end")
+
+                dl = e.get("downloaded", 0)
+                disc = e.get("discovered", 0)
+                el = e.get("elapsed", 0)
+
+                self._stat_labels["downloaded"].configure(text=str(dl))
+                self._stat_labels["discovered"].configure(text=str(disc))
                 self._stat_labels["elapsed"].configure(text=str(timedelta(seconds=int(el))) if el else "…")
+                self.cur_lbl.configure(text=e.get("msg", ""))
 
-                ph = s.get("phase", "discovery")
-                if ph == "discovery":
-                    self.phase_lbl.configure(text="🔍 Discovery Phase — finding all pages…", text_color=C["amber"])
-                    if s["discovered"] > 0:
-                        self.prog.set(min(s["discovered"] / max(s["discovered"] + 50, 1), 0.3))
-                else:
-                    self.phase_lbl.configure(text="📥 Download Phase", text_color=C["green"])
-                    if s["discovered"] > 0:
-                        self.prog.set(0.3 + 0.7 * min(s["downloaded"] / max(s["discovered"], 1), 1.0))
+                if disc > 0:
+                    self.prog.set(min(dl / max(disc, 1), 1.0))
+                    self.prog_lbl.configure(text=f"{dl} downloaded / {disc} discovered")
 
-                total_done = s["downloaded"] + s["failed"]
-                if ph == "discovery":
-                    self.prog_lbl.configure(text=f"Discovery: {s['discovered']} URLs found…")
-                elif total_done > 0:
-                    self.prog_lbl.configure(text=f"{s['downloaded']} ok / {s['failed']} fail / {s['discovered']} total")
-
-                if e["level"] in ("success", "error") and ("✓ [" in e.get("msg", "") or "✕ [" in e.get("msg", "")):
-                    self.cur_lbl.configure(text=e["msg"])
+                if e.get("phase") == "done":
+                    self._dl_done(dl, el)
+                    return
         except queue.Empty:
             pass
 
-        if self.engine.done.is_set():
-            self._dl_done()
-        else:
-            self._poll_job = self.after(100, self._dl_poll)
+        if not self._thread.is_alive():
+            self._dl_done(
+                self._thread.result[0] if self._thread.result else 0,
+                int(self._thread.result[1]) if self._thread.result else 0,
+            )
+            return
 
-    def _dl_done(self):
+        self._poll_job = self.after(100, self._dl_poll)
+
+    def _dl_done(self, pages, elapsed):
         self.btn_go.configure(state="normal")
         self.btn_stop.configure(state="disabled")
         self.prog.set(1.0)
         self.prog_lbl.configure(text="Complete ✓")
-        self.phase_lbl.configure(text="✅ Done", text_color=C["green"])
-        self.cur_lbl.configure(text="")
-        for w in (self.url_in, self.fname_in, self.maxpg_in, self.concurrency_in):
+        self.cur_lbl.configure(text=f"✅ Downloaded {pages} pages in {timedelta(seconds=int(elapsed))}")
+        for w in (self.url_in, self.fname_in, self.maxpg_in):
             w.configure(state="normal")
-        self.engine = None
+        self._thread = None
         self._poll_job = None
 
     def _dl_stop(self):
-        if self.engine:
-            self.engine.stop()
+        if self._thread:
+            self._thread.stop()
         self.btn_stop.configure(state="disabled")
         self.log.insert("end", "\n⏹  Stopping…\n", "error")
 
