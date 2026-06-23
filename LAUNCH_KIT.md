@@ -1,306 +1,428 @@
-# 🚀 Launch Kit — GitBook Downloader v3.1
+# 🚀 Launch Plan — GitBook Downloader v4.0
 
-> Copy-paste ready submissions for every platform. One post per platform.
+> Complete social media strategy. Copy-paste ready. Timeline included.
 
 ---
 
-## 📊 Product Hunt
+## 📋 Pre-Launch Checklist
 
-### Tagline (60 chars)
-**Download any GitBook docs → split into AI-friendly chunks**
+- [ ] Star the repo yourself (social proof — people follow early stars)
+- [ ] Add repo to your GitHub profile README pin
+- [ ] Screenshot the app (dashboard, download progress, split results)
+- [ ] Record a 15-second demo GIF (URL → download → split → ChatGPT upload)
+- [ ] Open `assets/social-preview.html` → screenshot → set as repo's Social Preview image in Settings
 
-### Description (260 chars)
-Download entire GitBook documentation sites as a single markdown file, then split into token-aware chunks for LLMs (ChatGPT, Claude, Gemini). Two-phase engine (sitemap + sidebar discovery → parallel downloads with retries). Ships with a beautiful dark GUI.
+---
+
+## 🎯 Target Audiences
+
+| Audience | Pain Point | Hook |
+|----------|-----------|------|
+| **AI/LLM devs** | Context window limits | "Feed entire docs to your LLM in 30 seconds" |
+| **RAG builders** | Manual chunking is tedious | "Header-boundary splitter that never breaks code blocks" |
+| **Open source devs** | Can't keep 20 docs tabs open | "One .md file. Searchable. Offline." |
+| **Indie hackers** | Building with unfamiliar APIs | "Download any API docs → feed to Cursor/Claude" |
+| **Students** | Need offline study materials | "Download docs before your flight" |
+| **Enterprise devs** | Behind firewalls, no internet | "Download once, reference forever" |
+
+---
+
+## 🗓️ Launch Timeline
+
+| Day | Time | Platform | Action |
+|-----|------|----------|--------|
+| **Mon** | 9 AM EST | GitHub | Set up repo, star, pin to profile |
+| **Mon** | 12 PM | Twitter | Teaser tweet: "Building something for AI devs..." |
+| **Tue** | 12:01 AM PST | **Product Hunt** | 🚀 LAUNCH (best time for dev tools) |
+| **Tue** | 7 AM EST | Hacker News | Show HN post |
+| **Tue** | 9 AM EST | r/Python | Project post |
+| **Tue** | 10 AM EST | r/LocalLLaMA | Text post (this audience LOVES doc-to-LLM tools) |
+| **Tue** | 12 PM | Twitter | Main launch thread (4 tweets) |
+| **Tue** | 2 PM | r/programming | Link post |
+| **Wed** | 9 AM | Dev.to | Long-form article |
+| **Wed** | 12 PM | LinkedIn | Professional post |
+| **Wed** | 2 PM | r/MachineLearning | [P] post |
+| **Thu** | Anytime | YouTube Shorts | 60-second demo |
+| **Fri** | Anytime | Newsletter pitches | Submit to TLDR, Changelog, Python Weekly |
+
+---
+
+## 🦄 PRODUCT HUNT
+
+### Tagline
+**Download any GitBook docs site → split into AI-ready chunks in 2 minutes**
+
+### Description
+Stop copy-pasting documentation into ChatGPT one page at a time. GitBook Downloader finds every page on a GitBook site, downloads clean markdown (no nav bars, no cookie banners), and splits it into perfectly-sized chunks that respect headers and code blocks. 673 pages of docs.openalgo.in → 5 MB → 5 chunks. Desktop app, one click. No Python required.
 
 ### Topics
-`Developer Tools` `Open Source` `GitHub` `AI` `Productivity`
+`Developer Tools` `AI` `Open Source` `Productivity` `GitHub`
 
-### First Comment (post immediately after launch)
+### Maker Comment (post immediately after launch)
 
-Hey makers 👋
+Hey Product Hunt! 👋
 
-I built this because I kept needing to feed documentation into ChatGPT/Claude but hit the context window limit every time. Manually copying pages one by one was painful.
+I built this after spending 3 hours copy-pasting OpenAlgo's documentation into ChatGPT one page at a time. There are 673 pages. I made it to page 40 before giving up.
 
-**What it does:**
-1. **Downloads** an entire GitBook site into one .md file (finds every page via sitemap + sidebar crawling)
-2. **Splits** that file into chunks — but intelligently: respects header boundaries AND counts actual tokens (using tiktoken — same encoding as GPT-4/Claude)
+**The problem:** AI tools like ChatGPT, Claude, and Cursor are incredible — but they can't browse entire documentation sites. Their context windows are limited, and manually feeding them pages is painful.
 
-**Why it's different from wget/curl:**
-- GitBook-specific: knows how to find ALL pages (sitemap indexes, sidebar `<nav>` trees)
-- Retry logic: handles rate limits, 429s, connection failures
-- AI-aware splitting: never cuts mid-paragraph, counts tokens not bytes
-- Beautiful GUI: if you prefer clicking over typing
+**What GitBook Downloader does:**
 
-**Stack:** Python 3.8+, requests + BeautifulSoup + customtkinter. MIT license.
+1. **Finds every page** — BFS crawler that discovers pages buried in submenus and sidebars
+2. **Downloads clean markdown** — strips navigation, footers, cookie banners. Just the content.
+3. **Splits intelligently** — chunks aligned to markdown headers. Never breaks mid-sentence or mid-code-block.
+4. **Updates incrementally** — docs changed? One click fetches only new pages.
 
-Would love feedback — especially from people who use docs for RAG or fine-tuning! What other doc platforms should I support next? (Docusaurus? ReadTheDocs?)
+**Real-world test: docs.openalgo.in**
+- 673 pages found
+- 5.0 MB of clean markdown (the old wget approach produced 38 MB of garbage)
+- 5 perfect chunks
+- Uploaded to ChatGPT in 30 seconds
 
-### Images to upload
-1. `assets/social-preview.html` — open in browser, fullscreen, screenshot → main thumbnail
-2. Terminal screenshot showing `gitbook-dl download` + progress
-3. GUI screenshot showing the dark dashboard with live stats
+**Why it's better than wget/curl:**
+- wget downloads HTML with nav bars, sidebars, scripts — useless for LLMs
+- curl gets one page at a time
+- Neither handles GitBook's sidebar navigation
+- Neither splits output into AI-friendly chunks
 
-### Launch checklist
-- [ ] Claim `gitbook-downloader` on Product Hunt (or use GitHub OAuth)
-- [ ] Upload 3+ images
-- [ ] Set launch time: **Tuesday/Wednesday/Thursday 12:01 AM PST** (best for dev tools)
-- [ ] First comment ready to paste
-- [ ] Share PH link on Twitter/Reddit to drive upvotes
+**Tech stack:** Python 3.8+, requests, BeautifulSoup, markdownify, customtkinter. MIT license.
+
+**I'd love feedback on:**
+- What other doc platforms should I support? (Docusaurus? ReadTheDocs? MkDocs?)
+- What chunk sizes work best for your LLM workflows?
+- Would a web UI version be useful?
+
+Thanks for checking it out! 🚀
 
 ---
 
-## 🔗 Hacker News — Show HN
+## 🧠 HACKER NEWS — Show HN
 
 ### Title
-**Show HN: GitBook Downloader — download any GitBook docs and split into AI-ready chunks**
+**Show HN: GitBook Downloader — download any GitBook docs site and split into AI-ready chunks**
 
 ### Body
 
-I built a Python tool that downloads entire GitBook documentation sites and splits them into AI-friendly markdown chunks.
+I built a tool that downloads entire GitBook documentation sites and splits them into LLM-friendly markdown chunks.
 
-**The problem:** You find a great documentation site on GitBook. You want to feed it to ChatGPT/Claude for context. But the context window is limited, and manually copying pages one by one takes forever.
+**The problem I was solving:** I needed OpenAlgo's full API documentation inside ChatGPT to build a trading bot. The docs have 673 pages. Copy-pasting them one-by-one was going to take hours. wget downloaded HTML garbage — navigation bars, cookie banners, sidebars — 90% of the bytes weren't documentation.
 
 **What it does:**
 
-```
-# Download the entire site (finds EVERY page via sitemap + sidebar)
-gitbook-dl download https://docs.example.com/
+```bash
+# Step 1: Download the entire site (finds all 673 pages)
+gitbook-dl download https://docs.openalgo.in/
 
-# Split into 8K-token chunks (uses GPT-4/Claude tokenizer)
-gitbook-dl split downloaded_docs.md --max-tokens 8000
+# → 5.0 MB of clean markdown, 673 pages, 2 minutes
+
+# Step 2: Split into AI-friendly chunks
+gitbook-dl split downloaded_docs.md
+
+# → 5 chunks, each ~1 MB, aligned to markdown headers
+# → Never breaks mid-sentence, never cuts a code block
 ```
 
 **How it works:**
-- Phase 1: Recursive sitemap parsing + `<nav>` sidebar crawling — finds pages sitemaps miss
-- Phase 2: Parallel downloads (configurable workers), retries with exponential backoff, rate-limit handling
-- Splitter: Header-boundary-aware (never cuts mid-section), token-counting via tiktoken
+- BFS crawler starts at the root and follows every internal link
+- Parallel downloads (5 workers) with streaming pipeline — pages download as they're discovered
+- URL normalization strips #fragments so you don't get 13 copies of the same page
+- markdownify converts HTML → clean markdown
+- Header-boundary splitter respects document structure
 
-It also has a desktop GUI (Linear-inspired dark theme) with live stats — discovered, downloaded, failed, elapsed.
+**Interesting finding:** The old approach (wget following #anchor links) produced a 38 MB file that was 92% duplicate content — the same pages repeated 13x with different fragment URLs. The new engine produces 5 MB with 18x more unique pages and zero duplicates.
 
-**Stack:** Python, requests, BeautifulSoup, customtkinter. MIT license.
+**It also has:**
+- Desktop GUI (Stripe-themed, one-click .exe, no Python required)
+- Incremental updates (only fetch new/changed pages)
+- Download history dashboard
 
-**Repo:** [github.com/RohannShetty/gitbook-downloader](https://github.com/RohannShetty/gitbook-downloader)
+**Repo:** https://github.com/RohannShetty/gitbook-downloader
 
-Would love feedback on what other documentation platforms to support. Docusaurus? ReadTheDocs?
+Curious what other documentation platforms people would want supported. Docusaurus? ReadTheDocs?
 
 ---
 
-## 🧵 Twitter/X — Thread
+## 🐦 TWITTER/X — Launch Thread
 
-### Tweet 1 (main)
-```text
-I got tired of manually copying GitBook pages into ChatGPT.
+### Tweet 1 (Hook)
+```
+I spent 3 hours copy-pasting docs into ChatGPT.
 
-So I built a tool that downloads the ENTIRE site + splits it into AI-friendly chunks.
+Page 40 of 673, I gave up and built a tool instead.
 
-One command:
-$ gitbook-dl download https://docs.example.com/
-$ gitbook-dl split docs.md --max-tokens 8000
+Now it takes 2 minutes.
 
-MIT license. 🚀
+🧵
 ```
 
-### Tweet 2 (image + features)
-```text
-What it does:
-🔍 Finds ALL pages (sitemaps + sidebar crawling)
-📥 Parallel downloads with retries
-✂️ Token-aware splitting (GPT-4/Claude encoding)
-🖥️ Beautiful dark GUI for clickers
+### Tweet 2 (The Problem)
+```
+The problem:
+• AI tools can't browse entire doc sites
+• Context windows are limited
+• Copy-pasting 673 pages = hours of pain
+• wget downloads HTML garbage (nav bars, cookies, scripts)
 
-pip install git+https://github.com/RohannShetty/gitbook-downloader.git
+I needed a better way.
 ```
 
-### Tweet 3 (use cases)
-```text
-Use it for:
-• Feed docs to ChatGPT as knowledge files
-• Build RAG pipelines (index chunks in vector DB)
-• Create offline doc archives (searchable .md)
-• Fine-tuning dataset prep
+### Tweet 3 (The Solution)
+```
+What I built:
+⬡ GitBook Downloader
 
-Pretty much: any time you need docs inside an LLM context window.
+1. Finds EVERY page (BFS crawler, no missed pages)
+2. Downloads CLEAN markdown (no nav, no footer, no junk)
+3. Splits into AI-ready chunks (never breaks a sentence)
+4. Updates incrementally (only new pages)
+
+Python CLI + .exe GUI. MIT license.
 ```
 
-### Tweet 4 (tech + call to action)
-```text
-Technical:
-→ Python 3.8+
-→ Sitemap index recursion
-→ Exponential backoff (1s→3s→8s)
-→ HTTP 429 auto-handling
-→ tiktoken for token counting
-→ customtkinter GUI
+### Tweet 4 (Results + CTA)
+```
+Real-world test: docs.openalgo.in
+• 673 pages → 5.0 MB → 5 chunks
+• 2 minutes, zero copy-paste
+• Uploaded to ChatGPT in 30 seconds
 
 Repo: github.com/RohannShetty/gitbook-downloader
-Stars ★ appreciated!
+
+Stars appreciated ⭐
 ```
 
 ---
 
-## 📝 Dev.to / Hashnode — Article
+## 📝 REDDIT — r/LocalLLaMA
 
 ### Title
-**How I Built a GitBook Downloader That Splits Docs into AI-Friendly Chunks**
+**I built a tool to download entire GitBook doc sites and split them into LLM-ready chunks — sharing it here because this community will actually use it**
+
+### Body
+
+You know the pain: you find great documentation for a framework, and you want your local LLM to understand it. But you need to feed it the docs first. And the docs are 600+ pages spread across a GitBook site.
+
+I built a tool that:
+1. Downloads every page from any GitBook site (BFS crawler, finds pages buried in sidebars)
+2. Converts to clean markdown (strips nav bars, footers, cookie banners)
+3. Splits into chunks aligned to markdown headers (never breaks mid-code-block)
+
+**Real result:** 673 pages from docs.openalgo.in → 5 MB → 5 chunks. Works with Ollama, LM Studio, llama.cpp — any local setup.
+
+```bash
+pip install git+https://github.com/RohannShetty/gitbook-downloader.git
+gitbook-dl download https://docs.example.com/
+gitbook-dl split downloaded_docs.md -s 1.0
+```
+
+There's also a Windows .exe if you prefer GUIs.
+
+**Repo:** https://github.com/RohannShetty/gitbook-downloader
+
+Question for this community: what chunk sizes do you find work best for your local models? I default to 1 MB but curious what others use.
+
+---
+
+## 📝 REDDIT — r/Python
+
+### Title
+**I built a Python tool to download entire GitBook doc sites as clean markdown — sharing the code and architecture**
+
+### Body
+
+Built a Python CLI + GUI tool that downloads complete GitBook documentation sites and splits them into markdown chunks optimized for LLM context windows.
+
+**Architecture:**
+- BFS crawler for page discovery
+- ThreadPoolExecutor for parallel downloads (streaming pipeline)
+- markdownify for HTML → markdown conversion
+- customtkinter for the GUI (Stripe-themed)
+- PyInstaller for single .exe distribution
+
+**Key design decisions:**
+- URL normalization to strip #fragments (saved 92% file size vs naive approach)
+- Streaming pipeline: pages download as they're discovered
+- Header-boundary splitter: never breaks mid-section
+
+**Repo:** https://github.com/RohannShetty/gitbook-downloader
+
+Would love code review and PRs — especially for supporting other doc platforms.
+
+---
+
+## 📝 REDDIT — r/programming
+
+### Title
+**GitBook Downloader: Download any GitBook docs site → AI-ready chunks (open source, MIT)**
+
+### Body
+
+https://github.com/RohannShetty/gitbook-downloader
+
+Built this because I was tired of copy-pasting documentation into ChatGPT. It downloads entire GitBook sites as clean markdown and splits them into chunks that respect document structure.
+
+673 pages of docs.openalgo.in → 5 MB → 5 chunks in 2 minutes. Desktop GUI or CLI. Single .exe for Windows.
+
+---
+
+## ✍️ DEV.TO — Long-Form Article
+
+### Title
+**How I Built a GitBook Downloader That Turned 673 Pages Into 5 AI-Ready Chunks**
 
 ### Tags
-`python` `opensource` `ai` `llm` `tutorial` `productivity`
+`python` `opensource` `ai` `tutorial` `productivity` `llm`
 
-### Body (outline)
+### Outline
 
-**The Problem**
-Feeding documentation to LLMs is painful. Context windows are small. Copy-paste is slow.
+**The 3-Hour Copy-Paste Nightmare**
+- Building a trading bot, needed full API docs
+- 673 pages of documentation
+- Made it to page 40 before mental breakdown
+- wget, curl, pandoc — all failed
 
-**The Solution**
-A two-phase Python tool that downloads entire GitBook sites and splits into token-aware chunks.
+**Why Existing Tools Don't Work**
+- wget: downloads HTML with nav, footer, cookies — 90% junk
+- curl: one page at a time
+- pandoc: doesn't handle site structure
+- None respect LLM context windows
 
-**How It Works**
-1. Discovery phase — sitemap XML recursion + `<nav>` sidebar crawling
-2. Download phase — ThreadPoolExecutor, retries, rate limiting
-3. Splitter — header boundaries + tiktoken encoding
+**Building the Solution**
+- BFS crawler: start at root, follow every link
+- URL normalization: strip #fragments (saved 92% file size)
+- Parallel downloads: ThreadPoolExecutor, streaming pipeline
+- Clean markdown: strip nav/footer/sidebar/scripts
+- Header-boundary splitter: never break mid-code-block
 
-**Code Deep Dive**
-- SmartEngine class architecture
-- Sitemap index handling
-- Thread-safe session pooling
-- Markdownify conversion pipeline
+**The Architecture**
+```python
+# Simplified engine flow
+Producer (discovery thread) → url_queue → Consumer pool (download threads)
+                                          ↓
+                                    OrderedDict[url] = (title, markdown)
+                                          ↓
+                                    Single .md file
+                                          ↓
+                                    Header-boundary splitter
+                                          ↓
+                                    AI-ready chunks
+```
+
+**The Stripe UI**
+- Why I chose Stripe's design language
+- Clean white, navy headings, purple accent
+- Dashboard with download history
 
 **Results**
-- 330+ pages from openalgo.in in under 2 minutes
-- Chunks respect markdown structure
-- Token counts match GPT-4/Claude encoding
+- 673 pages → 5 MB → 5 chunks
+- Old approach: 38 MB (92% duplicate from fragments)
+- New approach: 18x more unique pages in 1/8th the size
 
 **Try It**
 ```bash
 pip install git+https://github.com/RohannShetty/gitbook-downloader.git
 gitbook-dl download https://docs.example.com/
-gitbook-dl split downloaded_docs.md -t 8000
+gitbook-dl split downloaded_docs.md
 ```
 
----
-
-## 🗣️ Reddit — r/Python, r/LocalLLaMA, r/MachineLearning, r/programming
-
-### r/Python + r/programming
-
-**Title:** [Project] GitBook Downloader — download entire GitBook docs and split into AI-ready chunks
-
-**Body:**
-
-Built a Python CLI+GUI tool to solve a personal pain point: feeding documentation into LLMs without hitting context limits.
-
-**What:** Downloads every page from a GitBook site → single .md file → splits into token-counted chunks
-
-**How:**
-- `gitbook-dl download <url>` — two-phase engine: sitemap discovery → parallel downloads
-- `gitbook-dl split <file> --max-tokens 8000` — header-boundary aware + tiktoken counting
-- `gitbook-dl gui` — full dark-themed dashboard with live stats
-
-**Stack:** requests + BeautifulSoup + markdownify + customtkinter
-
-**Why not wget?** GitBook-specific discovery (sitemap indexes, sidebar trees), retry logic, and AI-aware splitting that wget can't do.
-
-[https://github.com/RohannShetty/gitbook-downloader](https://github.com/RohannShetty/gitbook-downloader)
+**What's Next**
+- Docusaurus, ReadTheDocs, MkDocs support
+- Web UI version
+- Docker image
 
 ---
 
-### r/LocalLLaMA
+## 💼 LINKEDIN
 
-**Title:** Tool to download GitBook docs + split into token-aware chunks for local LLMs
+### Post
 
-**Body:**
+🚀 **I open-sourced a tool that solves one of the most annoying problems in AI-assisted development.**
 
-Made a tool that downloads entire GitBook documentation sites and splits them into chunks using tiktoken (GPT-4/Claude encoding) — perfect for feeding to local models via RAG or direct context.
+You know the drill: you find great documentation for an API or framework. You want ChatGPT or Claude to understand it. But the docs are 600+ pages across a GitBook site. You start copy-pasting. Page 40, you give up.
 
-```bash
-gitbook-dl download https://docs.langchain.com/ -o lc_docs.md
-gitbook-dl split lc_docs.md --max-tokens 4096  # or whatever your model supports
-```
+**I built GitBook Downloader to solve this.**
 
-Features:
-- Finds ALL pages (sitemap + sidebar crawl — catches things sitemaps miss)
-- Parallel downloads with retries
-- Chunks respect markdown headers (never breaks mid-section)
-- Works offline once downloaded
+It downloads every page from any GitBook site, converts it to clean markdown, and splits it into chunks that respect document structure — ready for your LLM's context window.
 
-[https://github.com/RohannShetty/gitbook-downloader](https://github.com/RohannShetty/gitbook-downloader)
+**Real results from docs.openalgo.in:**
+• 673 pages found
+• 5.0 MB of clean markdown
+• 5 perfect chunks
+• 2 minutes end-to-end
 
----
+**Why this matters:**
+• AI tools are incredible — but they can't browse docs
+• Context windows are limited — you need smart chunking
+• Manual copy-paste doesn't scale — automation does
 
-### r/MachineLearning
+**For developers:** `pip install` + 2 commands.
+**For everyone else:** Download the .exe, double-click, paste a URL.
 
-**Title:** [P] GitBook Downloader — turn any documentation site into ML-ready token chunks
+MIT license. PRs welcome.
 
-**Body:**
+🔗 github.com/RohannShetty/gitbook-downloader
 
-Built a tool for ML practitioners who need to feed documentation into LLMs — downloads entire GitBook sites and splits into token-counted chunks using the GPT-4/Claude tokenizer.
-
-Use cases:
-- Fine-tuning dataset preparation
-- RAG pipeline ingestion
-- Offline documentation archives
-- Multi-shot prompt construction
-
-MIT licensed, Python 3.8+, CLI + GUI.
+#OpenSource #AI #Python #Developer #Productivity #LLM
 
 ---
 
-## 🌐 Aggregator Submissions
+## 📊 ADDITIONAL PROMOTION CHANNELS
 
 ### TrendShift
-- **URL:** [trendshift.io](https://trendshift.io) — submit as new repository
-- **Category:** Developer Tools / AI
-- **Description:** Download complete GitBook documentation sites and split into AI-friendly markdown chunks. Token-aware splitting, parallel downloads, dark GUI.
-
-### LibHunt
-- **URL:** [python.libhunt.com](https://python.libhunt.com) — add via GitHub topics
-- Already tagged with relevant topics — LibHunt auto-indexes
+- Submit at: https://trendshift.io
+- Category: Developer Tools
+- Tag: `gitbook-downloader`
 
 ### AlternativeTo
-- **URL:** [alternativeto.net](https://alternativeto.net) — submit as new software
-- **Category:** Documentation Tools, Web Scraping
-- **Alternatives to:** wget (for docs), HTTrack, DocDownloader
+- Submit as alternative to: wget, HTTrack, SiteSucker
+- Category: Documentation Tools
+- URL: https://alternativeto.net
 
-### awesome-python
-- **Submit PR to:** [github.com/vinta/awesome-python](https://github.com/vinta/awesome-python)
-- **Section:** "Documentation" or "Text Processing"
-- **Entry:** `gitbook-downloader` — Download GitBook docs and split into AI-friendly chunks.
+### Newsletter Pitches
 
-### awesome-llm
-- **Submit PR to relevant awesome-llm list**
-- **Section:** "Tools / Data Preparation"
+**TLDR Newsletter** (tldr.tech)
+- Subject: "Tool: Download any GitBook docs site for AI"
+- One-liner: "GitBook Downloader turns 673-page doc sites into 5 clean markdown chunks — ready for ChatGPT, Claude, or local LLMs. Free, open source, MIT."
 
----
+**Python Weekly**
+- Submit via: https://www.pythonweekly.com/submit
 
-## ⭐ Quick Actions You Can Take
+**Changelog Weekly**
+- Submit via: https://changelog.com/submit
 
-| Platform | Action | Time |
-|----------|--------|------|
-| Product Hunt | Schedule launch for Tue-Thu | 5 min |
-| Show HN | Post (best time: weekday morning PST) | 2 min |
-| r/Python | Submit link post | 1 min |
-| r/LocalLLaMA | Text post with use case | 2 min |
-| r/programming | Link post | 1 min |
-| Dev.to | Publish article | 20 min |
-| Twitter | Post thread | 5 min |
-| TrendShift | Submit repo | 2 min |
-| awesome-python | Open PR | 5 min |
+### YouTube Shorts / TikTok
+- 60-second demo: "How to feed 673 pages of docs to ChatGPT in 30 seconds"
+- Show: URL paste → download progress → split → ChatGPT upload
+
+### Discord Communities
+- Post in: r/LocalLLaMA Discord, LangChain Discord, OpenAI Discord
+- Format: "Hey everyone, built a free tool to download GitBook docs for LLM context..."
 
 ---
 
-## 📸 Image Checklist
+## 🏷️ Hashtag Strategy
 
-- [ ] Social preview card (open `assets/social-preview.html` → screenshot)
-- [ ] Terminal screenshot: `gitbook-dl download` in action
-- [ ] GUI screenshot: dark dashboard with live stats
-- [ ] Split output: terminal showing chunks with token counts
-- [ ] Logo: the ⬡ hexagon icon
+**Primary:** #OpenSource #Python #AI #DeveloperTools
+**Secondary:** #LLM #ChatGPT #Claude #Productivity #Documentation
+**Platform-specific:** #ShowHN (HN), #BuildingInPublic (Twitter)
 
 ---
 
-## 🏷️ Hashtags
+## 📈 Success Metrics
 
-```
-#OpenSource #Python #AI #LLM #ChatGPT #Claude #DeveloperTools
-#Documentation #GitBook #RAG #MachineLearning #Productivity
-```
+| Metric | Target (Week 1) |
+|--------|----------------|
+| GitHub stars | 100+ |
+| Product Hunt upvotes | 50+ |
+| HN points | 20+ |
+| Total downloads | 500+ |
+| Twitter impressions | 5K+ |
+
+---
+
+## 🔗 All Links
+
+- **GitHub:** https://github.com/RohannShetty/gitbook-downloader
+- **Download .exe:** https://github.com/RohannShetty/gitbook-downloader/releases/latest
+- **Issues:** https://github.com/RohannShetty/gitbook-downloader/issues
+- **Discussions:** https://github.com/RohannShetty/gitbook-downloader/discussions
