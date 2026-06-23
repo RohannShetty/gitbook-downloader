@@ -208,7 +208,10 @@ def stream_download(start_url, output_file, max_pages=0, workers=5,
             try:
                 url = download_queue.get(timeout=2)
             except thread_queue.Empty:
-                break
+                continue  # Keep waiting, producer may still be discovering
+
+            if url == "__DONE__":
+                break  # Producer finished, no more URLs coming
 
             norm = _norm(url)
             if norm in existing_urls:
@@ -255,14 +258,25 @@ def stream_download(start_url, output_file, max_pages=0, workers=5,
     prod_thread.start()
 
     # Start consumer pool
-    from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(download_worker) for _ in range(workers)]
+        futures = []
+        for _ in range(workers):
+            futures.append(executor.submit(download_worker))
 
-    # Wait
-    prod_thread.join(timeout=600)
-    for _ in range(workers):
-        download_queue.put(None)  # poison pill
+        # Wait for producer to finish discovering
+        prod_thread.join(timeout=600)
+
+        # Signal: no more URLs will be added to download_queue
+        for _ in range(workers):
+            download_queue.put("__DONE__")  # Sentinel value
+
+        # Wait for all consumers to finish
+        for f in futures:
+            try:
+                f.result(timeout=300)
+            except Exception:
+                pass
+
     stop_event.set()
 
     elapsed = round(time.time() - t0, 1)
