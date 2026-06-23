@@ -2,104 +2,139 @@
 
 All notable changes to GitBook Downloader.
 
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
+Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ---
 
 ## [4.0.0] — 2026-06-23
 
-### 🚀 Streaming Pipeline
-- **Discover + download simultaneously** — pages start downloading as they're found, no waiting for full discovery
-- 5 parallel workers by default, configurable 1–10
-- Thread-safe producer/consumer architecture with proper sentinel handling
+### Added
 
-### 🔄 Incremental Updates
-- **Parse existing .md file** to find already-downloaded URLs
-- **Only fetch new/changed pages** — appends to your existing file
-- One-click "Update" button on any past download in the dashboard
-- History stored in `~/.gitbook-downloader/history.json`
+- **Streaming download pipeline** — pages download as they're discovered, no waiting for full discovery
+- **Incremental updates** — parse existing `.md` file, detect already-downloaded URLs, only fetch new/changed pages
+- **Download history dashboard** — past downloads shown as cards with Update, Split, and Open actions
+- **Auto-split prompt** — after every download, one-click "Split into chunks" button
+- **`--workers` CLI flag** — configurable parallel download threads (1–10)
+- **Stripe design system** — complete GUI redesign using Stripe's visual language (white surface, navy `#061b31` headings, purple `#533afd` accent, 4px radius, blue-tinted shadows)
+- **GitHub Actions CD** — auto-builds `.exe` on every release tag
 
-### 🎨 Stripe Design System
-- Complete GUI redesign using Stripe's visual language
-- Clean white surface, deep navy headings (`#061b31`), purple accent (`#533afd`)
-- Weight-300 typography throughout
-- Blue-tinted shadows, 4px border radius
-- Dashboard view with download history cards
-- Auto-split prompt after every download
+### Changed
 
-### 🔗 Smart URL Handling
-- **Fragment deduplication** — strips `#section` anchors before download
-- Verified: original 38 MB file was 92% duplicate content from fragment URLs
-- New output: 673 unique pages vs 37 unique in old file (18x more content)
+- **URL normalization** — fragments (`#section`) are now stripped before download, eliminating ~92% duplicate content vs previous versions
+- **Engine architecture** — producer/consumer pattern with ThreadPoolExecutor replaces sequential BFS
+- **GUI** — sidebar navigation replaced with single-page dashboard + new download view
+- **History** — stored in `~/.gitbook-downloader/history.json` (auto-created)
 
-### 🐛 Fixed
-- Deadlock in streaming pipeline when discovery finishes before downloads
-- Relative import errors in PyInstaller builds
-- Missing log tag configurations
+### Fixed
+
+- Deadlock when discovery finishes before all consumers complete
+- Relative import errors in PyInstaller builds (`from .engine` → try/except fallback)
+- Missing log tag configurations in dashboard
+
+### Removed
+
+- `max_pages` default of 500 — now defaults to 0 (unlimited)
+- Sitemap-based discovery (over-engineered, BFS is more reliable)
+- `tiktoken` dependency (no longer needed)
 
 ---
 
 ## [3.2.0] — 2026-06-23
 
 ### Added
-- Parallel downloads via ThreadPoolExecutor (configurable workers)
-- Modern GUI redesign (sidebar navigation, animated stats)
-- PyInstaller packaging: single 35 MB .exe
-- GitHub Actions for auto-build on release tags
 
-### Fixed
-- Relative imports breaking PyInstaller executable
-- Missing `--workers` flag in CLI
+- Parallel downloads via `ThreadPoolExecutor`
+- Modern sidebar-based GUI redesign
+- PyInstaller packaging — single `.exe` distribution
+- GitHub Actions workflow for release builds
+- `--workers` flag in CLI
 
 ---
 
 ## [3.1.0] — 2026-06-21
 
 ### Added
-- Clean package structure: `src/gitbook_downloader/` layout
-- Proper CLI with argparse (`download`, `split`, `gui` subcommands)
-- `pyproject.toml` with optional dependency groups
-- MIT LICENSE, CONTRIBUTING.md, .gitignore
+
+- Clean package structure (`src/gitbook_downloader/`)
+- Proper CLI with argparse subcommands (`download`, `split`, `gui`)
+- `pyproject.toml` with optional dependency groups (`[gui]`, `[all]`)
+- MIT LICENSE
+- `CONTRIBUTING.md`
+- `.gitignore`
 
 ### Changed
-- Removed hardcoded paths and URLs
-- Stripped duplicate scripts and sample data
-- Simplified to single BFS engine (removed over-engineered SmartEngine)
+
+- Removed all hardcoded paths and URLs
+- Stripped duplicate scripts (`app.py`, `download_docs.py`, `resume_download.py`, `check_pages.py`)
+- Removed sample data files from repository
+- Simplified engine to proven BFS crawler
 
 ### Fixed
-- Folder renamed from `Gitbook Downloader` (with space) to `gitbook-downloader`
+
+- Repository renamed from `Gitbook Downloader` (with space) to `gitbook-downloader`
+- `__pycache__` no longer tracked by git
 
 ---
 
 ## [3.0.0] — 2026-06-10
 
 ### Added
-- Sitemap recursion with XML parsing
-- Sidebar `<nav>` crawling for complete page discovery
-- Saturation detection to stop when all pages found
+
+- Recursive sitemap parsing with XML (`lxml` + `xml.etree` fallback)
+- Sidebar `<nav>` crawling for page discovery
+- Saturation detection (stops when no new links found)
 - Page size tracking in download log
-- Failed URL tracking (`_failed.json`)
+- Failed URL tracking via `*_failed.json`
+- Retry stat tracking
 
 ### Fixed
-- Discovery completeness: v3 finds 330+ pages vs v2's 164
-- Content extraction matching proven quality
+
+- Discovery completeness — v3 finds 330+ pages vs v2's 164
+- Content extraction quality matching proven 38 MB output
+- Sitemap discovery tries multiple URLs (`/sitemap.xml`, `/sitemap-index.xml`)
 
 ---
 
 ## [2.0.0] — 2026-06-10
 
 ### Added
-- Two-phase engine: Phase 1 discovers URLs, Phase 2 downloads
-- Parallel downloads with configurable workers
-- Retry logic with exponential backoff (1s → 3s → 8s)
-- Rate limiting handling (HTTP 429 auto-wait)
-- Live stat cards: Discovered, Downloaded, Failed, Retries, Elapsed
+
+- Two-phase engine — Phase 1 discovers URLs, Phase 2 downloads with retries
+- Parallel downloads — configurable 1–10 workers
+- Retry logic — 3 attempts with exponential backoff (1s → 3s → 8s)
+- HTTP 429 rate-limit handling
+- Five live stat cards — Discovered, Downloaded, Failed, Retries, Elapsed
+- Phase indicator (Discovery vs Download)
+- Clear log button
+
+### Fixed
+
+- `CTkFont` initialization crash on some systems
+- Stat label update crash
 
 ---
 
 ## [1.0.0] — 2026-06-09
 
 ### Added
-- Initial dashboard with Download + Split tabs
-- Linear-inspired dark theme GUI
-- Basic BFS crawler
+
+- Initial release
+- Dashboard GUI with Download + Split tabs
+- Linear-inspired dark theme
+- Basic BFS crawler (single-threaded, no retries)
 - Markdown splitter with header-boundary awareness
 - Progress bar, activity log, live stats
+
+---
+
+## Legend
+
+| Icon | Type | Description |
+|------|------|-------------|
+| ✨ | Added | New features |
+| 🔧 | Changed | Changes in existing functionality |
+| 🗑️ | Deprecated | Soon-to-be removed features |
+| ❌ | Removed | Removed features |
+| 🐛 | Fixed | Bug fixes |
+| 🔒 | Security | Vulnerability fixes |

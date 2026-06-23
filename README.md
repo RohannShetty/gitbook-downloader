@@ -1,231 +1,277 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.0-533afd?style=flat-square" alt="version">
-  <img src="https://img.shields.io/badge/license-MIT-15be53?style=flat-square" alt="license">
-  <img src="https://img.shields.io/badge/python-3.8+-273951?style=flat-square" alt="python">
-  <img src="https://img.shields.io/badge/download-.exe-533afd?style=flat-square" alt="download">
-  <img src="https://img.shields.io/badge/stars-⭐⭐⭐⭐⭐-f59e0b?style=flat-square" alt="stars">
-</p>
+<div align="center">
 
-<h1 align="center">⬡ GitBook Downloader</h1>
+<img src="https://img.shields.io/badge/version-4.0.0-533afd?style=for-the-badge" alt="version">
+<img src="https://img.shields.io/badge/license-MIT-15be53?style=for-the-badge" alt="license">
+<img src="https://img.shields.io/badge/python-3.8+-273951?style=for-the-badge" alt="python">
+<img src="https://img.shields.io/badge/platform-Windows-533afd?style=for-the-badge" alt="platform">
 
-<p align="center">
-  <strong>Download any GitBook documentation site. Split it into AI-ready chunks. Feed your LLM.</strong><br>
-  <em>673 pages of docs.openalgo.in → 5 MB of clean markdown → 5 perfect chunks. In 2 minutes.</em>
-</p>
+<br><br>
+
+<h1>⬡ GitBook Downloader</h1>
+
+**Download entire GitBook documentation sites.**<br>
+**Convert to clean markdown. Split into AI-ready chunks.**
+
+<br>
+
+<a href="https://github.com/RohannShetty/gitbook-downloader/releases/latest">
+  <img src="https://img.shields.io/badge/Download%20.exe-Latest%20Release-533afd?style=for-the-badge&logo=windows&logoColor=white" alt="Download">
+</a>
+
+<br><br>
+
+</div>
 
 ---
 
-## 📖 The Story
+## What It Does
 
-I was building a trading bot using [OpenAlgo](https://docs.openalgo.in/). Their documentation is excellent — 673 pages covering every API endpoint, every SDK method, every configuration option. I needed all of it inside ChatGPT's context window.
-
-**The problem:** ChatGPT can't browse 673 pages. And copy-pasting 673 pages one-by-one would take hours.
-
-I tried `wget`. It downloaded HTML garbage — navigation bars, sidebars, footers, cookie banners — completely useless for an LLM.
-
-I tried `curl | pandoc`. Same problem. 90% of what it captured wasn't documentation — it was UI chrome.
-
-So I built a tool that does exactly what I needed:
+<table>
+<tr>
+<td width="65%">
 
 ```
-1. Find every page on the site (even the ones buried in submenus)
-2. Download just the content — clean markdown, no navigation junk
-3. Split it into chunks that fit inside an LLM's context window
-4. Never cut a sentence in half. Never break a code block.
+https://docs.example.com/
+        │
+        ▼
+  ┌─────────────┐
+  │  BFS Crawler │  Finds every page
+  │  5 workers   │  Parallel downloads
+  └──────┬──────┘
+         │
+         ▼
+  ┌─────────────┐
+  │  Markdown    │  Strips nav, footer,
+  │  Converter   │  sidebar, scripts
+  └──────┬──────┘
+         │
+         ▼
+    📄 docs.md
+    673 pages / 5 MB
+         │
+         ▼
+  ┌─────────────┐
+  │  Splitter    │  Header-boundary chunks
+  │  1 MB each   │  Never breaks code blocks
+  └──────┬──────┘
+         │
+         ▼
+  🧩 doc_part_01.md … doc_part_05.md
+     Ready for ChatGPT, Claude, Gemini
 ```
 
-**The result:** 673 pages → 5 MB → 5 chunks. Uploaded to ChatGPT in 30 seconds. My trading bot was built that afternoon.
+</td>
+<td width="35%">
 
-This tool is for everyone who's ever thought *"I wish I could just feed this entire documentation site to my AI."*
-
----
-
-## ⚡ One Click. No Python. No Terminal.
-
-<p align="center">
-  <a href="https://github.com/RohannShetty/gitbook-downloader/releases/latest">
-    <img src="https://img.shields.io/badge/⬇%20Download%20.exe-Windows-533afd?style=for-the-badge&logo=windows&logoColor=white" alt="Download">
-  </a>
-</p>
-
-```text
-1. Download GitBook-Downloader.exe
-2. Double-click
-3. Paste a GitBook URL → Start
-4. Click "Split" for AI-ready chunks
-```
-
-**That's it.** The app handles everything — finding every page, downloading in parallel, converting to clean markdown, and splitting into chunks that respect headings and code blocks.
-
----
-
-## 🎯 Who Is This For?
-
-| You are... | You need to... | This tool... |
-|---|---|---|
-| 🤖 **AI Developer** | Feed docs to ChatGPT, Claude, Gemini | Downloads the entire site, splits into context-sized chunks |
-| 🔍 **RAG Builder** | Index documentation in a vector database | Produces clean, sectioned markdown ready for embedding |
-| 📚 **Researcher** | Read docs offline during commutes/flights | Single searchable `.md` file — no internet needed |
-| 🛠️ **Open Source Dev** | Understand a project's full API surface | Downloads every endpoint doc in one pass |
-| 🎓 **Student** | Study a framework's documentation | Offline reference that fits in your notes app |
-| 🏢 **Enterprise Dev** | Work behind a firewall with limited internet | Download once, reference forever |
-
----
-
-## 🚀 What Makes It Different
-
-| | `wget` | `curl \| pandoc` | **GitBook Downloader** |
-|---|---|---|---|
-| Finds all pages | ❌ Only linked | ❌ Single page | ✅ BFS crawler — every page |
-| Clean markdown | ❌ Full HTML | ⚠️ Messy | ✅ Strips nav/footer/sidebar |
-| Header-boundary split | ❌ | ❌ | ✅ Never breaks mid-section |
-| Fragment dedup | ❌ Downloads #anchors | ❌ | ✅ Strips #fragments |
-| Parallel downloads | ❌ Sequential | ❌ | ✅ 5x faster |
-| Streaming pipeline | ❌ | ❌ | ✅ Download as you discover |
-| Incremental updates | ❌ | ❌ | ✅ Only fetch new pages |
-| Desktop GUI | ❌ | ❌ | ✅ One-click .exe |
-
----
-
-## 📊 Real-World Result
-
-```
-                    docs.openalgo.in
-                    ────────────────
-                          │
-                    ┌─────▼─────┐
-                    │  BFS Crawl │  Finds 673 pages
-                    │  5 workers │  in parallel
-                    └─────┬─────┘
-                          │
-                    ┌─────▼─────┐
-                    │  Markdown  │  5.0 MB clean
-                    │  Convert   │  138,000 lines
-                    └─────┬─────┘
-                          │
-                    ┌─────▼─────┐
-                    │  Splitter  │  5 chunks
-                    │  1 MB each │  Header-aligned
-                    └─────┬─────┘
-                          │
-                    ┌─────▼─────┐
-                    │  Upload to │  30 seconds
-                    │  ChatGPT   │  Full context
-                    └───────────┘
-```
-
----
-
-## 🖥️ The App
-
-<p align="center"><em>Stripe-inspired design — clean white surface, navy headings, purple accent. Dashboard with download history, one-click updates, and auto-split.</em></p>
-
-**Three views, zero clutter:**
-
-| 📥 Download | 🔄 Update | ✂️ Split |
-|---|---|---|
-| Paste URL → Start | Click on any past download | Pick file → choose chunk size |
-| Live streaming progress | Only new pages fetched | Results in seconds |
-| "Split into chunks" prompt | Appended to existing file | 5 clean, header-aligned files |
-
----
-
-## 🛠️ For Developers
+### One command
 
 ```bash
-# Install
-pip install git+https://github.com/RohannShetty/gitbook-downloader.git
+gitbook-dl download https://docs.example.com/
+gitbook-dl split downloaded_docs.md
+```
 
-# Download an entire site
+### Or zero commands
+
+Download the `.exe`, double-click, paste a URL.
+
+### Works on any GitBook site
+
+Docs, API references, guides, wikis — if it's on GitBook, it works.
+
+</td>
+</tr>
+</table>
+
+---
+
+## Why Not `wget`?
+
+| | wget | This Tool |
+|---|---|---|
+| **Finds all pages** | Only follows `<a href>` on visited pages | ✅ BFS crawler — discovers pages in sidebars |
+| **Clean output** | Downloads full HTML with nav, footer, scripts | ✅ Strips everything except content |
+| **Respects structure** | Raw dump, no organization | ✅ Each page with title + source URL + `---` separator |
+| **No duplicates** | Downloads `#anchor` links as separate pages | ✅ URL normalization strips fragments |
+| **AI-ready chunks** | No splitting | ✅ Header-boundary split, configurable size |
+| **Speed** | Sequential, single-threaded | ✅ 5 parallel workers, streaming pipeline |
+| **Incremental updates** | Re-downloads everything | ✅ Detects existing pages, only fetches new ones |
+
+---
+
+## Verified Performance
+
+**Test target:** `docs.openalgo.in` — a real GitBook documentation site.
+
+| Metric | Result |
+|---|---|
+| Pages discovered | **673** |
+| Unique pages (after dedup) | **673** |
+| Total download size | **5.0 MB** |
+| Download time | **~2 minutes** |
+| Parallel workers | 5 |
+| Chunks produced | 5 × ~1 MB each |
+| Errors | 2 (transient, non-critical) |
+
+<details>
+<summary>Page size distribution</summary>
+
+| Size | Pages |
+|---|---|
+| 20 KB+ (heavy API docs) | 37 |
+| 5–20 KB (standard docs) | 294 |
+| 1–5 KB (short reference) | 314 |
+| Under 1 KB | 28 |
+| **Average** | **7.4 KB/page** |
+
+</details>
+
+---
+
+## Installation
+
+### Option A: Desktop App (Recommended)
+
+1. [Download `GitBook-Downloader.exe`](https://github.com/RohannShetty/gitbook-downloader/releases/latest)
+2. Double-click to launch
+3. Paste a GitBook URL → Start
+
+No Python. No terminal. No dependencies.
+
+### Option B: Python CLI
+
+```bash
+pip install git+https://github.com/RohannShetty/gitbook-downloader.git
+```
+
+```bash
+# Download a site
 gitbook-dl download https://docs.example.com/
 
-# Update a previous download (only new pages)
-gitbook-dl download https://docs.example.com/ -o existing_docs.md --update
+# With custom options
+gitbook-dl download https://docs.example.com/ -o mydocs.md -w 8
 
-# Split into 1 MB chunks
+# Update an existing download (only new pages)
+gitbook-dl download https://docs.example.com/ -o existing.md
+
+# Split into chunks
 gitbook-dl split downloaded_docs.md -s 1.0
 
 # Launch the GUI
 gitbook-dl gui
 ```
 
----
+### CLI Reference
 
-## 🧩 Use Cases That Actually Matter
-
-### 1. "I need to build with this API but don't want to keep 20 browser tabs open"
-
-```bash
-gitbook-dl download https://docs.stripe.com/api -o stripe_api.md
-# → 1 file. Searchable. No tabs.
-```
-
-### 2. "My LLM keeps hallucinating API parameters"
-
-```bash
-gitbook-dl download https://docs.langchain.com/ -o lc_docs.md
-gitbook-dl split lc_docs.md -s 1.0
-# → Upload chunks as knowledge files. Zero hallucinations.
-```
-
-### 3. "I'm on a 12-hour flight and need to study this framework"
-
-```bash
-gitbook-dl download https://docs.astral.sh/uv/ -o uv_docs.md
-# → Offline. Searchable. Battery-friendly.
-```
-
-### 4. "I want to fine-tune a model on this project's documentation"
-
-```bash
-gitbook-dl download https://docs.example.com/ -o training_data.md
-gitbook-dl split training_data.md -s 0.5
-# → 0.5 MB chunks. Perfect for fine-tuning.
-```
-
-### 5. "The docs updated last week — I need the new content only"
-
-```bash
-gitbook-dl download https://docs.example.com/ -o existing.md
-# → Only 12 new pages downloaded. Appended to your file.
-```
+| Command | Flag | Default | Description |
+|---|---|---|---|
+| `download <url>` | | | GitBook site URL |
+| | `-o, --output` | `downloaded_docs.md` | Output file |
+| | `-p, --max-pages` | `0` (unlimited) | Page limit |
+| | `-w, --workers` | `5` | Parallel threads |
+| `split <file>` | | | Markdown file |
+| | `-o, --output-dir` | `<file>_chunks/` | Output directory |
+| | `-s, --max-mb` | `1.0` | Max chunk size |
+| `gui` | | | Launch desktop app |
 
 ---
 
-## 📦 Project Structure
+## Real-World Use Cases
+
+<table>
+<tr>
+<td width="33%">
+
+### 🤖 Feed Docs to LLMs
+
+Download an API reference site, split into chunks, upload to ChatGPT/Claude as knowledge files. Zero hallucinations about parameters or endpoints.
+
+</td>
+<td width="33%">
+
+### 🔍 Build RAG Pipelines
+
+Download documentation → split into section-aligned chunks → embed in your vector database. Each chunk is a complete, self-contained section.
+
+</td>
+<td width="33%">
+
+### 📚 Offline Reference
+
+Download once, read anywhere. Single searchable `.md` file. Works on flights, behind firewalls, anywhere without internet.
+
+</td>
+</tr>
+</table>
+
+---
+
+## How It Works
+
+### Download Engine
+
+1. **Start at the root URL** — fetch the homepage
+2. **Extract content** — remove `<nav>`, `<footer>`, `<aside>`, `<script>`, `<style>`
+3. **Convert to markdown** — HTML → clean markdown via `markdownify`
+4. **Discover links** — collect every internal `<a href>` on the page
+5. **Stream + download** — new URLs go to a queue, worker threads download in parallel
+6. **Dedup URLs** — normalize paths, strip `#fragments`, skip already-seen pages
+7. **Write output** — ordered by discovery, with `Source:` attribution per page
+
+### Splitter
+
+1. **Read the complete `.md` file**
+2. **Split on `#` headers** — each chunk starts at a markdown heading
+3. **Respect size limit** — when adding a section exceeds the limit, start a new chunk
+4. **Preserve structure** — code blocks, lists, tables never split mid-element
+5. **Write numbered files** — `doc_part_01.md`, `doc_part_02.md`, …
+
+---
+
+## Architecture
 
 ```
 gitbook-downloader/
 ├── src/gitbook_downloader/
-│   ├── engine.py          # Streaming BFS + parallel downloads
-│   ├── splitter.py        # Header-boundary chunking
-│   ├── dashboard.py       # Stripe-themed GUI
-│   └── cli.py             # Terminal interface
-├── .github/workflows/     # Auto-build .exe on release
-├── LAUNCH_KIT.md          # Social media launch plan
-└── README.md              # You are here
+│   ├── engine.py          Streaming BFS + parallel downloads
+│   ├── splitter.py        Header-boundary chunking
+│   ├── dashboard.py       Stripe-themed desktop GUI
+│   └── cli.py             Terminal interface
+├── .github/workflows/     Auto-build .exe on release tags
+├── assets/                Social preview card
+├── LAUNCH_KIT.md          Social media launch strategy
+└── CHANGELOG.md           Full release history
 ```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-This tool was born from frustration. If you've ever copy-pasted docs into ChatGPT one page at a time, you get it.
+Issues, PRs, and discussions welcome.
 
-**Ways to help:**
-- 🐛 Found a bug? [Open an issue](https://github.com/RohannShetty/gitbook-downloader/issues)
-- 💡 Have an idea? [Start a discussion](https://github.com/RohannShetty/gitbook-downloader/discussions)
-- 🔧 Want to code? Pick from [open issues](https://github.com/RohannShetty/gitbook-downloader/issues)
-- ⭐ Star the repo — it helps others discover the tool
+- **Bug?** [Open an issue](https://github.com/RohannShetty/gitbook-downloader/issues)
+- **Feature idea?** [Start a discussion](https://github.com/RohannShetty/gitbook-downloader/discussions)
+- **Want to code?** Check [open issues](https://github.com/RohannShetty/gitbook-downloader/issues) or see ideas below
+
+### Contribution Ideas
+
+| Difficulty | Task |
+|---|---|
+| 🟢 Easy | Support `GITBOOK_URL` environment variable |
+| 🟢 Easy | Add `--dry-run` flag (discover only, no download) |
+| 🟡 Medium | Docusaurus / ReadTheDocs / MkDocs support |
+| 🟡 Medium | PDF output option |
+| 🟡 Medium | Docker image |
+| 🔴 Hard | Web UI (Flask / FastAPI) |
+| 🔴 Hard | Scheduled downloads via cron / GitHub Actions |
 
 ---
 
-## 📄 License
+## License
 
 MIT © [Rohan Shetty](https://github.com/RohannShetty)
 
 ---
 
-<p align="center">
-  <sub>Built with frustration. Shared with love. ⬡</sub>
-</p>
+<div align="center">
+  <sub>⬡ Built for developers who feed docs to AI. Star the repo if it helps you.</sub>
+</div>
