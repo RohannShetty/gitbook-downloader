@@ -1,3 +1,3 @@
-"""GitBook Downloader v4.0 — Streaming download, incremental updates, Stripe UI."""
+"""GitBook Downloader v5.0 — .md-aware streaming download, llms.txt discovery, improved content extraction."""
 
-__version__ = "4.0.0"
+__version__ = "5.0.0"

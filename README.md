@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/version-4.0.0-533afd?style=for-the-badge" alt="version">
+<img src="https://img.shields.io/badge/version-5.0.0-533afd?style=for-the-badge" alt="version">
 <img src="https://img.shields.io/badge/license-MIT-15be53?style=for-the-badge" alt="license">
 <img src="https://img.shields.io/badge/python-3.8+-273951?style=for-the-badge" alt="python">
 <img src="https://img.shields.io/badge/platform-Windows-533afd?style=for-the-badge" alt="platform">
@@ -41,13 +41,13 @@ https://docs.example.com/
          │
          ▼
   ┌─────────────┐
-  │  Markdown    │  Strips nav, footer,
-  │  Converter   │  sidebar, scripts
+  │  .md-aware  │  Uses GitBook's native
+  │  Extraction  │  markdown export, not HTML→md
   └──────┬──────┘
          │
          ▼
     📄 docs.md
-    673 pages / 5 MB
+    341 pages / 3.1 MB / 0 errors
          │
          ▼
   ┌─────────────┐
@@ -88,42 +88,30 @@ Docs, API references, guides, wikis — if it's on GitBook, it works.
 
 | | wget | This Tool |
 |---|---|---|
-| **Finds all pages** | Only follows `<a href>` on visited pages | ✅ BFS crawler — discovers pages in sidebars |
-| **Clean output** | Downloads full HTML with nav, footer, scripts | ✅ Strips everything except content |
+| **Finds all pages** | Only follows `<a href>` on visited pages | ✅ BFS crawler + `/llms.txt` discovery |
+| **Clean output** | Downloads full HTML with nav, footer, scripts | ✅ Uses GitBook's native `.md` export — no HTML conversion |
 | **Respects structure** | Raw dump, no organization | ✅ Each page with title + source URL + `---` separator |
-| **No duplicates** | Downloads `#anchor` links as separate pages | ✅ URL normalization strips fragments |
+| **No duplicates** | Downloads `.md` versions as separate pages | ✅ Filters `.md` URLs; normalises HTML + `.md` to same key |
 | **AI-ready chunks** | No splitting | ✅ Header-boundary split, configurable size |
 | **Speed** | Sequential, single-threaded | ✅ 5 parallel workers, streaming pipeline |
 | **Incremental updates** | Re-downloads everything | ✅ Detects existing pages, only fetches new ones |
 
 ---
 
-## Verified Performance
+## Verified Performance (v5.0)
 
-**Test target:** `docs.openalgo.in` — a real GitBook documentation site.
+**Test target:** `docs.openalgo.in` — a 341-page GitBook documentation site.
 
-| Metric | Result |
-|---|---|
-| Pages discovered | **673** |
-| Unique pages (after dedup) | **673** |
-| Total download size | **5.0 MB** |
-| Download time | **~2 minutes** |
-| Parallel workers | 5 |
-| Chunks produced | 5 × ~1 MB each |
-| Errors | 2 (transient, non-critical) |
-
-<details>
-<summary>Page size distribution</summary>
-
-| Size | Pages |
-|---|---|
-| 20 KB+ (heavy API docs) | 37 |
-| 5–20 KB (standard docs) | 294 |
-| 1–5 KB (short reference) | 314 |
-| Under 1 KB | 28 |
-| **Average** | **7.4 KB/page** |
-
-</details>
+| Metric | v4.0 | **v5.0** |
+|---|---|---|
+| Pages downloaded | 681 (incl. **334 .md dupes**) | **341** (no dupes) |
+| File size | 5.0 MB | **3.1 MB** |
+| Download time | ~2 minutes | **7.7 seconds** |
+| Errors | Unknown | **0** |
+| Parallel workers | 5 | 5 |
+| Chunks produced | 5 × ~1 MB each | 5 × ~0.6 MB each |
+| `.md` duplicates | 334 | **0** |
+| Agent Instructions boilerplate | 333 pages | **1** (cleaned) |
 
 ---
 
@@ -168,10 +156,14 @@ gitbook-dl gui
 | | `-o, --output` | `downloaded_docs.md` | Output file |
 | | `-p, --max-pages` | `0` (unlimited) | Page limit |
 | | `-w, --workers` | `5` | Parallel threads |
+| | `--no-llms-txt` | `True` (enabled) | Skip `/llms.txt` discovery |
+| | `--no-prefer-md` | `True` (enabled) | Use HTML extraction instead of `.md` |
 | `split <file>` | | | Markdown file |
 | | `-o, --output-dir` | `<file>_chunks/` | Output directory |
 | | `-s, --max-mb` | `1.0` | Max chunk size |
 | `gui` | | | Launch desktop app |
+
+> **New in v5.0**: `.md`-aware content extraction and `/llms.txt` discovery are enabled by default. Use `--no-llms-txt` or `--no-prefer-md` to fall back to legacy BFS-only + HTML-to-markdown mode.
 
 ---
 

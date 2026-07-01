@@ -1,5 +1,5 @@
 """
-CLI for GitBook Downloader v3.2.
+GitBook Downloader v5.0 - .md-aware streaming download, llms.txt discovery, improved content extraction.
 
 Usage:
     gitbook-dl download <url> [options]
@@ -23,13 +23,15 @@ except ImportError:
 
 def cmd_download(args):
     """Download a GitBook documentation site."""
-    print(f"\n{'═' * 50}")
-    print(f"  GitBook Downloader v4.0")
+    print(f"\n{'=' * 50}")
+    print(f"  GitBook Downloader v5.0")
     print(f"  URL:     {args.url}")
     print(f"  Output:  {args.output}")
     print(f"  Max:     {args.max_pages} pages")
     print(f"  Workers: {args.workers}")
-    print(f"{'═' * 50}\n")
+    print(f"  llms.txt: {'Yes' if args.use_llms_txt else 'No'}")
+    print(f"  Prefer .md: {'Yes' if args.prefer_md else 'No'}")
+    print(f"{'=' * 50}\n")
 
     t0 = time.time()
     out = os.path.abspath(args.output)
@@ -39,14 +41,20 @@ def cmd_download(args):
             args.url, out,
             max_pages=args.max_pages,
             workers=args.workers,
+            use_llms_txt=args.use_llms_txt,
+            prefer_md=args.prefer_md,
         )
         elapsed = round(time.time() - t0, 1)
-        print(f"\n{'═' * 50}")
-        print(f"  ✅ {result['pages']} pages | {len(result['errors'])} errors | {elapsed}s")
-        print(f"  📄 {os.path.basename(out)} ({result['size_kb']/1024:.1f} MB)")
-        print(f"{'═' * 50}\n")
+        print(f"\n{'=' * 50}")
+        disco = result.get('discovered', result['pages'])
+        print(f"  {result['pages']} new pages | {disco} discovered | "
+              f"{len(result['errors'])} errors | {elapsed}s")
+        print(f"  {os.path.basename(out)} ({result['size_kb']/1024:.1f} MB)")
+        if result['errors']:
+            print(f"  Errors: {list(result['errors'].keys())[:5]}...")
+        print(f"{'=' * 50}\n")
     except KeyboardInterrupt:
-        print("\n⏹ Cancelled")
+        print("\nCancelled")
         sys.exit(0)
 
 
@@ -79,14 +87,18 @@ def main():
         prog="gitbook-downloader",
         description="Download complete GitBook documentation sites and split into AI-friendly chunks.",
     )
-    parser.add_argument("--version", action="version", version="gitbook-downloader 4.0.0")
+    parser.add_argument("--version", action="version", version="gitbook-downloader 5.0.0")
     sub = parser.add_subparsers(dest="command", help="Available commands")
 
     dl = sub.add_parser("download", help="Download a GitBook documentation site")
     dl.add_argument("url", help="URL of the GitBook site")
     dl.add_argument("-o", "--output", default="downloaded_docs.md", help="Output file")
-    dl.add_argument("-p", "--max-pages", type=int, default=500, help="Max pages")
+    dl.add_argument("-p", "--max-pages", type=int, default=0, help="Max pages (0=unlimited)")
     dl.add_argument("-w", "--workers", type=int, default=5, help="Parallel workers (1-10)")
+    dl.add_argument("--no-llms-txt", action="store_false", dest="use_llms_txt",
+                    default=True, help="Skip llms.txt discovery")
+    dl.add_argument("--no-prefer-md", action="store_false", dest="prefer_md",
+                    default=True, help="Use HTML extraction instead of .md")
     dl.set_defaults(func=cmd_download)
 
     sp = sub.add_parser("split", help="Split a markdown file into chunks")

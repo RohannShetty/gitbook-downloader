@@ -7,6 +7,37 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.0.0] — 2026-07-02
+
+### Added
+
+- **`.md`-aware content extraction** (`--prefer-md`) — downloads GitBook's native markdown export (`URL.md`) instead of converting HTML to markdown. Produces 2.2x richer content per page with proper code blocks, headers, and lists.
+- **`llms.txt` discovery** (`--use-llms-txt`, on by default) — seeds the page list from GitBook's `/llms.txt` for instant complete discovery without BFS crawling startup delay.
+- **Idle timeout** — producer thread stops automatically when no new pages discovered for 15 seconds and all downloads complete, eliminating indefinite crawling.
+- **Agent Instructions boilerplate removal** — GitBook's AI agent instruction block is automatically stripped from `.md` export content.
+- **`--no-llms-txt` and `--no-prefer-md` CLI flags** — opt-out flags for the new features.
+- **Improved CLI output** — shows discovered count, errors summary, and new feature status.
+
+### Fixed
+
+- **`.md` URL duplication** — pages ending in `.md` are now filtered from the crawl queue. Previously, **49% of downloaded pages** were `.md` duplicates (334 out of 681 entries in a typical export). URLs ending in `.md` are now derived internally for content extraction but never crawled as separate pages.
+- **Link extraction before nav stripping** — `_extract_links()` now runs on the FULL HTML before `<nav>`/`<footer>`/`<aside>` elements are removed, ensuring sidebar navigation links are discovered for crawling.
+- **URL normalization** — `_norm()` strips `.md` suffixes so `URL` and `URL.md` resolve to the same normalized key, preventing duplicate detection issues.
+- **Deadlock on pipeline completion** — producer now checks idle timeout and download completion before stopping, preventing indefinite hangs when all pages are downloaded but link exploration continues.
+- **`urlunquote` import error on Python 3.14** — removed deprecated import.
+
+### Performance
+
+- **Full export (341 pages) in 7.7 seconds** — 86% faster than v4's ~2 minutes for comparable page count.
+- **3.1 MB output** — compact, deduplicated, clean markdown vs v4's 5.0 MB (with 334 `.md` duplicates).
+- **Zero errors** on full export of a 341-page GitBook site.
+
+### Removed
+
+- `<nav>` stripping before link extraction — sidebar links in CSS-classed `<div>` elements now survive extraction.
+
+---
+
 ## [4.0.0] — 2026-06-23
 
 ### Added
