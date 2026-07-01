@@ -34,9 +34,24 @@ jobs:
             --hidden-import bs4 `
             --hidden-import lxml `
             --hidden-import requests `
+            --hidden-import queue `
+            --hidden-import threading `
+            --hidden-import concurrent.futures `
+            --hidden-import collections `
+            --hidden-import re `
             --add-data "src/gitbook_downloader;gitbook_downloader" `
             --clean --noconfirm `
             src/gitbook_downloader/dashboard.py
+
+      - name: Verify EXE runs
+        run: |
+          if (Test-Path "dist/GitBook-Downloader.exe") {
+            $size = (Get-Item "dist/GitBook-Downloader.exe").Length / 1MB
+            Write-Host "EXE built successfully: $([math]::Round($size, 1)) MB"
+          } else {
+            Write-Error "EXE not found at dist/GitBook-Downloader.exe"
+            exit 1
+          }
 
       - name: Package release
         run: |

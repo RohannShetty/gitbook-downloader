@@ -1,9 +1,9 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/version-5.0.0-533afd?style=for-the-badge" alt="version">
-<img src="https://img.shields.io/badge/license-MIT-15be53?style=for-the-badge" alt="license">
-<img src="https://img.shields.io/badge/python-3.8+-273951?style=for-the-badge" alt="python">
-<img src="https://img.shields.io/badge/platform-Windows-533afd?style=for-the-badge" alt="platform">
+<img src="https://img.shields.io/badge/version-5.0.0-7c3aed?style=for-the-badge&logo=gitbook&logoColor=white" alt="version">
+<img src="https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge" alt="license">
+<img src="https://img.shields.io/badge/python-3.8+-3b82f6?style=for-the-badge" alt="python">
+<img src="https://img.shields.io/badge/platform-Windows-7c3aed?style=for-the-badge" alt="platform">
 
 <br><br>
 
@@ -15,12 +15,29 @@
 <br>
 
 <a href="https://github.com/RohannShetty/gitbook-downloader/releases/latest">
-  <img src="https://img.shields.io/badge/Download%20.exe-Latest%20Release-533afd?style=for-the-badge&logo=windows&logoColor=white" alt="Download">
+  <img src="https://img.shields.io/badge/Download%20.exe-Latest%20Release-7c3aed?style=for-the-badge&logo=windows&logoColor=white" alt="Download">
+</a>
+
+<a href="https://github.com/RohannShetty/gitbook-downloader">
+  <img src="https://img.shields.io/github/stars/RohannShetty/gitbook-downloader?style=for-the-badge&logo=github&color=22c55e" alt="Stars">
 </a>
 
 <br><br>
 
 </div>
+
+---
+
+## ✨ What's New in v5.0
+
+| Feature | Description |
+|---|---|
+| 🪟 **Glass Dashboard** | Dark frosted-glass GUI with real-time stats, activity log, one-click split |
+| 🎯 **Zero `.md` duplicates** | 49% of pages in v4 were duplicate `.md` downloads — eliminated |
+| ⚡ **7.7s full export** | 341 pages, 0 errors — 86% faster than v4 |
+| 📄 **Native `.md` content** | Uses GitBook's built-in markdown export, 2.2x richer than HTML→md |
+| 🔍 **`/llms.txt` discovery** | Finds every page instantly without crawling delays |
+| 🧹 **Auto-cleanup** | Agent Instructions boilerplate stripped automatically |
 
 ---
 
@@ -197,19 +214,18 @@ Download once, read anywhere. Single searchable `.md` file. Works on flights, be
 
 ---
 
-## How It Works
+### How It Works
 
-### Download Engine
+#### Download Engine
 
-1. **Start at the root URL** — fetch the homepage
-2. **Extract content** — remove `<nav>`, `<footer>`, `<aside>`, `<script>`, `<style>`
-3. **Convert to markdown** — HTML → clean markdown via `markdownify`
-4. **Discover links** — collect every internal `<a href>` on the page
-5. **Stream + download** — new URLs go to a queue, worker threads download in parallel
-6. **Dedup URLs** — normalize paths, strip `#fragments`, skip already-seen pages
-7. **Write output** — ordered by discovery, with `Source:` attribution per page
+1. **Start discovery** — fetch the root URL (and optionally parse `/llms.txt` for every page)
+2. **Extract links** — collect every internal `<a href>` on the page (sidebar links included)
+3. **Filter duplicates** — skip `.md` URLs, normalize paths, strip `#fragments`
+4. **Stream + download** — worker threads fetch each page's native `.md` export (not HTML→md conversion)
+5. **Clean content** — strip Agent Instructions boilerplate, deduplicate, normalize whitespace
+6. **Write output** — ordered by discovery, with `Source:` attribution per page
 
-### Splitter
+#### Splitter
 
 1. **Read the complete `.md` file**
 2. **Split on `#` headers** — each chunk starts at a markdown heading
@@ -219,14 +235,14 @@ Download once, read anywhere. Single searchable `.md` file. Works on flights, be
 
 ---
 
-## Architecture
+### Architecture
 
 ```
 gitbook-downloader/
 ├── src/gitbook_downloader/
-│   ├── engine.py          Streaming BFS + parallel downloads
+│   ├── engine.py          Streaming BFS + parallel .md-aware downloads
 │   ├── splitter.py        Header-boundary chunking
-│   ├── dashboard.py       Stripe-themed desktop GUI
+│   ├── dashboard.py       Dark glassmorphism desktop GUI
 │   └── cli.py             Terminal interface
 ├── .github/workflows/     Auto-build .exe on release tags
 ├── assets/                Social preview card

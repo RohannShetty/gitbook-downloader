@@ -13,6 +13,12 @@ import sys
 import time
 from datetime import timedelta
 
+# ── PyInstaller onefile fix: must run BEFORE any local imports ──
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    pkg_dir = os.path.join(sys._MEIPASS, 'gitbook_downloader')
+    if os.path.isdir(pkg_dir) and pkg_dir not in sys.path:
+        sys.path.insert(0, pkg_dir)
+
 try:
     from .engine import stream_download
     from .splitter import split_file
