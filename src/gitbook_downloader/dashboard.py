@@ -47,7 +47,7 @@ class Glass:
     BG_HOVER = "#1a1a2a"     # hover state
 
     # Glass frosted surfaces (semi-transparent)
-    GLASS = "#14141ecc"      # frosted card base
+    GLASS = "#14141e"        # frosted card base
     GLASS_BORDER = "#1e1e32" # frosted edge
     GLASS_GLOW = "#2a2a4e"   # glow around active elements
 
@@ -55,7 +55,7 @@ class Glass:
     ACCENT = "#6c47ff"       # primary interactive
     ACCENT_HOVER = "#7f5cff" # hover
     ACCENT_DIM = "#4a30b3"   # pressed/active
-    ACCENT_GLOW = "#6c47ff33" # glow behind accent elements
+    ACCENT_GLOW = "#2a2055"  # glow behind accent elements
 
     # Brand gradients
     GRADIENT_START = "#6c47ff"
@@ -69,9 +69,9 @@ class Glass:
 
     # Status
     SUCCESS = "#22c55e"
-    SUCCESS_BG = "#22c55e15"
+    SUCCESS_BG = "#062b12"
     ERROR = "#ef4444"
-    ERROR_BG = "#ef444415"
+    ERROR_BG = "#2b0a0a"
     WARNING = "#f59e0b"
     INFO = "#3b82f6"
 
@@ -163,15 +163,15 @@ class Toast(ctk.CTkFrame):
 
     def __init__(self, master, message, variant="info", duration=3000):
         color_map = {
-            "info": (Glass.INFO, Glass.INFO),
-            "success": (Glass.SUCCESS, Glass.SUCCESS),
-            "error": (Glass.ERROR, Glass.ERROR),
-            "warning": (Glass.WARNING, Glass.WARNING),
+            "info": (Glass.INFO, Glass.INFO, Glass.BG_SOFT),
+            "success": (Glass.SUCCESS, Glass.SUCCESS, Glass.SUCCESS_BG),
+            "error": (Glass.ERROR, Glass.ERROR, Glass.ERROR_BG),
+            "warning": (Glass.WARNING, Glass.WARNING, Glass.BG_SOFT),
         }
-        bg, accent = color_map.get(variant, color_map["info"])
+        accent, border, bg = color_map.get(variant, color_map["info"])
 
-        super().__init__(master, fg_color=bg + "15", border_width=1,
-                         border_color=accent + "40", corner_radius=8, height=40)
+        super().__init__(master, fg_color=bg, border_width=1,
+                         border_color=border, corner_radius=8, height=40)
         self.pack_propagate(False)
 
         ctk.CTkLabel(self, text=message, font=(Glass.FONT_FAMILY, 11),
@@ -598,7 +598,7 @@ class App(ctk.CTk):
             if isinstance(w, ctk.CTkFrame) and w != self._toast_frame:
                 # Add split prompt below the action row
                 prompt = GlassCard(w, fg_color=Glass.SUCCESS_BG,
-                                   border_color=Glass.SUCCESS + "40")
+                                   border_color=Glass.SUCCESS)
                 prompt.pack(fill="x", pady=(8, 0))
 
                 ctk.CTkLabel(prompt, text="Split into AI-ready chunks?",
