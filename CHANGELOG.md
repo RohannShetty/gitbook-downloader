@@ -12,22 +12,21 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - **PyInstaller `--onefile` import crash** — when running the `.exe`, relative imports (`from .engine import ...`) and absolute imports (`from engine import ...`) both failed because the entry point runs standalone in a `--onefile` build. Added `sys._MEIPASS` path detection that inserts the extracted package directory into `sys.path` before any local imports are attempted. Fixes both `dashboard.py` and `cli.py`.
-- **GitHub Actions workflow** — removed invalid `--collect-subpackages` flag that caused the build to fail. Workflow now also verifies the EXE was produced.
+- **GitHub Actions workflow** — removed invalid `--collect-subpackages` flag that caused the build to fail. Now verifies EXE was produced.
 
 ### Added
 
-- **Dark glassmorphism dashboard** — redesigned GUI with frosted-glass panels, deep space background (`#0d0d12`), vibrant purple accent (`#7c3aed`), rounded stat cards, real-time progress with activity log.
-- **Build verification step** — GitHub Actions workflow now checks that `dist/GitBook-Downloader.exe` exists after PyInstaller completes.
+- **Dark glassmorphism dashboard** — redesigned GUI with frosted-glass panels, deep space background, purple accent, rounded stat cards, real-time progress.
 
 ## [5.0.2] — 2026-07-02
 
 ### Fixed
 
-- **Tkinter hex color crash** — removed 8-digit alpha hex colors (`#14141ecc`) which are unsupported by tkinter. All colors now use 6-digit hex only. Also fixed alpha string concatenation patterns (`+ "40"`) in Toast and split prompt.
+- **Tkinter hex color crash** — removed 8-digit alpha hex colors which are unsupported by tkinter. All colors now 6-digit hex only. Fixed alpha string concatenation in Toast and split prompt.
 
 ### Added
 
-- **Non-blocking Toast notifications** — replaced all `messagebox` modal dialogs with in-app Toast popups that auto-dismiss without freezing the UI.
+- **Non-blocking Toast notifications** — replaced all `messagebox` modal dialogs with in-app Toast popups that auto-dismiss.
 
 ## [5.0.3] — 2026-07-02
 
