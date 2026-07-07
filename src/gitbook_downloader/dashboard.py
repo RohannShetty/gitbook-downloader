@@ -82,12 +82,15 @@ HISTORY_DIR = os.path.join(os.path.expanduser("~"), ".gitbook-downloader")
 # ═══════════════════════════════════════════════════════════
 
 class DownloadPipeline(threading.Thread):
-    def __init__(self, url, output, max_pages, workers, update_existing, event_queue):
+    def __init__(self, url, output, max_pages, workers, update_existing, event_queue,
+                 path_scope=None, exclude_paths=None):
         super().__init__(daemon=True)
         self.url = url; self.output = output
         self.max_pages = max_pages; self.workers = workers
         self.update_existing = update_existing
         self.event_queue = event_queue; self._stop = threading.Event()
+        self.path_scope = path_scope
+        self.exclude_paths = exclude_paths
 
     def run(self):
         def cb(data):
@@ -96,7 +99,9 @@ class DownloadPipeline(threading.Thread):
         try:
             stream_download(self.url, self.output, max_pages=self.max_pages,
                           workers=self.workers, update_existing=self.update_existing,
-                          progress_callback=cb)
+                          progress_callback=cb,
+                          path_scope=self.path_scope,
+                          exclude_paths=self.exclude_paths)
         except SystemExit: pass
         except Exception as e:
             self.event_queue.put({"phase": "error", "message": str(e)})
@@ -256,6 +261,54 @@ class App(ctk.CTk):
         B(row, "primary", text="Start", width=110,
           command=self._start_download).pack(side="right", padx=(10,0))
 
+        # Optional path-scope and exclude-paths (collapsed by default)
+        opts = ctk.CTkFrame(card, fg_color="transparent")
+        opts.pack(fill="x", padx=18, pady=(0,14))
+
+        # Toggle button for advanced options
+        self._show_opts = False
+        self._opts_toggle = B(opts, "ghost", text="▸ Advanced (path scope)", width=180,
+                              height=28, font=(T.font(), 10, "bold"),
+                              command=self._toggle_opts)
+        self._opts_toggle.pack(anchor="w")
+
+        self._opts_panel = ctk.CTkFrame(opts, fg_color="transparent")
+        # (hidden initially — populated by _toggle_opts)
+
+    def _toggle_opts(self):
+        self._show_opts = not self._show_opts
+        self._opts_toggle.configure(text="▾ Advanced (path scope)" if self._show_opts else "▸ Advanced (path scope)")
+        for w in self._opts_panel.winfo_children():
+            w.destroy()
+        if not self._show_opts:
+            return
+
+        # Path scope row
+        ps_row = ctk.CTkFrame(self._opts_panel, fg_color="transparent")
+        ps_row.pack(fill="x", pady=(6,4))
+        ctk.CTkLabel(ps_row, text="Path scope", font=(T.font(), 10),
+                     text_color=T.text_secondary(), width=80).pack(side="left")
+        self._scope_entry = ctk.CTkEntry(ps_row,
+            placeholder_text="e.g. /docs/connect/v3/  (leave blank for entire site)",
+            font=(T.font(), 11), fg_color=T.bg(),
+            text_color=T.text_primary(), border_color=T.border(),
+            corner_radius=6, height=32)
+        self._scope_entry.pack(side="left", fill="x", expand=True)
+
+        # Exclude paths row
+        ex_row = ctk.CTkFrame(self._opts_panel, fg_color="transparent")
+        ex_row.pack(fill="x", pady=(4,6))
+        ctk.CTkLabel(ex_row, text="Exclude paths", font=(T.font(), 10),
+                     text_color=T.text_secondary(), width=80).pack(side="left")
+        self._exclude_entry = ctk.CTkEntry(ex_row,
+            placeholder_text="e.g. /alerts/,/basket/,/changelog/  (comma-separated)",
+            font=(T.font(), 11), fg_color=T.bg(),
+            text_color=T.text_primary(), border_color=T.border(),
+            corner_radius=6, height=32)
+        self._exclude_entry.pack(side="left", fill="x", expand=True)
+
+        self._opts_panel.pack(fill="x", pady=(0,4))
+
         # History
         hist = load_history()
         if hist.get("downloads"):
@@ -329,12 +382,31 @@ class App(ctk.CTk):
 
     # ── Actions ──
 
+    def _get_path_scope(self):
+        """Read path-scope from entry field (if panel is visible and has value)."""
+        if hasattr(self, '_show_opts') and self._show_opts:
+            s = self._scope_entry.get().strip()
+            return s if s else None
+        return None
+
+    def _get_exclude_paths(self):
+        """Read comma-separated exclude paths from entry field."""
+        if hasattr(self, '_show_opts') and self._show_opts:
+            val = self._exclude_entry.get().strip()
+            if val:
+                return [p.strip() for p in val.split(",") if p.strip()]
+        return None
+
     def _start_download(self):
         url = self._url_entry.get().strip()
         if not url: return self._toast("Enter a URL", "error")
         self._url = url; self._output = "downloaded_docs.md"
         self._show_download(url)
-        self._pipeline = DownloadPipeline(url, self._output, 0, 5, False, self._event_queue)
+        ps = self._get_path_scope()
+        ex = self._get_exclude_paths()
+        self._pipeline = DownloadPipeline(url, self._output, 0, 5, False,
+                                          self._event_queue, path_scope=ps,
+                                          exclude_paths=ex)
         self._pipeline.start()
 
     def _update_download(self, e):
