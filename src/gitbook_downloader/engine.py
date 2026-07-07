@@ -80,10 +80,11 @@ def _session():
     return s
 
 
-def _extract_links(url, html):
+def _extract_links(url, html, path_scope=None):
     """Extract same-domain links from HTML for crawling/discovery.
 
     Does NOT strip nav/footer/etc. before extracting — we need sidebar links.
+    If path_scope is set, only links whose path starts with path_scope are kept.
     Returns a set of absolute URLs.
     """
     soup = BeautifulSoup(html, "html.parser")
@@ -107,6 +108,9 @@ def _extract_links(url, html):
             continue
         # Skip .md URLs from the crawl queue (will be derived for content)
         if _is_md_url(full):
+            continue
+        # Path scope filter — stay within the documentation prefix
+        if path_scope and not parsed.path.startswith(path_scope):
             continue
         links.add(full)
     return links
@@ -137,7 +141,10 @@ def _fetch_md_content(url, sess):
 
 
 def _extract_md_from_html(url, sess):
-    """Fallback: download HTML and convert to markdown."""
+    """Fallback: download HTML and convert to markdown.
+
+    Handles GitBook (React/Next.js), MkDocs Material, and generic doc sites.
+    """
     try:
         resp = sess.get(url, timeout=20)
         if resp.status_code != 200:
@@ -150,15 +157,21 @@ def _extract_md_from_html(url, sess):
     for tag in soup.find_all(["nav", "footer", "aside", "script", "style"]):
         tag.decompose()
 
+    # Try multiple content selectors — GitBook first, then MkDocs, then generic
     main = (
         soup.find("main")
         or soup.find("article")
+        # MkDocs Material content area
+        or soup.find("div", class_=lambda c: c and ("md-content" in c or "rst-content" in c))
         or soup.find("div", class_="content")
         or soup.body
     )
     body = str(main) if main else html
     markdown = md(body, heading_style="ATX")
+    # Clean up: normalize whitespace, strip MkDocs permalink noise
     markdown = re.sub(r"\n\s*\n\s*\n", "\n\n", markdown)
+    # Strip MkDocs Material "¶" permalink anchors
+    markdown = re.sub(r" ¶\n", "\n", markdown)
     return markdown.strip()
 
 
@@ -286,9 +299,11 @@ def stream_download(
     progress_callback=None,
     use_llms_txt=True,
     prefer_md=True,
+    path_scope=None,
+    min_content_chars=60,
 ):
     """
-    Stream-download a GitBook site: discover + download simultaneously.
+    Stream-download a documentation site: discover + download simultaneously.
 
     Args:
         start_url: Root URL
@@ -299,6 +314,9 @@ def stream_download(
         progress_callback: fn(phase, data) — called on every event
         use_llms_txt: If True, try to discover pages from /llms.txt first
         prefer_md: If True, fetch .md versions for content (cleaner)
+        path_scope: Optional path prefix — only crawl URLs starting with this
+                    (e.g., '/docs/connect/v3/'). Filters out forum, blog, etc.
+        min_content_chars: Skip pages with fewer characters of real content
 
     Returns:
         dict with 'pages', 'new_pages', 'errors', 'size_kb', 'output'
@@ -330,10 +348,11 @@ def stream_download(
         llms_urls = discover_from_llms_txt(start_url, sess)
         if llms_urls:
             for u in llms_urls:
+                # Apply path scope to llms.txt results too
+                if path_scope and not urlparse(u).path.startswith(path_scope):
+                    continue
                 if u not in discovered_norm:
                     discovered_norm.add(u)
-                    # Put on link_queue for further exploration (can't hurt,
-                    # the producer will skip if already processed)
                     link_queue.put(u)
                     if u not in existing_urls and u not in downloaded:
                         download_queue.put(u)
@@ -384,7 +403,7 @@ def stream_download(
                     continue
 
                 # Extract links from FULL HTML (nav intact for sidebar discovery)
-                links = _extract_links(url, resp.text)
+                links = _extract_links(url, resp.text, path_scope=path_scope)
 
                 new_found = False
                 with stats_lock:
@@ -459,6 +478,12 @@ def stream_download(
 
                 if not markdown.strip():
                     # Skip empty pages
+                    with stats_lock:
+                        stats["in_progress"] -= 1
+                    continue
+
+                # Skip trivial pages with negligible content
+                if min_content_chars and len(markdown) < min_content_chars:
                     with stats_lock:
                         stats["in_progress"] -= 1
                     continue

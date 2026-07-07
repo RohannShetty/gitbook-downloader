@@ -19,6 +19,39 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Dark glassmorphism dashboard** — redesigned GUI with frosted-glass panels, deep space background (`#0d0d12`), vibrant purple accent (`#7c3aed`), rounded stat cards, real-time progress with activity log.
 - **Build verification step** — GitHub Actions workflow now checks that `dist/GitBook-Downloader.exe` exists after PyInstaller completes.
 
+## [5.0.2] — 2026-07-02
+
+### Fixed
+
+- **Tkinter hex color crash** — removed 8-digit alpha hex colors (`#14141ecc`) which are unsupported by tkinter. All colors now use 6-digit hex only. Also fixed alpha string concatenation patterns (`+ "40"`) in Toast and split prompt.
+
+### Added
+
+- **Non-blocking Toast notifications** — replaced all `messagebox` modal dialogs with in-app Toast popups that auto-dismiss without freezing the UI.
+
+## [5.0.3] — 2026-07-02
+
+### Added
+
+- **`--path-scope` flag** — restricts crawling to URLs whose path starts with a given prefix (e.g., `--path-scope /docs/connect/v3/`). Prevents leeching forum, blog, changelog, and other unrelated same-domain pages.
+- **Minimum content filter** — skips pages with fewer than 60 characters of real content, filtering out placeholder/empty pages.
+- **MkDocs Material support** — improved HTML→markdown fallback with MkDocs Material content selectors (`md-content`, `rst-content`) and permalink anchor cleanup (`¶`). Works on non-GitBook documentation sites.
+
+### Fixed
+
+- **Forum/blog leeching** — the BFS crawler followed all same-domain links including forum posts, blog articles, changelogs, and unrelated product pages. Path-scoping now confines crawling to the documentation prefix.
+- **Numbers not visible on MkDocs sites** — markdownify's generic `<div class="content">` selector missed MkDocs Material's content wrapper (`md-content`). Fixed by adding MkDocs-specific content selectors.
+
+### Changed
+
+- Engine description updated from "GitBook site" to "documentation site" — the tool now handles GitBook, MkDocs Material, Read the Docs, and generic doc sites.
+- **GitHub Actions workflow** — removed invalid `--collect-subpackages` flag that caused the build to fail. Workflow now also verifies the EXE was produced.
+
+### Added
+
+- **Dark glassmorphism dashboard** — redesigned GUI with frosted-glass panels, deep space background (`#0d0d12`), vibrant purple accent (`#7c3aed`), rounded stat cards, real-time progress with activity log.
+- **Build verification step** — GitHub Actions workflow now checks that `dist/GitBook-Downloader.exe` exists after PyInstaller completes.
+
 ---
 
 ## [5.0.0] — 2026-07-02
