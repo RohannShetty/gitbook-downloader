@@ -39,10 +39,15 @@ def cmd_download(args):
     print(f"  Prefer .md: {'Yes' if args.prefer_md else 'No'}")
     if args.path_scope:
         print(f"  Path-scope: {args.path_scope}")
+    if args.exclude_paths:
+        print(f"  Exclude:    {args.exclude_paths}")
     print(f"{'=' * 50}\n")
 
     t0 = time.time()
     out = os.path.abspath(args.output)
+
+    # Parse exclude-paths: comma-separated string → list
+    exclude_list = [p.strip() for p in args.exclude_paths.split(",")] if args.exclude_paths else None
 
     try:
         result = stream_download(
@@ -52,6 +57,7 @@ def cmd_download(args):
             use_llms_txt=args.use_llms_txt,
             prefer_md=args.prefer_md,
             path_scope=args.path_scope,
+            exclude_paths=exclude_list,
         )
         elapsed = round(time.time() - t0, 1)
         print(f"\n{'=' * 50}")
@@ -106,6 +112,8 @@ def main():
     dl.add_argument("-w", "--workers", type=int, default=5, help="Parallel workers (1-10)")
     dl.add_argument("--path-scope", default=None,
                     help="Only crawl URLs under this path prefix (e.g. /docs/connect/v3/)")
+    dl.add_argument("--exclude-paths", default=None,
+                    help="Comma-separated sub-paths to skip (e.g. /alerts/,/changelog/)")
     dl.add_argument("--no-llms-txt", action="store_false", dest="use_llms_txt",
                     default=True, help="Skip llms.txt discovery")
     dl.add_argument("--no-prefer-md", action="store_false", dest="prefer_md",

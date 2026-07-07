@@ -80,11 +80,12 @@ def _session():
     return s
 
 
-def _extract_links(url, html, path_scope=None):
+def _extract_links(url, html, path_scope=None, exclude_paths=None):
     """Extract same-domain links from HTML for crawling/discovery.
 
     Does NOT strip nav/footer/etc. before extracting — we need sidebar links.
     If path_scope is set, only links whose path starts with path_scope are kept.
+    If exclude_paths is set, links whose path contains any exclude entry are skipped.
     Returns a set of absolute URLs.
     """
     soup = BeautifulSoup(html, "html.parser")
@@ -112,6 +113,10 @@ def _extract_links(url, html, path_scope=None):
         # Path scope filter — stay within the documentation prefix
         if path_scope and not parsed.path.startswith(path_scope):
             continue
+        # Exclude patterns — skip specific sub-paths (e.g. /alerts/, /changelog/)
+        if exclude_paths:
+            if any(ex in parsed.path for ex in exclude_paths):
+                continue
         links.add(full)
     return links
 
@@ -300,6 +305,7 @@ def stream_download(
     use_llms_txt=True,
     prefer_md=True,
     path_scope=None,
+    exclude_paths=None,
     min_content_chars=60,
 ):
     """
@@ -316,6 +322,8 @@ def stream_download(
         prefer_md: If True, fetch .md versions for content (cleaner)
         path_scope: Optional path prefix — only crawl URLs starting with this
                     (e.g., '/docs/connect/v3/'). Filters out forum, blog, etc.
+        exclude_paths: Optional list of sub-path fragments to skip even within
+                       path_scope (e.g. ['/alerts/', '/changelog/'])
         min_content_chars: Skip pages with fewer characters of real content
 
     Returns:
@@ -348,8 +356,10 @@ def stream_download(
         llms_urls = discover_from_llms_txt(start_url, sess)
         if llms_urls:
             for u in llms_urls:
-                # Apply path scope to llms.txt results too
+                # Apply path scope AND exclusions to llms.txt results
                 if path_scope and not urlparse(u).path.startswith(path_scope):
+                    continue
+                if exclude_paths and any(ex in urlparse(u).path for ex in exclude_paths):
                     continue
                 if u not in discovered_norm:
                     discovered_norm.add(u)
@@ -403,7 +413,8 @@ def stream_download(
                     continue
 
                 # Extract links from FULL HTML (nav intact for sidebar discovery)
-                links = _extract_links(url, resp.text, path_scope=path_scope)
+                links = _extract_links(url, resp.text, path_scope=path_scope,
+                                       exclude_paths=exclude_paths)
 
                 new_found = False
                 with stats_lock:
