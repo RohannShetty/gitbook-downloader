@@ -1,21 +1,13 @@
 """
-GitBook Downloader v5.0 — Glassmorphism Dashboard
-
-Dark frosted-glass UI inspired by Linear's dark-mode native design and
-Stripe's purple accent system. Uses customtkinter with semi-transparent
-panels, layered depth, and non-blocking in-app notifications.
+GitBook Downloader v5.0 — Editorial Dashboard
+Warm amber + charcoal palette. Anti-default: no purple gradients.
+Dark/light theme toggle. File rename support. Clean editorial density.
 """
 
-import os
-import sys
-import json
-import time
-import queue
-import threading
+import os, sys, json, time, queue, threading
 from datetime import datetime
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
-# ── PyInstaller onefile fix ──
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     pkg_dir = os.path.join(sys._MEIPASS, 'gitbook_downloader')
     if os.path.isdir(pkg_dir) and pkg_dir not in sys.path:
@@ -32,599 +24,427 @@ except ImportError:
 
 
 # ═══════════════════════════════════════════════════════════
-# GLASS DESIGN TOKENS
+# DESIGN TOKENS — Editorial Amber
 # ═══════════════════════════════════════════════════════════
+
+class _T:
+    _mode = "dark"
+
+    @classmethod
+    def set_mode(cls, mode):
+        cls._mode = mode
+
+    @classmethod
+    def bg(cls):    return "#16141a" if cls._mode == "dark" else "#faf7f4"
+    @classmethod
+    def surface(cls): return "#1f1c24" if cls._mode == "dark" else "#ffffff"
+    @classmethod
+    def border(cls): return "#2e2936" if cls._mode == "dark" else "#e6e0d8"
+    @classmethod
+    def accent(cls): return "#e8983e"   # warm amber — constant accent
+    @classmethod
+    def accent_hover(cls): return "#f0a84c"
+    @classmethod
+    def text_primary(cls): return "#e8e4dd" if cls._mode == "dark" else "#2d2520"
+    @classmethod
+    def text_secondary(cls): return "#9d9490" if cls._mode == "dark" else "#6b635c"
+    @classmethod
+    def text_muted(cls): return "#5c5554" if cls._mode == "dark" else "#a09890"
+    @classmethod
+    def success(cls): return "#4ec9a0"
+    @classmethod
+    def error(cls): return "#e0556a"
+    @classmethod
+    def radius(cls): return 8
+    @classmethod
+    def font(cls): return "Segoe UI"
+
+
+T = _T
+
+DARK = {
+    "bg": "#16141a", "surface": "#1f1c24", "border": "#2e2936",
+    "text_primary": "#e8e4dd", "text_secondary": "#9d9490", "text_muted": "#5c5554",
+}
+LIGHT = {
+    "bg": "#faf7f4", "surface": "#ffffff", "border": "#e6e0d8",
+    "text_primary": "#2d2520", "text_secondary": "#6b635c", "text_muted": "#a09890",
+}
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-class Glass:
-    """Design token namespace — inspired by Linear + Stripe."""
-    # Backgrounds — near-black canvas with blue-cast
-    BG = "#07070d"           # deepest void
-    BG_SOFT = "#0c0c14"      # card/panel background
-    BG_ELEVATED = "#12121e"  # elevated surface
-    BG_HOVER = "#1a1a2a"     # hover state
-
-    # Glass frosted surfaces (semi-transparent)
-    GLASS = "#14141e"        # frosted card base
-    GLASS_BORDER = "#1e1e32" # frosted edge
-    GLASS_GLOW = "#2a2a4e"   # glow around active elements
-
-    # Accent — deep indigo-violet
-    ACCENT = "#6c47ff"       # primary interactive
-    ACCENT_HOVER = "#7f5cff" # hover
-    ACCENT_DIM = "#4a30b3"   # pressed/active
-    ACCENT_GLOW = "#2a2055"  # glow behind accent elements
-
-    # Brand gradients
-    GRADIENT_START = "#6c47ff"
-    GRADIENT_END = "#9b6dff"
-
-    # Text — silvery white scale
-    TEXT_PRIMARY = "#e8e8f2"
-    TEXT_SECONDARY = "#9494ac"
-    TEXT_MUTED = "#5c5c74"
-    TEXT_DIM = "#3c3c54"
-
-    # Status
-    SUCCESS = "#22c55e"
-    SUCCESS_BG = "#062b12"
-    ERROR = "#ef4444"
-    ERROR_BG = "#2b0a0a"
-    WARNING = "#f59e0b"
-    INFO = "#3b82f6"
-
-    # Layout
-    RADIUS = 12              # card radius
-    RADIUS_BTN = 8           # button radius
-    RADIUS_INPUT = 8         # input radius
-    PADDING = 20
-
-    # Font system
-    FONT_FAMILY = "Segoe UI"
-    FONT_MONO = "Consolas"
+HISTORY_DIR = os.path.join(os.path.expanduser("~"), ".gitbook-downloader")
 
 
 # ═══════════════════════════════════════════════════════════
-# CUSTOM GLASS WIDGETS
-# ═══════════════════════════════════════════════════════════
-
-class GlassCard(ctk.CTkFrame):
-    """Frosted glass card with layered depth."""
-
-    def __init__(self, master, hover_glow=False, **kwargs):
-        kwargs.setdefault("fg_color", Glass.GLASS)
-        kwargs.setdefault("border_width", 1)
-        kwargs.setdefault("border_color", Glass.GLASS_BORDER)
-        kwargs.setdefault("corner_radius", Glass.RADIUS)
-        super().__init__(master, **kwargs)
-
-        # Inner glow line
-        self._glow = ctk.CTkFrame(self, height=1, fg_color=Glass.GLASS_GLOW,
-                                   corner_radius=0)
-        self._glow.place(relx=0, rely=0, relwidth=1)
-
-
-class GlassButton(ctk.CTkButton):
-    """Gradient glass button."""
-
-    def __init__(self, master, variant="primary", **kwargs):
-        cfg = {
-            "primary": {
-                "fg_color": Glass.ACCENT,
-                "hover_color": Glass.ACCENT_HOVER,
-                "text_color": "#ffffff",
-            },
-            "ghost": {
-                "fg_color": "transparent",
-                "hover_color": Glass.BG_HOVER,
-                "text_color": Glass.TEXT_SECONDARY,
-                "border_width": 1,
-                "border_color": Glass.GLASS_BORDER,
-            },
-            "success": {
-                "fg_color": Glass.SUCCESS,
-                "hover_color": "#16a34a",
-                "text_color": "#ffffff",
-            },
-        }
-        c = cfg.get(variant, cfg["primary"])
-        c.setdefault("corner_radius", Glass.RADIUS_BTN)
-        c.setdefault("font", (Glass.FONT_FAMILY, 12, "bold"))
-        c.setdefault("height", 36)
-        c.update(kwargs)
-        super().__init__(master, **c)
-
-
-class StatTile(GlassCard):
-    """Compact stat tile with label + animated value."""
-
-    def __init__(self, master, label, icon="", width=140, height=80):
-        super().__init__(master, width=width, height=height)
-        self.pack_propagate(False)
-
-        ctk.CTkLabel(self, text=icon, font=(Glass.FONT_FAMILY, 16),
-                     text_color=Glass.TEXT_DIM).pack(anchor="w", padx=12, pady=(10, 0))
-
-        ctk.CTkLabel(self, text=label, font=(Glass.FONT_FAMILY, 9),
-                     text_color=Glass.TEXT_MUTED).pack(anchor="w", padx=12, pady=(0, 1))
-
-        self._val = ctk.CTkLabel(self, text="—", font=(Glass.FONT_FAMILY, 18, "bold"),
-                                 text_color=Glass.TEXT_PRIMARY)
-        self._val.pack(anchor="w", padx=12, pady=(0, 8))
-
-    def set(self, text, color=None):
-        self._val.configure(text=str(text), text_color=color or Glass.TEXT_PRIMARY)
-
-
-class Toast(ctk.CTkFrame):
-    """Non-blocking in-app notification bar."""
-
-    def __init__(self, master, message, variant="info", duration=3000):
-        color_map = {
-            "info": (Glass.INFO, Glass.INFO, Glass.BG_SOFT),
-            "success": (Glass.SUCCESS, Glass.SUCCESS, Glass.SUCCESS_BG),
-            "error": (Glass.ERROR, Glass.ERROR, Glass.ERROR_BG),
-            "warning": (Glass.WARNING, Glass.WARNING, Glass.BG_SOFT),
-        }
-        accent, border, bg = color_map.get(variant, color_map["info"])
-
-        super().__init__(master, fg_color=bg, border_width=1,
-                         border_color=border, corner_radius=8, height=40)
-        self.pack_propagate(False)
-
-        ctk.CTkLabel(self, text=message, font=(Glass.FONT_FAMILY, 11),
-                     text_color=Glass.TEXT_PRIMARY).pack(side="left", padx=16)
-
-        # Auto-dismiss
-        self.after(duration, self._fade_out)
-
-    def _fade_out(self):
-        try:
-            self.destroy()
-        except Exception:
-            pass
-
-
-# ═══════════════════════════════════════════════════════════
-# DOWNLOAD ENGINE THREAD
+# PIPELINE THREAD
 # ═══════════════════════════════════════════════════════════
 
 class DownloadPipeline(threading.Thread):
-    """Non-blocking download runner — feeds events to queue."""
-
     def __init__(self, url, output, max_pages, workers, update_existing, event_queue):
         super().__init__(daemon=True)
-        self.url = url
-        self.output = output
-        self.max_pages = max_pages
-        self.workers = workers
+        self.url = url; self.output = output
+        self.max_pages = max_pages; self.workers = workers
         self.update_existing = update_existing
-        self.event_queue = event_queue
-        self._stop = threading.Event()
+        self.event_queue = event_queue; self._stop = threading.Event()
 
     def run(self):
         def cb(data):
-            if self._stop.is_set():
-                raise SystemExit()
+            if self._stop.is_set(): raise SystemExit()
             self.event_queue.put(data)
         try:
-            stream_download(self.url, self.output,
-                          max_pages=self.max_pages,
-                          workers=self.workers,
-                          update_existing=self.update_existing,
+            stream_download(self.url, self.output, max_pages=self.max_pages,
+                          workers=self.workers, update_existing=self.update_existing,
                           progress_callback=cb)
-        except SystemExit:
-            pass
+        except SystemExit: pass
         except Exception as e:
             self.event_queue.put({"phase": "error", "message": str(e)})
 
-    def stop(self):
-        self._stop.set()
+    def stop(self): self._stop.set()
 
 
 # ═══════════════════════════════════════════════════════════
-# MAIN APP
+# WIDGETS
+# ═══════════════════════════════════════════════════════════
+
+class C(ctk.CTkFrame):
+    """Surface card — picks up theme from T."""
+    def __init__(self, m, **kw):
+        kw.setdefault("fg_color", T.surface())
+        kw.setdefault("border_width", 1)
+        kw.setdefault("border_color", T.border())
+        kw.setdefault("corner_radius", T.radius())
+        super().__init__(m, **kw)
+
+class B(ctk.CTkButton):
+    """Accent button."""
+    def __init__(self, m, variant="primary", **kw):
+        if variant == "primary":
+            kw.setdefault("fg_color", T.accent())
+            kw.setdefault("hover_color", T.accent_hover())
+            kw.setdefault("text_color", "#ffffff")
+        else:
+            kw.setdefault("fg_color", "transparent")
+            kw.setdefault("hover_color", T.border())
+            kw.setdefault("text_color", T.text_secondary())
+            kw.setdefault("border_width", 1)
+            kw.setdefault("border_color", T.border())
+        kw.setdefault("corner_radius", 6)
+        kw.setdefault("font", (T.font(), 11, "bold"))
+        kw.setdefault("height", 34)
+        super().__init__(m, **kw)
+
+class StatTile(C):
+    def __init__(self, m, label, w=130, h=72):
+        super().__init__(m, width=w, height=h)
+        self.pack_propagate(False)
+        ctk.CTkLabel(self, text=label, font=(T.font(), 9),
+                     text_color=T.text_muted()).pack(anchor="w", padx=12, pady=(8,0))
+        self._v = ctk.CTkLabel(self, text="—", font=(T.font(), 16, "bold"),
+                                text_color=T.text_primary())
+        self._v.pack(anchor="w", padx=12, pady=(0,8))
+    def set(self, t, c=None):
+        self._v.configure(text=str(t), text_color=c or T.text_primary())
+
+class Toast(ctk.CTkFrame):
+    def __init__(self, m, msg, variant="info", dur=3000):
+        bg_map = {"info": T.border(), "success": "#254d3c", "error": "#4d1c24"}
+        border_map = {"info": T.border(), "success": T.success(), "error": T.error()}
+        super().__init__(m, fg_color=bg_map.get(variant, bg_map["info"]),
+                         border_width=1, border_color=border_map.get(variant, border_map["info"]),
+                         corner_radius=6, height=36)
+        self.pack_propagate(False)
+        ctk.CTkLabel(self, text=msg, font=(T.font(), 10),
+                     text_color=T.text_primary()).pack(side="left", padx=14)
+        self.after(dur, self.destroy)
+
+
+# ═══════════════════════════════════════════════════════════
+# APP
 # ═══════════════════════════════════════════════════════════
 
 class App(ctk.CTk):
-    """Glassmorphism GitBook Downloader — no blocking dialogs."""
-
     def __init__(self):
         super().__init__()
         self.title("GitBook Downloader v5.0")
-        self.geometry("1060x720")
-        self.configure(fg_color=Glass.BG)
+        self.geometry("1060x700")
+        self.configure(fg_color=T.bg())
         self.minsize(860, 560)
-        self._pipeline = None
-        self._event_queue = queue.Queue()
-        self._toast_y = 0
-
+        self._pipeline = None; self._event_queue = queue.Queue()
+        self._current_theme = "dark"
         self._build_ui()
         self._show_dashboard()
         self._start_poll()
 
-    # ── LAYOUT ─────────────────────────────────────────────
+    def _apply_theme(self, mode):
+        self._current_theme = mode
+        ctk.set_appearance_mode(mode)
+        T.set_mode(mode)
+        self.configure(fg_color=T.bg())
+        # Rebuild to refresh all colors
+        self._build_ui(); self._show_dashboard()
 
     def _build_ui(self):
-        # Header bar
-        header = ctk.CTkFrame(self, fg_color=Glass.BG_SOFT, height=56,
-                              corner_radius=0)
-        header.pack(fill="x")
-        header.pack_propagate(False)
+        # Header
+        h = ctk.CTkFrame(self, fg_color=T.surface(), height=52, corner_radius=0)
+        h.pack(fill="x"); h.pack_propagate(False)
 
-        # Logo area
-        logo_frame = ctk.CTkFrame(header, fg_color="transparent")
-        logo_frame.pack(side="left", padx=24)
+        lf = ctk.CTkFrame(h, fg_color="transparent"); lf.pack(side="left", padx=20)
+        ctk.CTkLabel(lf, text="⬡ ", font=(T.font(), 22),
+                     text_color=T.accent()).pack(side="left")
+        ctk.CTkLabel(lf, text="GitBook Downloader", font=(T.font(), 15, "bold"),
+                     text_color=T.text_primary()).pack(side="left", padx=(6,0))
+        ctk.CTkLabel(lf, text="v5.0", font=(T.font(), 10),
+                     text_color=T.text_muted()).pack(side="left", padx=(4,0))
 
-        ctk.CTkLabel(logo_frame, text="⬡", font=(Glass.FONT_FAMILY, 24),
-                     text_color=Glass.ACCENT).pack(side="left")
-        ctk.CTkLabel(logo_frame, text="GitBook Downloader",
-                     font=(Glass.FONT_FAMILY, 16, "bold"),
-                     text_color=Glass.TEXT_PRIMARY).pack(side="left", padx=(8, 0))
-        ctk.CTkLabel(logo_frame, text="v5.0",
-                     font=(Glass.FONT_FAMILY, 10), text_color=Glass.TEXT_DIM
-                     ).pack(side="left", padx=(6, 0))
+        # Theme toggle
+        rf = ctk.CTkFrame(h, fg_color="transparent"); rf.pack(side="right", padx=16)
+        t = "☀️" if self._current_theme == "dark" else "🌙"
+        self._theme_btn = B(rf, "ghost", text=t, width=36, height=36,
+                            font=(T.font(), 14),
+                            command=self._toggle_theme)
+        self._theme_btn.pack(side="right", padx=(0,4))
 
-        # Views container
+        # Views
         self._views = ctk.CTkFrame(self, fg_color="transparent")
-        self._views.pack(fill="both", expand=True, padx=24, pady=(12, 12))
+        self._views.pack(fill="both", expand=True, padx=20, pady=(8,4))
 
-        # Toast container (overlays at bottom)
-        self._toast_frame = ctk.CTkFrame(self._views, fg_color="transparent",
-                                          height=0)
-        self._toast_frame.pack(fill="x", side="bottom", pady=(0, 8))
+        self._toast_frame = ctk.CTkFrame(self._views, fg_color="transparent", height=0)
+        self._toast_frame.pack(fill="x", side="bottom")
 
         # Footer
-        footer = ctk.CTkFrame(self, fg_color=Glass.BG_SOFT, height=28,
-                              corner_radius=0)
-        footer.pack(fill="x", side="bottom")
-        ctk.CTkLabel(footer, text="⬡ Built for the docs community",
-                     font=(Glass.FONT_FAMILY, 9), text_color=Glass.TEXT_DIM
-                     ).pack(pady=4)
+        f = ctk.CTkFrame(self, fg_color=T.surface(), height=24, corner_radius=0)
+        f.pack(fill="x", side="bottom")
+        ctk.CTkLabel(f, text="docs → markdown → AI", font=(T.font(), 9),
+                     text_color=T.text_muted()).pack(pady=3)
 
-    def _toast(self, message, variant="info", duration=3000):
-        """Show non-blocking notification — never freezes."""
-        t = Toast(self._toast_frame, message, variant, duration)
-        t.pack(fill="x", pady=(0, 4))
+    def _toggle_theme(self):
+        self._apply_theme("light" if self._current_theme == "dark" else "dark")
 
-    # ── VIEWS ──────────────────────────────────────────────
+    def _toast(self, msg, v="info", d=3000):
+        Toast(self._toast_frame, msg, v, d).pack(fill="x", pady=(0,4))
 
     def _clear(self):
         for w in self._views.winfo_children():
-            if w != self._toast_frame:
-                w.destroy()
+            if w != self._toast_frame: w.destroy()
+
+    # ── Dashboard ──
 
     def _show_dashboard(self):
         self._clear()
-        c = ctk.CTkFrame(self._views, fg_color="transparent")
-        c.pack(fill="both", expand=True)
+        c = ctk.CTkFrame(self._views, fg_color="transparent"); c.pack(fill="both", expand=True)
 
-        # ── New download ──
-        card = GlassCard(c)
-        card.pack(fill="x", pady=(0, 16))
+        # New download card
+        card = C(c); card.pack(fill="x", pady=(0,14))
 
-        ctk.CTkLabel(card, text="New Download",
-                     font=(Glass.FONT_FAMILY, 20, "bold"),
-                     text_color=Glass.TEXT_PRIMARY).pack(anchor="w", padx=20, pady=(16, 2))
-        ctk.CTkLabel(card, text="Paste a GitBook URL and press Enter or click Start",
-                     font=(Glass.FONT_FAMILY, 11),
-                     text_color=Glass.TEXT_SECONDARY).pack(anchor="w", padx=20, pady=(0, 14))
+        ctk.CTkLabel(card, text="New Download", font=(T.font(), 18, "bold"),
+                     text_color=T.text_primary()).pack(anchor="w", padx=18, pady=(14,2))
+        ctk.CTkLabel(card, text="Paste a GitBook or MkDocs URL",
+                     font=(T.font(), 11), text_color=T.text_secondary()
+                     ).pack(anchor="w", padx=18, pady=(0,12))
 
-        row = ctk.CTkFrame(card, fg_color="transparent")
-        row.pack(fill="x", padx=20, pady=(0, 16))
+        row = ctk.CTkFrame(card, fg_color="transparent"); row.pack(fill="x", padx=18, pady=(0,14))
 
-        self._url_entry = ctk.CTkEntry(
-            row, placeholder_text="https://docs.example.com/",
-            font=(Glass.FONT_FAMILY, 13),
-            fg_color=Glass.BG, text_color=Glass.TEXT_PRIMARY,
-            border_color=Glass.GLASS_BORDER, corner_radius=Glass.RADIUS_INPUT,
-            height=42)
+        self._url_entry = ctk.CTkEntry(row, placeholder_text="https://docs.example.com/",
+            font=(T.font(), 12), fg_color=T.bg(),
+            text_color=T.text_primary(), border_color=T.border(),
+            corner_radius=6, height=40)
         self._url_entry.pack(side="left", fill="x", expand=True)
         self._url_entry.bind("<Return>", lambda e: self._start_download())
 
-        GlassButton(row, "primary", text="Start", width=120,
-                    command=self._start_download).pack(side="right", padx=(12, 0))
+        B(row, "primary", text="Start", width=110,
+          command=self._start_download).pack(side="right", padx=(10,0))
 
-        # ── History ──
-        history = load_history()
-        if history.get("downloads"):
-            ctk.CTkLabel(c, text="Download History",
-                         font=(Glass.FONT_FAMILY, 16, "bold"),
-                         text_color=Glass.TEXT_PRIMARY
-                         ).pack(anchor="w", pady=(0, 10))
-            for entry in history["downloads"][:8]:
-                self._build_history_card(c, entry)
+        # History
+        hist = load_history()
+        if hist.get("downloads"):
+            ctk.CTkLabel(c, text="History", font=(T.font(), 14, "bold"),
+                         text_color=T.text_primary()).pack(anchor="w", pady=(0,8))
+            for e in hist["downloads"][:8]:
+                self._hist_card(c, e)
 
-    def _build_history_card(self, parent, entry):
-        card = GlassCard(parent, hover_glow=True)
-        card.pack(fill="x", pady=(0, 8))
+    def _hist_card(self, p, e):
+        card = C(p); card.pack(fill="x", pady=(0,6))
+        row = ctk.CTkFrame(card, fg_color="transparent"); row.pack(fill="x", padx=14, pady=10)
 
-        row = ctk.CTkFrame(card, fg_color="transparent")
-        row.pack(fill="x", padx=16, pady=12)
+        info = ctk.CTkFrame(row, fg_color="transparent"); info.pack(side="left", fill="x", expand=True)
+        name = e.get("url","").rstrip("/").split("/")[-1] or "Home"
+        ctk.CTkLabel(info, text=name, font=(T.font(), 12, "bold"),
+                     text_color=T.text_primary()).pack(anchor="w")
+        ctk.CTkLabel(info, text=f"{e.get('pages',0)} pages · {e.get('size_kb',0)/1024:.1f}MB · {e.get('date','')}",
+                     font=(T.font(), 10), text_color=T.text_muted()).pack(anchor="w")
 
-        info = ctk.CTkFrame(row, fg_color="transparent")
-        info.pack(side="left", fill="x", expand=True)
+        acts = ctk.CTkFrame(row, fg_color="transparent"); acts.pack(side="right")
+        out = e.get("output","")
 
-        name = entry.get("url", "").rstrip("/").split("/")[-1] or "Home"
-        ctk.CTkLabel(info, text=name, font=(Glass.FONT_FAMILY, 13, "bold"),
-                     text_color=Glass.TEXT_PRIMARY).pack(anchor="w")
-        detail = "{} pages | {:.1f} MB | {}".format(
-            entry.get("pages", 0),
-            entry.get("size_kb", 0) / 1024,
-            entry.get("date", ""))
-        ctk.CTkLabel(info, text=detail, font=(Glass.FONT_FAMILY, 10),
-                     text_color=Glass.TEXT_MUTED).pack(anchor="w")
+        B(acts, "ghost", text="Rename", width=70, height=28, font=(T.font(), 10),
+          command=lambda p=out: self._rename_file(p)).pack(side="left", padx=2)
+        B(acts, "ghost", text="Open", width=58, height=28, font=(T.font(), 10),
+          command=lambda p=out: self._open_file(p)).pack(side="left", padx=2)
+        B(acts, "ghost", text="Split", width=58, height=28, font=(T.font(), 10),
+          command=lambda p=out: self._split_output(p)).pack(side="left", padx=2)
+        B(acts, "ghost", text="Update", width=64, height=28, font=(T.font(), 10),
+          command=lambda e=e: self._update_download(e)).pack(side="left", padx=2)
 
-        acts = ctk.CTkFrame(row, fg_color="transparent")
-        acts.pack(side="right")
-
-        out = entry.get("output", "")
-        GlassButton(acts, "ghost", text="Open", width=64, height=28,
-                    font=(Glass.FONT_FAMILY, 10),
-                    command=lambda p=out: self._open_file(p)
-                    ).pack(side="left", padx=2)
-        GlassButton(acts, "ghost", text="Split", width=64, height=28,
-                    font=(Glass.FONT_FAMILY, 10),
-                    command=lambda p=out: self._split_output(p)
-                    ).pack(side="left", padx=2)
-        GlassButton(acts, "ghost", text="Update", width=72, height=28,
-                    font=(Glass.FONT_FAMILY, 10),
-                    command=lambda e=entry: self._update_download(e)
-                    ).pack(side="left", padx=2)
-
-    # ── Download view ──
+    # ── Download ──
 
     def _show_download(self, url):
         self._clear()
-        c = ctk.CTkFrame(self._views, fg_color="transparent")
-        c.pack(fill="both", expand=True)
+        c = ctk.CTkFrame(self._views, fg_color="transparent"); c.pack(fill="both", expand=True)
 
-        card = GlassCard(c)
-        card.pack(fill="x", pady=(0, 16))
+        card = C(c); card.pack(fill="x", pady=(0,12))
+        ctk.CTkLabel(card, text="Downloading", font=(T.font(), 18, "bold"),
+                     text_color=T.text_primary()).pack(anchor="w", padx=18, pady=(14,2))
+        ctk.CTkLabel(card, text=url, font=(T.font(), 11),
+                     text_color=T.text_secondary(), wraplength=600
+                     ).pack(anchor="w", padx=18, pady=(0,12))
 
-        ctk.CTkLabel(card, text="Downloading",
-                     font=(Glass.FONT_FAMILY, 20, "bold"),
-                     text_color=Glass.TEXT_PRIMARY).pack(anchor="w", padx=20, pady=(16, 2))
-        ctk.CTkLabel(card, text=url, font=(Glass.FONT_FAMILY, 11),
-                     text_color=Glass.TEXT_SECONDARY, wraplength=600
-                     ).pack(anchor="w", padx=20, pady=(0, 14))
+        sr = ctk.CTkFrame(card, fg_color="transparent"); sr.pack(fill="x", padx=18, pady=(0,12))
+        self._s_disc = StatTile(sr, "Discovered"); self._s_disc.pack(side="left", padx=(0,4))
+        self._s_dl = StatTile(sr, "Downloaded"); self._s_dl.pack(side="left", padx=4)
+        self._s_err = StatTile(sr, "Errors"); self._s_err.pack(side="left", padx=4)
+        self._s_size = StatTile(sr, "Size"); self._s_size.pack(side="left", padx=4)
+        self._s_elap = StatTile(sr, "Elapsed"); self._s_elap.pack(side="left", padx=4)
 
-        # Stats row
-        sr = ctk.CTkFrame(card, fg_color="transparent")
-        sr.pack(fill="x", padx=20, pady=(0, 14))
+        pf = ctk.CTkFrame(card, fg_color="transparent"); pf.pack(fill="x", padx=18, pady=(0,4))
+        self._prog = ctk.CTkProgressBar(pf, fg_color=T.border(),
+                                        progress_color=T.accent(), corner_radius=3, height=3)
+        self._prog.pack(fill="x"); self._prog.set(0)
+        self._status = ctk.CTkLabel(pf, text="Starting...", font=(T.font(), 10),
+                                    text_color=T.text_muted())
+        self._status.pack(anchor="w", pady=(3,0))
 
-        self._s_discovered = StatTile(sr, "Discovered", "\u25c9")
-        self._s_discovered.pack(side="left", padx=(0, 6))
-        self._s_downloaded = StatTile(sr, "Downloaded", "\u2713")
-        self._s_downloaded.pack(side="left", padx=6)
-        self._s_errors = StatTile(sr, "Errors", "\u26a0")
-        self._s_errors.pack(side="left", padx=6)
-        self._s_size = StatTile(sr, "Size", "\u25a0")
-        self._s_size.pack(side="left", padx=6)
-        self._s_elapsed = StatTile(sr, "Elapsed", "\u25b6")
-        self._s_elapsed.pack(side="left", padx=6)
+        log = C(c); log.pack(fill="both", expand=True)
+        ctk.CTkLabel(log, text="Activity", font=(T.font(), 12, "bold"),
+                     text_color=T.text_primary()).pack(anchor="w", padx=14, pady=(8,4))
+        self._logb = ctk.CTkTextbox(log, fg_color="transparent", border_width=0,
+                                     text_color=T.text_secondary(), font=("Consolas", 10), corner_radius=0)
+        self._logb.pack(fill="both", expand=True, padx=14, pady=(0,10))
 
-        # Progress bar with label
-        pf = ctk.CTkFrame(card, fg_color="transparent")
-        pf.pack(fill="x", padx=20, pady=(0, 4))
-        self._progress = ctk.CTkProgressBar(pf, fg_color=Glass.GLASS_BORDER,
-                                             progress_color=Glass.ACCENT,
-                                             corner_radius=4, height=4)
-        self._progress.pack(fill="x")
-        self._progress.set(0)
-
-        self._status = ctk.CTkLabel(pf, text="Initializing...",
-                                    font=(Glass.FONT_FAMILY, 10),
-                                    text_color=Glass.TEXT_MUTED)
-        self._status.pack(anchor="w", pady=(4, 0))
-
-        # Log
-        log_card = GlassCard(c)
-        log_card.pack(fill="both", expand=True)
-
-        ctk.CTkLabel(log_card, text="Activity Log",
-                     font=(Glass.FONT_FAMILY, 13, "bold"),
-                     text_color=Glass.TEXT_PRIMARY).pack(anchor="w", padx=16, pady=(10, 6))
-
-        self._log_box = ctk.CTkTextbox(log_card, fg_color="transparent",
-                                        border_width=0,
-                                        text_color=Glass.TEXT_SECONDARY,
-                                        font=(Glass.FONT_MONO, 10),
-                                        corner_radius=0)
-        self._log_box.pack(fill="both", expand=True, padx=16, pady=(0, 12))
-
-        # Action row
-        ar = ctk.CTkFrame(c, fg_color="transparent")
-        ar.pack(fill="x", pady=(10, 0))
-        self._btn_cancel = GlassButton(ar, "ghost", text="Cancel", width=100,
-                                       command=self._cancel_download)
-        self._btn_cancel.pack(side="right")
-
+        ar = ctk.CTkFrame(c, fg_color="transparent"); ar.pack(fill="x", pady=(8,0))
+        self._cancel_btn = B(ar, "ghost", text="Cancel", width=90, command=self._cancel_download)
+        self._cancel_btn.pack(side="right")
         self._download_t0 = time.time()
-        self._log("Download started")
 
-    # ── ACTIONS ────────────────────────────────────────────
+    # ── Actions ──
 
     def _start_download(self):
         url = self._url_entry.get().strip()
-        if not url:
-            self._toast("Enter a URL first", "warning")
-            return
-        self._url = url
-        self._output = "downloaded_docs.md"
+        if not url: return self._toast("Enter a URL", "error")
+        self._url = url; self._output = "downloaded_docs.md"
         self._show_download(url)
-        self._pipeline = DownloadPipeline(
-            url, self._output, max_pages=0, workers=5,
-            update_existing=False, event_queue=self._event_queue)
+        self._pipeline = DownloadPipeline(url, self._output, 0, 5, False, self._event_queue)
         self._pipeline.start()
 
-    def _update_download(self, entry):
-        self._url = entry["url"]
-        self._output = entry["output"]
-        self._show_download(entry["url"] + " (update)")
-        self._log("Updating existing download...")
-        self._pipeline = DownloadPipeline(
-            entry["url"], entry["output"], max_pages=0, workers=5,
-            update_existing=True, event_queue=self._event_queue)
+    def _update_download(self, e):
+        self._url = e["url"]; self._output = e["output"]
+        self._show_download(e["url"] + " (update)")
+        self._pipeline = DownloadPipeline(e["url"], e["output"], 0, 5, True, self._event_queue)
         self._pipeline.start()
 
     def _cancel_download(self):
-        if self._pipeline:
-            self._pipeline.stop()
-            self._pipeline = None
-        self._log("Cancelled")
-        self._btn_cancel.configure(state="disabled")
+        if self._pipeline: self._pipeline.stop(); self._pipeline = None
+        self._cancel_btn.configure(state="disabled")
         self._show_done_buttons()
 
-    def _split_output(self, path):
+    def _rename_file(self, path):
         if not os.path.exists(path):
-            self._toast("File not found: " + os.path.basename(path), "error")
-            return
+            return self._toast("File not found", "error")
+        # Non-blocking: use filedialog
+        new = filedialog.asksaveasfilename(
+            initialdir=os.path.dirname(path) or ".",
+            initialfile=os.path.basename(path),
+            defaultextension=".md",
+            filetypes=[("Markdown", "*.md"), ("All files", "*.*")])
+        if new and new != path:
+            try:
+                os.rename(path, new)
+                # Update history entry
+                h = load_history()
+                for entry in h.get("downloads", []):
+                    if entry.get("output") and os.path.abspath(entry["output"]) == os.path.abspath(path):
+                        entry["output"] = os.path.abspath(new)
+                        save_history(h)
+                        break
+                self._toast(f"Renamed to {os.path.basename(new)}", "success")
+                self._show_dashboard()
+            except OSError as ex:
+                self._toast(f"Rename failed: {ex}", "error")
+
+    def _split_output(self, path):
+        if not os.path.exists(path): return self._toast("File not found", "error")
         try:
-            base = path.replace(".md", "_chunks")
+            base = path.replace(".md","_chunks")
             chunks = split_markdown(path, base)
-            self._toast("Split into {} chunks".format(len(chunks)), "success")
-            self._log("Split into {} chunks in {}".format(len(chunks), base))
+            self._toast(f"Split into {len(chunks)} chunks", "success")
         except Exception as e:
-            self._toast("Split failed: " + str(e), "error")
+            self._toast(f"Split failed: {e}", "error")
 
     def _open_file(self, path):
-        if os.path.exists(path):
-            # Use after() to avoid blocking
-            self.after(10, lambda: os.startfile(path))
-        else:
-            self._toast("File was moved or deleted", "warning")
+        if os.path.exists(path): self.after(10, lambda: os.startfile(path))
+        else: self._toast("File moved or deleted", "warning")
 
-    def _show_done_buttons(self, dl_count=0):
-        ar = ctk.CTkFrame(self._views.winfo_children()[0] if
-                          self._views.winfo_children() else self,
-                          fg_color="transparent")
-        ar.pack(fill="x", pady=(8, 0))
-
-        GlassButton(ar, "ghost", text="Dashboard", width=100,
-                    command=self._show_dashboard).pack(side="left", padx=2)
+    def _show_done_buttons(self, dl=0):
+        ar = ctk.CTkFrame(self._views.winfo_children()[0] if self._views.winfo_children() else self,
+                          fg_color="transparent"); ar.pack(fill="x", pady=(6,0))
+        B(ar, "ghost", text="Dashboard", width=90, command=self._show_dashboard).pack(side="left", padx=2)
         if self._output and os.path.exists(self._output):
-            GlassButton(ar, "ghost", text="Split", width=80,
-                        command=lambda: self._split_output(self._output)
-                        ).pack(side="left", padx=2)
-            GlassButton(ar, "ghost", text="Open", width=80,
-                        command=lambda: self._open_file(self._output)
-                        ).pack(side="left", padx=2)
+            B(ar, "ghost", text="Rename", width=80,
+              command=lambda: self._rename_file(self._output)).pack(side="left", padx=2)
+            B(ar, "ghost", text="Split", width=70,
+              command=lambda: self._split_output(self._output)).pack(side="left", padx=2)
+            B(ar, "ghost", text="Open", width=70,
+              command=lambda: self._open_file(self._output)).pack(side="left", padx=2)
 
-    def _log(self, msg, color=None):
+    def _log(self, msg, c=None):
         try:
-            tag = "default"
-            if color:
-                self._log_box.tag_config(tag, foreground=color)
-            self._log_box.insert("end", msg + "\n", tag)
-            self._log_box.see("end")
-        except Exception:
-            pass
+            tag = "d"
+            if c: self._logb.tag_config(tag, foreground=c)
+            self._logb.insert("end", msg + "\n", tag); self._logb.see("end")
+        except Exception: pass
 
-    # ── NON-BLOCKING EVENT POLL ───────────────────────────
+    # ── Poll ──
 
     def _start_poll(self):
-        """Begin polling the event queue — runs every 80ms."""
-        self._poll_running = True
-        self._poll_tick()
+        self._poll_running = True; self._poll_tick()
 
     def _poll_tick(self):
-        if not self._poll_running:
-            return
+        if not self._poll_running: return
         try:
-            while True:
-                data = self._event_queue.get_nowait()
-                self._handle(data)
-        except queue.Empty:
-            pass
+            while True: self._handle(self._event_queue.get_nowait())
+        except queue.Empty: pass
         self.after(80, self._poll_tick)
 
-    def _handle(self, data):
-        phase = data.get("phase", "")
-        disc = data.get("discovered", 0)
-        dl = data.get("downloaded", 0)
-        err = data.get("errors", 0)
-        size_kb = data.get("size_kb", 0)
-        elapsed = data.get("elapsed", 0)
+    def _handle(self, d):
+        p = d.get("phase",""); disc = d.get("discovered",0); dl = d.get("downloaded",0)
+        err = d.get("errors",0); skb = d.get("size_kb",0); ela = d.get("elapsed",0)
 
-        # Update stats
-        self._s_discovered.set(disc)
-        self._s_downloaded.set(dl, Glass.SUCCESS if dl > 0 else Glass.TEXT_PRIMARY)
-        self._s_errors.set(err, Glass.ERROR if err > 0 else Glass.TEXT_PRIMARY)
-        if size_kb:
-            s = "{:.1f} MB".format(size_kb / 1024) if size_kb > 1024 else "{:.0f} KB".format(size_kb)
-            self._s_size.set(s)
-        if elapsed:
-            self._s_elapsed.set("{:.0f}s".format(elapsed))
+        self._s_disc.set(disc); self._s_dl.set(dl, T.success() if dl>0 else T.text_primary())
+        self._s_err.set(err, T.error() if err>0 else T.text_primary())
+        if skb: self._s_size.set(f"{skb/1024:.1f}MB" if skb>1024 else f"{skb:.0f}KB")
+        if ela: self._s_elap.set(f"{ela:.0f}s")
 
-        if phase == "progress":
-            url = data.get("url", "")[:50]
-            self._status.configure(text=url)
-            if disc > 0:
-                self._progress.set(dl / disc if disc else 0)
-
-        elif phase == "downloaded":
-            self._log("  {}  {:.1f} KB".format(
-                data.get("url", "")[:60], data.get("size_kb", 0)))
-
-        elif phase == "error":
-            msg = data.get("message", "")
-            self._log("ERROR: " + msg, Glass.ERROR)
-            self._toast(msg[:60], "error")
-
-        elif phase == "done":
-            t = time.time() - self._download_t0
-            self._status.configure(
-                text="Done — {} pages | {} errors | {:.0f}s".format(dl, err, t),
-                text_color=Glass.SUCCESS)
-            self._progress.set(1.0)
-            self._log("Done. {} pages, {} errors, {:.0f}s".format(dl, err, t), Glass.SUCCESS)
-            self._pipeline = None
-            self._btn_cancel.configure(state="disabled", text="Done")
+        if p == "progress":
+            self._status.configure(text=d.get("url","")[:50])
+            if disc: self._prog.set(dl/disc)
+        elif p == "downloaded":
+            self._log(f"  {d.get('url','')[:60]}  {d.get('size_kb',0):.1f}KB")
+        elif p == "error":
+            self._log("ERROR: " + d.get("message",""), T.error())
+        elif p == "done":
+            t = time.time()-self._download_t0
+            self._status.configure(text=f"Done · {dl} pages · {err} errors · {t:.0f}s",
+                                   text_color=T.success())
+            self._prog.set(1.0)
+            self._log(f"Done. {dl} pages, {err} errors, {t:.0f}s", T.success())
+            self._pipeline = None; self._cancel_btn.configure(state="disabled", text="Done")
             self._show_done_buttons(dl)
-
-            # Non-blocking split prompt via toast with a callback button
-            if dl > 0 and self._output and os.path.exists(self._output):
-                self._toast("Download complete! {} pages, {:.1f} MB".format(
-                    dl, size_kb / 1024 if size_kb else 0), "success", 5000)
-                # Show inline Split button
-                self.after(200, lambda: self._show_split_prompt())
-
-    def _show_split_prompt(self):
-        """Show a non-blocking split button after download completes."""
-        for w in self._views.winfo_children():
-            if isinstance(w, ctk.CTkFrame) and w != self._toast_frame:
-                # Add split prompt below the action row
-                prompt = GlassCard(w, fg_color=Glass.SUCCESS_BG,
-                                   border_color=Glass.SUCCESS)
-                prompt.pack(fill="x", pady=(8, 0))
-
-                ctk.CTkLabel(prompt, text="Split into AI-ready chunks?",
-                            font=(Glass.FONT_FAMILY, 12),
-                            text_color=Glass.TEXT_PRIMARY
-                            ).pack(side="left", padx=16, pady=10)
-
-                GlassButton(prompt, "success", text="Split Now",
-                           command=lambda p=self._output: self._split_output(p)
-                           ).pack(side="right", padx=(4, 16), pady=8)
-
-                GlassButton(prompt, "ghost", text="Dismiss",
-                           command=lambda f=prompt: f.destroy()
-                           ).pack(side="right", padx=4, pady=8)
-                break
+            if dl > 0:
+                self._toast(f"Downloaded {dl} pages · {skb/1024:.1f}MB" if skb else f"Downloaded {dl} pages", "success", 5000)
 
 
-# ═══════════════════════════════════════════════════════════
-# ENTRY POINT
-# ═══════════════════════════════════════════════════════════
-
-def ModernDashboard():
-    """Factory function for PyInstaller entry."""
-    return App()
-
+def ModernDashboard(): return App()
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    App().mainloop()
