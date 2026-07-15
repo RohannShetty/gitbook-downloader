@@ -1,609 +1,286 @@
-"""
-Streaming Download Engine v5 — Discover + Download simultaneously.
-Fixed for modern GitBook (React/Next.js) sites.
+"""Download engine — orchestrates discovery, downloading, extraction, and storage.
 
-Pipeline:
-  Producer (discovery thread): crawls pages (HTML), finds URLs, pushes to queue
-  Consumer pool (worker threads): downloads pages (.md preferred), writes to file
-
-v5 fixes:
-  - .md URL duplication: pages ending in .md are excluded from crawl/discovery
-  - .md content preference: consumer fetches URL.md for clean markdown instead of
-    converting HTML to markdown (markdownify is poor on GitBook React HTML)
-  - Link extraction before nav stripping: sidebar links in CSS-classed divs survive
-  - Agent Instructions boilerplate removed from .md output
-  - llms.txt discovery: optional, seeds the page list from GitBook's /llms.txt
+Provides stream_download() as the main entry point for CLI, GUI, and MCP.
 """
 
+import logging
 import os
-import re
-import json
-import time
 import threading
-import queue as thread_queue
-from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urljoin, urlparse, urlunparse
+from typing import Optional
 
 import requests
-from bs4 import BeautifulSoup
-from markdownify import markdownify as md
 
-# ── Agent Instructions boilerplate (GitBook adds this to .md exports) ───
-_AGENT_BOILERPLATE = re.compile(
-    r"---\s*\n# Agent Instructions\s*\n.*?(?=\n---\s*\n|\Z)",
-    re.DOTALL,
-)
-_AGENT_BOILERPLATE_SIMPLE = re.compile(
-    r"# Agent Instructions\s*\n.*?(?=\n---\s*\n|\Z)",
-    re.DOTALL,
-)
-_LLM_REF_LINE = re.compile(
-    r"^(>?\s*For the complete documentation index, see \[llms\.txt\].*)$",
-    re.MULTILINE,
-)
+from gitbook_downloader.providers import Provider, detect_provider, ProviderRegistry
+from gitbook_downloader.providers.base import normalize_url, same_domain
+from gitbook_downloader.storage import StorageManager, VersionManager
+from gitbook_downloader.utils import create_session
+from gitbook_downloader.utils.discovery import discover_from_llms_txt, discover_from_sitemap
+from gitbook_downloader.search import SearchIndex
 
-# ── Helpers ────────────────────────────────────────────────
+logger = logging.getLogger(__name__)
 
 
-def _norm(u):
-    """Normalize a URL: strip fragments, trailing slash, and .md suffix."""
-    p = urlparse(u)
-    path = p.path.rstrip("/") or "/"
-    # Normalise .md suffix — strip it so HTML and .md versions resolve to the same key
-    if path.endswith(".md"):
-        path = path[:-3] or "/"
-    return urlunparse((p.scheme, p.netloc, path, "", "", ""))
-
-
-def _is_md_url(u):
-    """Return True if the URL ends in .md."""
-    p = urlparse(u)
-    return p.path.endswith(".md")
-
-
-def _strip_agent_boilerplate(markdown_text):
-    """Remove GitBook Agent Instructions boilerplate from .md content."""
-    text = _AGENT_BOILERPLATE.sub("", markdown_text)
-    text = _AGENT_BOILERPLATE_SIMPLE.sub("", text)
-    text = _LLM_REF_LINE.sub("", text)
-    # Clean up excessive blank lines
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
-
-
-def _session():
-    s = requests.Session()
-    s.headers.update(
-        {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    )
-    return s
-
-
-def _extract_links(url, html, path_scope=None, exclude_paths=None):
-    """Extract same-domain links from HTML for crawling/discovery.
-
-    Does NOT strip nav/footer/etc. before extracting — we need sidebar links.
-    If path_scope is set, only links whose path starts with path_scope are kept.
-    If exclude_paths is set, links whose path contains any exclude entry are skipped.
-    Returns a set of absolute URLs.
-    """
-    soup = BeautifulSoup(html, "html.parser")
-    base_domain = urlparse(url).netloc
-    links = set()
-    for a in soup.find_all("a", href=True):
-        href = a["href"]
-        # Skip javascript, mailto, tel
-        if href.startswith(("javascript:", "mailto:", "tel:")):
-            continue
-        full = urljoin(url, href)
-        parsed = urlparse(full)
-        # Only keep same-domain links
-        if parsed.netloc != base_domain:
-            continue
-        # Skip hash-only links
-        if parsed.fragment and not parsed.path and not parsed.query:
-            continue
-        # Skip GitBook internal asset links
-        if parsed.path.startswith("/~gitbook"):
-            continue
-        # Skip .md URLs from the crawl queue (will be derived for content)
-        if _is_md_url(full):
-            continue
-        # Path scope filter — stay within the documentation prefix
-        if path_scope and not parsed.path.startswith(path_scope):
-            continue
-        # Exclude patterns — skip specific sub-paths (e.g. /alerts/, /changelog/)
-        if exclude_paths:
-            if any(ex in parsed.path for ex in exclude_paths):
-                continue
-        links.add(full)
-    return links
-
-
-def _fetch_md_content(url, sess):
-    """Fetch the .md version of a page, returning clean markdown.
-
-    Falls back to HTML→markdown extraction if .md is not available (404/403).
-    """
-    md_url = url.rstrip("/") + ".md"
-    try:
-        resp = sess.get(md_url, timeout=20)
-        if resp.status_code == 200:
-            text = resp.text
-            # Parse from BeautifulSoup if it returned HTML (e.g. redirect to HTML)
-            if text.strip().startswith("<!") or "data-dpl-id" in text[:500]:
-                # It returned HTML, fall through to HTML extraction
-                pass
-            else:
-                # Clean markdown — strip agent boilerplate
-                return _strip_agent_boilerplate(text)
-    except Exception:
-        pass
-
-    # Fallback: extract from HTML
-    return _extract_md_from_html(url, sess)
-
-
-def _extract_md_from_html(url, sess):
-    """Fallback: download HTML and convert to markdown.
-
-    Handles GitBook (React/Next.js), MkDocs Material, and generic doc sites.
-    """
-    try:
-        resp = sess.get(url, timeout=20)
-        if resp.status_code != 200:
-            return ""
-        html = resp.text
-    except Exception:
-        return ""
-
-    soup = BeautifulSoup(html, "html.parser")
-    for tag in soup.find_all(["nav", "footer", "aside", "script", "style"]):
-        tag.decompose()
-
-    # Try multiple content selectors — GitBook first, then MkDocs, then generic
-    main = (
-        soup.find("main")
-        or soup.find("article")
-        # MkDocs Material content area
-        or soup.find("div", class_=lambda c: c and ("md-content" in c or "rst-content" in c))
-        or soup.find("div", class_="content")
-        or soup.body
-    )
-    body = str(main) if main else html
-    markdown = md(body, heading_style="ATX")
-    # Clean up: normalize whitespace, strip MkDocs permalink noise
-    markdown = re.sub(r"\n\s*\n\s*\n", "\n\n", markdown)
-    # Strip MkDocs Material "¶" permalink anchors
-    markdown = re.sub(r" ¶\n", "\n", markdown)
-    return markdown.strip()
-
-
-def _extract_page(url, html):
-    """Extract page info for the CONSUMER (legacy path, kept for direct-HTML mode).
-
-    Returns (title, markdown, links).
-    Links are extracted BEFORE stripping for use by the producer path.
-    This is still called by the direct-HTML path (no .md available).
-    """
-    soup = BeautifulSoup(html, "html.parser")
-    # Extract links first (before stripping)
-    links = _extract_links(url, html)
-    # Now strip nav for content
-    for tag in soup.find_all(["nav", "footer", "aside", "script", "style"]):
-        tag.decompose()
-    main = (
-        soup.find("main")
-        or soup.find("article")
-        or soup.find("div", class_="content")
-        or soup.body
-    )
-    body = str(main) if main else html
-    markdown = md(body, heading_style="ATX")
-    markdown = re.sub(r"\n\s*\n\s*\n", "\n\n", markdown)
-    title_el = soup.find("h1")
-    title = (
-        title_el.get_text().strip()
-        if title_el
-        else url.rstrip("/").split("/")[-1] or "Home"
-    )
-    return title, markdown, links
-
-
-def _read_existing_urls(filepath):
-    """Parse existing .md file to find already-downloaded URLs."""
-    urls = set()
-    if not os.path.exists(filepath):
-        return urls
-    try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-        for match in re.finditer(
-            r"^Source:\s*(https?://\S+)", content, re.MULTILINE
-        ):
-            urls.add(_norm(match.group(1).strip()))
-    except Exception:
-        pass
-    return urls
-
-
-# ── History ────────────────────────────────────────────────
-HISTORY_DIR = os.path.join(os.path.expanduser("~"), ".gitbook-downloader")
-HISTORY_FILE = os.path.join(HISTORY_DIR, "history.json")
-
-
-def load_history():
-    try:
-        with open(HISTORY_FILE, "r") as f:
-            return json.load(f)
-    except Exception:
-        return {"downloads": []}
-
-
-def save_history(history):
-    os.makedirs(HISTORY_DIR, exist_ok=True)
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=2)
-
-
-def add_to_history(url, output, pages, size_kb, new_pages=0):
-    h = load_history()
-    h["downloads"].insert(
-        0,
-        {
-            "url": url,
-            "output": os.path.abspath(output),
-            "pages": pages,
-            "new_pages": new_pages,
-            "size_kb": size_kb,
-            "date": time.strftime("%Y-%m-%d %H:%M"),
-            "timestamp": time.time(),
-        },
-    )
-    h["downloads"] = h["downloads"][:50]
-    save_history(h)
-
-
-# ── llms.txt discovery ────────────────────────────────────
-def discover_from_llms_txt(start_url, sess=None):
-    """Discover all pages from GitBook's /llms.txt.
-
-    Returns a set of normalized URLs.
-    """
-    if sess is None:
-        sess = _session()
-    base = start_url.rstrip("/")
-    llms_url = f"{base}/llms.txt"
-    urls = set()
-    try:
-        resp = sess.get(llms_url, timeout=30)
-        if resp.status_code != 200:
-            return urls
-        # Parse markdown links from llms.txt
-        for match in re.finditer(r"\]\((https?://[^)]+)\)", resp.text):
-            u = match.group(1)
-            # Only keep same-domain links and strip .md
-            parsed = urlparse(u)
-            if parsed.netloc == urlparse(start_url).netloc:
-                urls.add(_norm(u))
-    except Exception:
-        pass
-    return urls
-
-
-# ═══════════════════════════════════════════════════════════
-# STREAMING ENGINE
-# ═══════════════════════════════════════════════════════════
 def stream_download(
-    start_url,
-    output_file,
-    max_pages=0,
-    workers=5,
-    update_existing=False,
-    progress_callback=None,
-    use_llms_txt=True,
-    prefer_md=True,
-    path_scope=None,
-    exclude_paths=None,
-    min_content_chars=60,
-):
-    """
-    Stream-download a documentation site: discover + download simultaneously.
+    url: str,
+    max_pages: int = 0,
+    workers: int = 5,
+    session: Optional[requests.Session] = None,
+    provider: Optional[Provider] = None,
+    progress_callback: Optional[callable] = None,
+) -> str:
+    """Download an entire documentation site.
+
+    Auto-detects the documentation platform, discovers all pages,
+    downloads them in parallel, extracts clean markdown, and saves
+    to the per-domain storage.
 
     Args:
-        start_url: Root URL
-        output_file: Path to save markdown
-        max_pages: Max pages (0 = unlimited)
-        workers: Parallel download threads
-        update_existing: If True, append new pages to existing file
-        progress_callback: fn(phase, data) — called on every event
-        use_llms_txt: If True, try to discover pages from /llms.txt first
-        prefer_md: If True, fetch .md versions for content (cleaner)
-        path_scope: Optional path prefix — only crawl URLs starting with this
-                    (e.g., '/docs/connect/v3/'). Filters out forum, blog, etc.
-        exclude_paths: Optional list of sub-path fragments to skip even within
-                       path_scope (e.g. ['/alerts/', '/changelog/'])
-        min_content_chars: Skip pages with fewer characters of real content
+        url: Root URL of the documentation site.
+        max_pages: Maximum pages to download (0 = unlimited).
+        workers: Number of concurrent download threads.
+        session: Pre-configured requests Session (created if None).
+        provider: Provider instance for the site (auto-detected if None).
+        progress_callback: Optional callable receiving progress dicts.
 
     Returns:
-        dict with 'pages', 'new_pages', 'errors', 'size_kb', 'output'
+        Combined markdown content of all downloaded pages.
     """
-    base_domain = urlparse(start_url).netloc
+    if session is None:
+        session = create_session()
 
-    # ── State ──
-    existing_urls = _read_existing_urls(output_file) if update_existing else set()
-    downloaded = OrderedDict()  # url → (title, markdown)
-    discovered_norm = set()  # normalized URLs we've seen
-    errors = {}
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    domain = parsed.netloc.replace("www.", "")
 
-    # Queues
-    link_queue = thread_queue.Queue()  # URLs to visit for link extraction
-    download_queue = thread_queue.Queue()  # URLs to download
-    result_queue = thread_queue.Queue()  # completed downloads
-    stop_event = threading.Event()
+    # Auto-detect provider
+    if provider is None:
+        provider = detect_provider(url, session)
 
-    # ── Seed discovery ──
-    start_norm = _norm(start_url)
-    discovered_norm.add(start_norm)
-    link_queue.put(start_url)
-    if start_norm not in existing_urls:
-        download_queue.put(start_url)
+    logger.info("Detected provider: %s for %s", provider.name, url)
 
-    # Try llms.txt for complete page list
-    if use_llms_txt:
-        sess = _session()
-        llms_urls = discover_from_llms_txt(start_url, sess)
-        if llms_urls:
-            for u in llms_urls:
-                # Apply path scope AND exclusions to llms.txt results
-                if path_scope and not urlparse(u).path.startswith(path_scope):
-                    continue
-                if exclude_paths and any(ex in urlparse(u).path for ex in exclude_paths):
-                    continue
-                if u not in discovered_norm:
-                    discovered_norm.add(u)
-                    link_queue.put(u)
-                    if u not in existing_urls and u not in downloaded:
-                        download_queue.put(u)
+    if progress_callback:
+        progress_callback({"phase": "discovery", "status": "start", "url": url})
 
-    # ── Stats ──
-    stats_lock = threading.Lock()
-    stats = {"discovered": len(discovered_norm), "downloaded": 0, "in_progress": 0, "phase": "streaming"}
+    all_content_parts: list[str] = []
+    total_size_kb = 0.0
+    pages_downloaded = 0
+    pages_errored = 0
 
-    def emit(phase, **kwargs):
-        with stats_lock:
-            d = dict(stats, phase=phase, **kwargs)
-        if progress_callback:
-            try:
-                progress_callback(d)
-            except Exception:
-                pass
+    # ── Discovery ────────────────────────────────────────────────
+    discovered_urls: set[str] = set()
 
-    # ── Producer: extract links from downloaded pages ──────
-    def producer():
-        processed = set()
-        sess = _session()
+    # Try provider-specific discovery (llms.txt / sitemap)
+    try:
+        discovered_urls = provider.discover_urls(url, session)
+    except Exception as e:
+        logger.debug("Provider discovery failed: %s", e)
 
-        # Track idle time — if no new URLs discovered and downloads are done, exit
-        last_new_discovery = time.time()
-        idle_timeout = 15  # seconds without discovery before producer stops
+    # Fallback: try generic discovery methods
+    if not discovered_urls:
+        try:
+            discovered_urls = discover_from_llms_txt(url, session)
+        except Exception:
+            pass
+    if not discovered_urls:
+        try:
+            discovered_urls = discover_from_sitemap(url, session)
+        except Exception:
+            pass
 
-        while not stop_event.is_set():
-            try:
-                url = link_queue.get(timeout=1)
-            except thread_queue.Empty:
-                # Check idle timeout
-                if time.time() - last_new_discovery > idle_timeout:
-                    if download_queue.empty() and link_queue.empty():
-                        break
-                continue
+    if progress_callback:
+        progress_callback({
+            "phase": "discovery",
+            "status": "done",
+            "discovered": len(discovered_urls),
+            "url": url,
+        })
 
-            norm = _norm(url)
-            if norm in processed:
-                continue
-            processed.add(norm)
+    logger.info("Discovered %d URLs for %s", len(discovered_urls), domain)
 
-            if max_pages and len(discovered_norm) >= max_pages:
-                continue
-
-            try:
-                resp = sess.get(url, timeout=15)
-                if resp.status_code != 200:
-                    continue
-
-                # Extract links from FULL HTML (nav intact for sidebar discovery)
-                links = _extract_links(url, resp.text, path_scope=path_scope,
-                                       exclude_paths=exclude_paths)
-
-                new_found = False
-                with stats_lock:
-                    for link in links:
-                        n = _norm(link)
-                        if n not in discovered_norm:
-                            if max_pages and len(discovered_norm) >= max_pages:
-                                break
-                            discovered_norm.add(n)
-                            stats["discovered"] = len(discovered_norm)
-                            link_queue.put(link)
-                            if n not in existing_urls:
-                                download_queue.put(link)
-                            new_found = True
-
-                if new_found:
-                    last_new_discovery = time.time()
-
-                emit("discovery", discovered=len(discovered_norm), url=url)
-            except Exception:
-                continue
-
-            # Check if we should stop early: all discovered pages downloaded
-            with stats_lock:
-                all_downloaded = (
-                    stats["downloaded"] >= len(discovered_norm)
-                    and download_queue.empty()
-                )
-            if all_downloaded and max_pages == 0:
-                # All discovered pages are downloaded — stop exploring
-                break
-
-    # ── Consumer: download pages ───────────────────────────
-    def download_worker():
-        sess = _session()
-        while not stop_event.is_set():
-            try:
-                url = download_queue.get(timeout=2)
-            except thread_queue.Empty:
-                continue  # Keep waiting, producer may still be discovering
-
-            if url == "__DONE__":
-                break  # Producer finished, no more URLs coming
-
-            norm = _norm(url)
-            if norm in existing_urls:
-                continue
-
-            with stats_lock:
-                stats["in_progress"] += 1
-            emit(
-                "progress",
-                downloaded=stats["downloaded"],
-                discovered=len(discovered_norm),
-                url=url,
-            )
-
-            try:
-                if prefer_md:
-                    # Fetch .md version for clean markdown
-                    markdown = _fetch_md_content(url, sess)
-                    # Derive title from the first H1 in the markdown
-                    title_match = re.search(r"^# (.+)", markdown, re.MULTILINE)
-                    title = title_match.group(1).strip() if title_match else (url.rstrip("/").split("/")[-1] or "Home")
-                else:
-                    # Legacy: fetch HTML and convert
-                    resp = sess.get(url, timeout=20)
-                    if resp.status_code != 200:
-                        errors[url] = f"HTTP {resp.status_code}"
-                        continue
-                    title, markdown, _ = _extract_page(url, resp.text)
-
-                if not markdown.strip():
-                    # Skip empty pages
-                    with stats_lock:
-                        stats["in_progress"] -= 1
-                    continue
-
-                # Skip trivial pages with negligible content
-                if min_content_chars and len(markdown) < min_content_chars:
-                    with stats_lock:
-                        stats["in_progress"] -= 1
-                    continue
-
-                with stats_lock:
-                    downloaded[url] = (title, markdown)
-                    stats["downloaded"] = len(downloaded)
-                    stats["in_progress"] -= 1
-
-                kb = round(len(markdown.encode("utf-8")) / 1024, 1)
-                emit(
-                    "downloaded",
-                    downloaded=len(downloaded),
-                    discovered=len(discovered_norm),
-                    title=title,
-                    url=url,
-                    size_kb=kb,
-                )
-
-            except requests.Timeout:
-                errors[url] = "Timeout"
-            except requests.ConnectionError:
-                errors[url] = "Connection failed"
-            except Exception as e:
-                errors[url] = str(e)[:80]
-            finally:
-                with stats_lock:
-                    stats["in_progress"] -= 1
-
-    # ── Run pipeline ──────────────────────────────────────
-    t0 = time.time()
-
-    # Start producer
-    prod_thread = threading.Thread(target=producer, daemon=True)
-    prod_thread.start()
-
-    # Start consumer pool
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = []
-        for _ in range(workers):
-            futures.append(executor.submit(download_worker))
-
-        # Wait for producer to finish discovering
-        prod_thread.join(timeout=600)
-
-        # Signal: no more URLs will be added to download_queue
-        for _ in range(workers):
-            download_queue.put("__DONE__")  # Sentinel value
-
-        # Wait for all consumers to finish
-        for f in futures:
-            try:
-                f.result(timeout=300)
-            except Exception:
-                pass
-
-    stop_event.set()
-
-    elapsed = round(time.time() - t0, 1)
-
-    # ── Write output ──────────────────────────────────────
-    os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
-
-    if update_existing and os.path.exists(output_file):
-        # Append mode: add new pages to existing file
-        new_entries = []
-        for url, (title, markdown) in downloaded.items():
-            new_entries.append(f"# {title}\n\nSource: {url}\n\n{markdown}\n\n---\n\n")
-        if new_entries:
-            with open(output_file, "a", encoding="utf-8") as f:
-                f.write("\n".join(new_entries))
+    # ── Prepare crawl frontier ───────────────────────────────────
+    if discovered_urls:
+        # Discovered URLs are the complete set
+        crawl_urls = list(discovered_urls)
     else:
-        # Fresh write
-        all_md = []
-        for url, (title, markdown) in downloaded.items():
-            all_md.append(f"# {title}\n\nSource: {url}\n\n{markdown}\n\n---\n\n")
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write("\n".join(all_md))
+        # No discovery method worked — start BFS from root
+        crawl_urls = [url]
 
-    size_kb = round(os.path.getsize(output_file) / 1024, 1)
-    new_count = len(downloaded)
+    # Apply max_pages limit
+    if max_pages > 0:
+        crawl_urls = crawl_urls[:max_pages]
 
-    # ── History ───────────────────────────────────────────
-    add_to_history(
-        start_url,
-        output_file,
-        len(downloaded) + len(existing_urls),
-        size_kb,
-        new_pages=new_count,
+    # ── Download ─────────────────────────────────────────────────
+    lock = threading.Lock()
+    url_content: dict[str, str] = {}
+
+    def download_one(url_to_fetch: str) -> tuple[Optional[str], str, Optional[str]]:
+        """Download a single URL, return (content, url, error)."""
+        nonlocal pages_downloaded, pages_errored, total_size_kb
+        try:
+            content = provider.extract_content(url_to_fetch, session)
+            if not content or len(content.strip()) < 60:
+                return None, url_to_fetch, "Content too short"
+
+            with lock:
+                pages_downloaded += 1
+                size_kb = len(content.encode("utf-8")) / 1024
+                total_size_kb += size_kb
+
+            title = provider.extract_title(content, url_to_fetch)
+
+            if progress_callback:
+                progress_callback({
+                    "phase": "downloaded",
+                    "url": url_to_fetch,
+                    "title": title,
+                    "size_kb": round(size_kb, 1),
+                    "provider": provider.name,
+                })
+
+            return content, url_to_fetch, None
+
+        except Exception as e:
+            with lock:
+                pages_errored += 1
+            error_msg = str(e)[:100]
+            if progress_callback:
+                progress_callback({
+                    "phase": "error",
+                    "url": url_to_fetch,
+                    "error": error_msg,
+                })
+            return None, url_to_fetch, error_msg
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {executor.submit(download_one, u): u for u in crawl_urls}
+        for future in as_completed(futures):
+            content, fetched_url, error = future.result()
+            if content:
+                url_content[fetched_url] = content
+
+    # ── Assemble content ─────────────────────────────────────────
+    all_content_parts = list(url_content.values())
+
+    combined = ""
+    for i, (u, content) in enumerate(url_content.items()):
+        if i > 0:
+            combined += "\n\n---\n\n"
+        # Add source marker for search indexing
+        combined += f"Source: {u}\n\n{content}"
+
+    if not combined.strip():
+        if progress_callback:
+            progress_callback({
+                "phase": "done",
+                "pages": 0,
+                "errors": pages_errored,
+                "total_size_kb": 0,
+                "provider": provider.name,
+                "error": "No content downloaded",
+            })
+        return ""
+
+    # ── Save to storage ──────────────────────────────────────────
+    storage = StorageManager()
+    versioning = None
+
+    # Snapshot previous version if it exists
+    if storage.domain_exists(domain):
+        try:
+            versioning = VersionManager(storage)
+            version = versioning.snapshot(domain)
+            if progress_callback:
+                progress_callback({
+                    "phase": "snapshot",
+                    "domain": domain,
+                    "version": version,
+                })
+        except Exception as e:
+            logger.warning("Snapshot failed: %s", e)
+
+    storage.save_doc(
+        domain=domain,
+        content=combined,
+        url=url,
+        title=provider.extract_title(combined, url),
+        pages=pages_downloaded,
+        provider=provider.name,
+        new_pages=pages_downloaded,
+        size_kb=round(total_size_kb, 1),
     )
 
-    emit(
-        "done",
-        downloaded=new_count,
-        discovered=len(discovered_norm),
-        errors=len(errors),
-        size_kb=size_kb,
-        elapsed=elapsed,
-        output=output_file,
-        new_pages=new_count,
-    )
+    # ── Index for search ─────────────────────────────────────────
+    try:
+        search = SearchIndex()
+        search.index_domain(domain, combined, domain_url=url)
+    except Exception as e:
+        logger.warning("Search indexing failed: %s", e)
 
-    return {
-        "pages": new_count,
-        "total_pages": new_count + len(existing_urls),
-        "new_pages": new_count,
-        "errors": errors,
-        "size_kb": size_kb,
-        "elapsed": elapsed,
-        "output": output_file,
-        "discovered": len(discovered_norm),
-    }
+    if progress_callback:
+        progress_callback({
+            "phase": "done",
+            "pages": pages_downloaded,
+            "errors": pages_errored,
+            "total_size_kb": round(total_size_kb, 1),
+            "provider": provider.name,
+        })
+
+    return combined
+
+
+def download_urls(
+    urls: set[str],
+    provider: Provider,
+    session: requests.Session,
+    workers: int = 5,
+    progress_callback: Optional[callable] = None,
+) -> dict[str, str]:
+    """Download multiple URLs in parallel using the given provider.
+
+    Args:
+        urls: Set of URLs to download.
+        provider: Provider instance for content extraction.
+        session: requests.Session to use.
+        workers: Number of concurrent download threads.
+        progress_callback: Optional progress callback.
+
+    Returns:
+        Dict mapping URL → markdown content for successful downloads.
+    """
+    results: dict[str, str] = {}
+    error_count = 0
+    lock = threading.Lock()
+
+    def download_one(url_to_fetch: str) -> tuple[Optional[str], str]:
+        try:
+            content = provider.extract_content(url_to_fetch, session)
+            if content and len(content.strip()) >= 60:
+                return content, url_to_fetch
+            return None, url_to_fetch
+        except Exception:
+            return None, url_to_fetch
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {executor.submit(download_one, u): u for u in urls}
+        for future in as_completed(futures):
+            content, fetched_url = future.result()
+            if content:
+                results[fetched_url] = content
+                if progress_callback:
+                    progress_callback({
+                        "phase": "downloaded",
+                        "url": fetched_url,
+                        "size_kb": round(len(content.encode("utf-8")) / 1024, 1),
+                    })
+            else:
+                with lock:
+                    error_count += 1
+                if progress_callback:
+                    progress_callback({
+                        "phase": "error",
+                        "url": fetched_url,
+                        "error": "Download failed",
+                    })
+
+    return results

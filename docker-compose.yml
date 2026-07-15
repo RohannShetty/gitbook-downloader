@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  gitbook-downloader:
+    build: .
+    image: gitbook-downloader:6.0
+    container_name: gitbook-downloader
+    command: --help
+    volumes:
+      - type: bind
+        source: ~/.gitbook-downloader
+        target: /root/.gitbook-downloader
+    environment:
+      - GITBOOK_DOWNLOADER_CONFIG=/root/.gitbook-downloader/config.toml

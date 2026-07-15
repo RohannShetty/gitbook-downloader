@@ -1,14 +1,10 @@
-# Byte-compiled / optimized
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
-
-# Distribution / packaging
+*.egg-info/
 dist/
 build/
-*.egg-info/
 *.egg
-*.spec
 
 # Virtual environments
 venv/
@@ -16,25 +12,31 @@ venv/
 env/
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Project output (user downloads)
+# Project
+downloads/
+*.md_chunks/
+*.db
+*.spec
+
+# Downloaded content artifacts
 downloaded_docs.md
-*_chunks/
-*_failed.json
 openalgo*.md
+openalgo_chunks/
 
-# Jupyter
-.ipynb_checkpoints/
+# Graphify
+graphify-out/
 
-# dotenv
-.env
-.env.local
+# Docker
+.docker/
+
+# pytest
+.pytest_cache/

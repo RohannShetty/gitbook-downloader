@@ -1,7 +1,7 @@
 """
-GitBook Downloader v5.0 — Editorial Dashboard
+GitBook Downloader v6.0 — Editorial Dashboard
 Warm amber + charcoal palette. Anti-default: no purple gradients.
-Dark/light theme toggle. File rename support. Clean editorial density.
+Dark/light theme toggle. Clean editorial density.
 """
 
 import os, sys, json, time, queue, threading
@@ -16,11 +16,13 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 import customtkinter as ctk
 
 try:
-    from .engine import stream_download, load_history, add_to_history
+    from .engine import stream_download
     from .splitter import split_markdown
+    from .storage import StorageManager
 except ImportError:
-    from engine import stream_download, load_history, add_to_history
+    from engine import stream_download
     from splitter import split_markdown
+    from storage import StorageManager
 
 
 # ═══════════════════════════════════════════════════════════
@@ -74,7 +76,7 @@ LIGHT = {
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-HISTORY_DIR = os.path.join(os.path.expanduser("~"), ".gitbook-downloader")
+
 
 
 # ═══════════════════════════════════════════════════════════
@@ -82,26 +84,19 @@ HISTORY_DIR = os.path.join(os.path.expanduser("~"), ".gitbook-downloader")
 # ═══════════════════════════════════════════════════════════
 
 class DownloadPipeline(threading.Thread):
-    def __init__(self, url, output, max_pages, workers, update_existing, event_queue,
-                 path_scope=None, exclude_paths=None):
+    def __init__(self, url, max_pages, workers, event_queue):
         super().__init__(daemon=True)
-        self.url = url; self.output = output
+        self.url = url
         self.max_pages = max_pages; self.workers = workers
-        self.update_existing = update_existing
         self.event_queue = event_queue; self._stop = threading.Event()
-        self.path_scope = path_scope
-        self.exclude_paths = exclude_paths
 
     def run(self):
         def cb(data):
             if self._stop.is_set(): raise SystemExit()
             self.event_queue.put(data)
         try:
-            stream_download(self.url, self.output, max_pages=self.max_pages,
-                          workers=self.workers, update_existing=self.update_existing,
-                          progress_callback=cb,
-                          path_scope=self.path_scope,
-                          exclude_paths=self.exclude_paths)
+            stream_download(self.url, max_pages=self.max_pages,
+                          workers=self.workers, progress_callback=cb)
         except SystemExit: pass
         except Exception as e:
             self.event_queue.put({"phase": "error", "message": str(e)})
@@ -172,7 +167,7 @@ class Toast(ctk.CTkFrame):
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("GitBook Downloader v5.0")
+        self.title("GitBook Downloader v6.0")
         self.geometry("1060x700")
         self.configure(fg_color=T.bg())
         self.minsize(860, 560)
@@ -200,7 +195,7 @@ class App(ctk.CTk):
                      text_color=T.accent()).pack(side="left")
         ctk.CTkLabel(lf, text="GitBook Downloader", font=(T.font(), 15, "bold"),
                      text_color=T.text_primary()).pack(side="left", padx=(6,0))
-        ctk.CTkLabel(lf, text="v5.0", font=(T.font(), 10),
+        ctk.CTkLabel(lf, text="v6.0", font=(T.font(), 10),
                      text_color=T.text_muted()).pack(side="left", padx=(4,0))
 
         # Theme toggle
@@ -261,60 +256,16 @@ class App(ctk.CTk):
         B(row, "primary", text="Start", width=110,
           command=self._start_download).pack(side="right", padx=(10,0))
 
-        # Optional path-scope and exclude-paths (collapsed by default)
-        opts = ctk.CTkFrame(card, fg_color="transparent")
-        opts.pack(fill="x", padx=18, pady=(0,14))
-
-        # Toggle button for advanced options
-        self._show_opts = False
-        self._opts_toggle = B(opts, "ghost", text="▸ Advanced (path scope)", width=180,
-                              height=28, font=(T.font(), 10, "bold"),
-                              command=self._toggle_opts)
-        self._opts_toggle.pack(anchor="w")
-
-        self._opts_panel = ctk.CTkFrame(opts, fg_color="transparent")
-        # (hidden initially — populated by _toggle_opts)
-
-    def _toggle_opts(self):
-        self._show_opts = not self._show_opts
-        self._opts_toggle.configure(text="▾ Advanced (path scope)" if self._show_opts else "▸ Advanced (path scope)")
-        for w in self._opts_panel.winfo_children():
-            w.destroy()
-        if not self._show_opts:
-            return
-
-        # Path scope row
-        ps_row = ctk.CTkFrame(self._opts_panel, fg_color="transparent")
-        ps_row.pack(fill="x", pady=(6,4))
-        ctk.CTkLabel(ps_row, text="Path scope", font=(T.font(), 10),
-                     text_color=T.text_secondary(), width=80).pack(side="left")
-        self._scope_entry = ctk.CTkEntry(ps_row,
-            placeholder_text="e.g. /docs/connect/v3/  (leave blank for entire site)",
-            font=(T.font(), 11), fg_color=T.bg(),
-            text_color=T.text_primary(), border_color=T.border(),
-            corner_radius=6, height=32)
-        self._scope_entry.pack(side="left", fill="x", expand=True)
-
-        # Exclude paths row
-        ex_row = ctk.CTkFrame(self._opts_panel, fg_color="transparent")
-        ex_row.pack(fill="x", pady=(4,6))
-        ctk.CTkLabel(ex_row, text="Exclude paths", font=(T.font(), 10),
-                     text_color=T.text_secondary(), width=80).pack(side="left")
-        self._exclude_entry = ctk.CTkEntry(ex_row,
-            placeholder_text="e.g. /alerts/,/basket/,/changelog/  (comma-separated)",
-            font=(T.font(), 11), fg_color=T.bg(),
-            text_color=T.text_primary(), border_color=T.border(),
-            corner_radius=6, height=32)
-        self._exclude_entry.pack(side="left", fill="x", expand=True)
-
-        self._opts_panel.pack(fill="x", pady=(0,4))
-
-        # History
-        hist = load_history()
-        if hist.get("downloads"):
+        # History (from StorageManager)
+        try:
+            _storage = StorageManager()
+            domains = _storage.list_domains()
+        except Exception:
+            domains = []
+        if domains:
             ctk.CTkLabel(c, text="History", font=(T.font(), 14, "bold"),
                          text_color=T.text_primary()).pack(anchor="w", pady=(0,8))
-            for e in hist["downloads"][:8]:
+            for e in domains[:8]:
                 self._hist_card(c, e)
 
     def _hist_card(self, p, e):
@@ -322,21 +273,28 @@ class App(ctk.CTk):
         row = ctk.CTkFrame(card, fg_color="transparent"); row.pack(fill="x", padx=14, pady=10)
 
         info = ctk.CTkFrame(row, fg_color="transparent"); info.pack(side="left", fill="x", expand=True)
-        name = e.get("url","").rstrip("/").split("/")[-1] or "Home"
-        ctk.CTkLabel(info, text=name, font=(T.font(), 12, "bold"),
+        name = e.get("domain", e.get("url","").rstrip("/").split("/")[-1]) or "Home"
+        title = e.get("title", "")
+        label = title if title else name
+        ctk.CTkLabel(info, text=label, font=(T.font(), 12, "bold"),
                      text_color=T.text_primary()).pack(anchor="w")
-        ctk.CTkLabel(info, text=f"{e.get('pages',0)} pages · {e.get('size_kb',0)/1024:.1f}MB · {e.get('date','')}",
+        pages = e.get("total_pages", 0)
+        size_kb = e.get("total_size_kb", 0)
+        last = e.get("last_scraped", e.get("date", ""))
+        provider = e.get("provider", "")
+        prov_label = f" · {provider}" if provider else ""
+        ctk.CTkLabel(info, text=f"{pages} pages · {size_kb/1024:.1f}MB · {last}{prov_label}",
                      font=(T.font(), 10), text_color=T.text_muted()).pack(anchor="w")
 
         acts = ctk.CTkFrame(row, fg_color="transparent"); acts.pack(side="right")
-        out = e.get("output","")
+        doc_path = str(StorageManager().latest_path(name))
 
         B(acts, "ghost", text="Rename", width=70, height=28, font=(T.font(), 10),
-          command=lambda p=out: self._rename_file(p)).pack(side="left", padx=2)
+          command=lambda p=doc_path: self._rename_file(p)).pack(side="left", padx=2)
         B(acts, "ghost", text="Open", width=58, height=28, font=(T.font(), 10),
-          command=lambda p=out: self._open_file(p)).pack(side="left", padx=2)
+          command=lambda p=doc_path: self._open_file(p)).pack(side="left", padx=2)
         B(acts, "ghost", text="Split", width=58, height=28, font=(T.font(), 10),
-          command=lambda p=out: self._split_output(p)).pack(side="left", padx=2)
+          command=lambda p=doc_path: self._split_output(p)).pack(side="left", padx=2)
         B(acts, "ghost", text="Update", width=64, height=28, font=(T.font(), 10),
           command=lambda e=e: self._update_download(e)).pack(side="left", padx=2)
 
@@ -382,37 +340,18 @@ class App(ctk.CTk):
 
     # ── Actions ──
 
-    def _get_path_scope(self):
-        """Read path-scope from entry field (if panel is visible and has value)."""
-        if hasattr(self, '_show_opts') and self._show_opts:
-            s = self._scope_entry.get().strip()
-            return s if s else None
-        return None
-
-    def _get_exclude_paths(self):
-        """Read comma-separated exclude paths from entry field."""
-        if hasattr(self, '_show_opts') and self._show_opts:
-            val = self._exclude_entry.get().strip()
-            if val:
-                return [p.strip() for p in val.split(",") if p.strip()]
-        return None
-
     def _start_download(self):
         url = self._url_entry.get().strip()
         if not url: return self._toast("Enter a URL", "error")
-        self._url = url; self._output = "downloaded_docs.md"
+        self._url = url
         self._show_download(url)
-        ps = self._get_path_scope()
-        ex = self._get_exclude_paths()
-        self._pipeline = DownloadPipeline(url, self._output, 0, 5, False,
-                                          self._event_queue, path_scope=ps,
-                                          exclude_paths=ex)
+        self._pipeline = DownloadPipeline(url, 0, 5, self._event_queue)
         self._pipeline.start()
 
     def _update_download(self, e):
-        self._url = e["url"]; self._output = e["output"]
-        self._show_download(e["url"] + " (update)")
-        self._pipeline = DownloadPipeline(e["url"], e["output"], 0, 5, True, self._event_queue)
+        self._url = e.get("url", e.get("domain", ""))
+        self._show_download(self._url + " (update)")
+        self._pipeline = DownloadPipeline(self._url, 0, 5, self._event_queue)
         self._pipeline.start()
 
     def _cancel_download(self):
@@ -432,13 +371,6 @@ class App(ctk.CTk):
         if new and new != path:
             try:
                 os.rename(path, new)
-                # Update history entry
-                h = load_history()
-                for entry in h.get("downloads", []):
-                    if entry.get("output") and os.path.abspath(entry["output"]) == os.path.abspath(path):
-                        entry["output"] = os.path.abspath(new)
-                        save_history(h)
-                        break
                 self._toast(f"Renamed to {os.path.basename(new)}", "success")
                 self._show_dashboard()
             except OSError as ex:
@@ -461,13 +393,6 @@ class App(ctk.CTk):
         ar = ctk.CTkFrame(self._views.winfo_children()[0] if self._views.winfo_children() else self,
                           fg_color="transparent"); ar.pack(fill="x", pady=(6,0))
         B(ar, "ghost", text="Dashboard", width=90, command=self._show_dashboard).pack(side="left", padx=2)
-        if self._output and os.path.exists(self._output):
-            B(ar, "ghost", text="Rename", width=80,
-              command=lambda: self._rename_file(self._output)).pack(side="left", padx=2)
-            B(ar, "ghost", text="Split", width=70,
-              command=lambda: self._split_output(self._output)).pack(side="left", padx=2)
-            B(ar, "ghost", text="Open", width=70,
-              command=lambda: self._open_file(self._output)).pack(side="left", padx=2)
 
     def _log(self, msg, c=None):
         try:
@@ -489,31 +414,56 @@ class App(ctk.CTk):
         self.after(80, self._poll_tick)
 
     def _handle(self, d):
-        p = d.get("phase",""); disc = d.get("discovered",0); dl = d.get("downloaded",0)
-        err = d.get("errors",0); skb = d.get("size_kb",0); ela = d.get("elapsed",0)
+        p = d.get("phase","")
+        disc = d.get("discovered",0); dl = d.get("downloaded",0)
+        err = d.get("errors",0); skb = d.get("size_kb",0)
+        total_skb = d.get("total_size_kb",0)
 
-        self._s_disc.set(disc); self._s_dl.set(dl, T.success() if dl>0 else T.text_primary())
-        self._s_err.set(err, T.error() if err>0 else T.text_primary())
-        if skb: self._s_size.set(f"{skb/1024:.1f}MB" if skb>1024 else f"{skb:.0f}KB")
-        if ela: self._s_elap.set(f"{ela:.0f}s")
-
-        if p == "progress":
-            self._status.configure(text=d.get("url","")[:50])
-            if disc: self._prog.set(dl/disc)
+        # Track page counts for stats tiles
+        if not hasattr(self, '_page_count'):
+            self._page_count = 0; self._error_count = 0; self._discovered = 0
+        if p == "discovery":
+            if d.get("status") == "start":
+                self._status.configure(text=f"Discovering: {d.get('url','')[:50]}")
+            elif d.get("status") == "done":
+                self._discovered = disc or d.get("discovered", 0)
+                self._s_disc.set(self._discovered)
         elif p == "downloaded":
-            self._log(f"  {d.get('url','')[:60]}  {d.get('size_kb',0):.1f}KB")
+            self._page_count += 1
+            title = d.get("title", "")
+            prov = d.get("provider", "")
+            label = title or d.get("url","")[:60]
+            self._log(f"  {label}  {skb:.1f}KB" + (f"  [{prov}]" if prov else ""))
+            self._s_dl.set(self._page_count, T.success())
+            self._s_err.set(self._error_count, T.error() if self._error_count > 0 else T.text_primary())
+            if skb: self._s_size.set(f"{skb/1024:.1f}MB" if skb > 1024 else f"{skb:.0f}KB")
+            if self._discovered and self._discovered > 0:
+                self._prog.set(self._page_count / self._discovered)
+            self._status.configure(text=label[:50])
         elif p == "error":
-            self._log("ERROR: " + d.get("message",""), T.error())
+            self._error_count += 1
+            err_msg = d.get("error", d.get("message", ""))
+            self._log(f"ERROR [{d.get('url','')[:40]}]: {err_msg}", T.error())
+            self._s_err.set(self._error_count, T.error())
+        elif p == "snapshot":
+            domain = d.get("domain",""); ver = d.get("version","")
+            self._log(f"  Snapshot: {domain} → {ver}", T.text_muted())
         elif p == "done":
             t = time.time()-self._download_t0
-            self._status.configure(text=f"Done · {dl} pages · {err} errors · {t:.0f}s",
+            dl = self._page_count; err = self._error_count
+            provider = d.get("provider", "")
+            prov_label = f" [{provider}]" if provider else ""
+            self._status.configure(text=f"Done · {dl} pages · {err} errors · {t:.0f}s{prov_label}",
                                    text_color=T.success())
             self._prog.set(1.0)
-            self._log(f"Done. {dl} pages, {err} errors, {t:.0f}s", T.success())
+            self._log(f"Done. {dl} pages, {err} errors, {t:.0f}s{prov_label}", T.success())
             self._pipeline = None; self._cancel_btn.configure(state="disabled", text="Done")
             self._show_done_buttons(dl)
+            total = total_skb or skb
             if dl > 0:
-                self._toast(f"Downloaded {dl} pages · {skb/1024:.1f}MB" if skb else f"Downloaded {dl} pages", "success", 5000)
+                self._toast(f"Downloaded {dl} pages · {total/1024:.1f}MB" if total else f"Downloaded {dl} pages", "success", 5000)
+            # Reset counters
+            self._page_count = 0; self._error_count = 0; self._discovered = 0
 
 
 def ModernDashboard(): return App()

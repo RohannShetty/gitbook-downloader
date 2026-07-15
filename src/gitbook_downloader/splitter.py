@@ -8,7 +8,7 @@ This is the exact logic that produced the 37 clean chunks from the 39 MB downloa
 import os
 
 
-def split_markdown(input_path, output_dir, max_mb=1.0):
+def split_markdown(input_path, output_dir=None, max_mb=1.0, progress_callback=None):
     """
     Split a markdown file into chunks on header boundaries.
 
@@ -60,12 +60,15 @@ def split_markdown(input_path, output_dir, max_mb=1.0):
         filename = os.path.join(output_dir, f"doc_part_{i:02d}.md")
         with open(filename, "w", encoding="utf-8") as f:
             f.write(chunk)
+        chunk_path = filename
         results.append((filename, len(chunk)))
+        if progress_callback:
+            progress_callback({"phase": "chunk", "index": i, "total": len(chunks), "filename": os.path.basename(chunk_path)})
 
     return results
 
 
-def split_file(input_path, output_dir=None, max_mb=1.0, quiet=False):
+def split_file(input_path, output_dir=None, max_mb=1.0, quiet=False, progress_callback=None):
     """
     Convenience function — split with progress output.
 
@@ -89,7 +92,7 @@ def split_file(input_path, output_dir=None, max_mb=1.0, quiet=False):
         print(f"Reading {input_path}...")
         print(f"Splitting into chunks (max {max_mb} MB each)...")
 
-    chunks = split_markdown(input_path, output_dir, max_mb)
+    chunks = split_markdown(input_path, output_dir, max_mb, progress_callback=progress_callback)
 
     if not quiet:
         total_kb = 0
