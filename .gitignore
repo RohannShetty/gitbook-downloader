@@ -1,0 +1,104 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project
+downloads/
+*.md_chunks/
+*.db
+*.spec
+
+# Downloaded content artifacts
+downloaded_docs.md
+openalgo*.md
+openalgo_chunks/
+
+# Graphify
+graphify-out/
+
+# Docker
+.docker/
+
+# pytest
+.pytest_cache/
+
+# Local agent-tooling state (77 per-tool symlink dirs created by `npx skills add`)
+.serena/
+.adal/
+.aider-desk/
+.autohand/
+.augment/
+.bob/
+.clawd/
+.claude/
+.codeartsdoer/
+.codebuddy/
+.codemaker/
+.codestudio/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.devin/
+.droid/
+.factory/
+.forge/
+.goose/
+.grok/
+.hermes/
+.iflow/
+.inferencesh/
+.jazz/
+.junie/
+.kilocode/
+.kimchi/
+.kiro/
+.kode/
+.lingma/
+.mcpjam/
+.minimax/
+.moxby/
+.mux/
+.neovate/
+.ona/
+.openhands/
+.pi/
+.pochi/
+.posit/
+.qoder/
+.qwen/
+.reasonix/
+.roo/
+.rovodev/
+.tabnine/
+.terramind/
+.tinycloud/
+.trae/
+.vibe/
+.windsurf/
+.zcode/
+.zencoder/
+.zenflow/
+skills/
+
+# Local runtime data
+data/

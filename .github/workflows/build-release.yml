@@ -1,0 +1,59 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package and PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          pip install pyinstaller
+
+      # Single source of truth for the PyInstaller spec: build_exe.py.
+      # The workflow deliberately contains no PyInstaller flags of its own.
+      - name: Build binary (console onefile)
+        run: python build_exe.py
+
+      - name: Stage per-OS artifact
+        shell: python
+        env:
+          OS_TAG: ${{ matrix.os }}
+        run: |
+          import glob, os, shutil
+
+          os_tag = os.environ["OS_TAG"]
+          candidates = glob.glob("dist/gitbook-dl*")
+          if not candidates:
+              raise SystemExit(f"No built binary found in dist/: {os.listdir('dist')}")
+          src = candidates[0]
+          ext = os.path.splitext(src)[1]  # .exe on Windows, '' elsewhere
+          dest = f"gitbook-dl-{os_tag}{ext}"
+          shutil.copyfile(src, dest)
+          print(f"Staged {src} -> {dest}")
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gitbook-dl-*
+          generate_release_notes: true

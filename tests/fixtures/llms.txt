@@ -1,0 +1,5 @@
+# Example Docs
+
+- [Introduction]({{BASE}}/docs/intro)
+- [Guide]({{BASE}}/docs/guide).
+- [Chinese page]({{BASE}}/docs/zh-cn/page)

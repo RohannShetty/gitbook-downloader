@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="gbdl-social-title">
+  <title id="gbdl-social-title">gitbook-downloader &#8212; Any docs site, LLM-ready Markdown</title>
+  <desc>GitHub social preview card: dark canvas, gitbook-downloader logo, tagline, and a terminal showing a real capture command.</desc>
+  <!--
+    gitbook-downloader social preview, 1280x640.
+    GitHub's "Social preview" upload needs a PNG. Export options:
+      1) resvg with width 1280 and height 640, input this file (install Inter + JetBrains Mono first), or
+      2) open this file in a browser at 1280x640 and screenshot at 2x.
+    Fonts fall back to system mono/sans if Inter / JetBrains Mono are absent.
+    Honesty note: the terminal shows the REAL cli verb (`gitbook-dl capture`); no metrics are claimed anywhere on this card.
+  -->
+  <defs>
+    <pattern id="dotgrid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <circle cx="1.4" cy="1.4" r="1.4" fill="#1b1b20"/>
+    </pattern>
+  </defs>
+
+  <!-- canvas + texture -->
+  <rect width="1280" height="640" fill="#09090b"/>
+  <rect width="1280" height="640" fill="url(#dotgrid)" opacity="0.55"/>
+  <rect x="24.5" y="24.5" width="1231" height="591" rx="24" fill="none" stroke="#27272a" stroke-width="1"/>
+
+  <!-- logo lockup -->
+  <g transform="translate(64 56) scale(0.172)">
+    <rect x="16" y="16" width="480" height="480" rx="104" fill="#09090b"/>
+    <rect x="17.5" y="17.5" width="477" height="477" rx="102.5" fill="none" stroke="#27272a" stroke-width="6"/>
+    <rect x="100" y="142" width="170" height="228" rx="30" fill="none" stroke="#d4d4d8" stroke-width="26"/>
+    <line x1="148" y1="214" x2="222" y2="214" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <line x1="148" y1="270" x2="222" y2="270" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <path d="M288 206 L344 256 L288 306" fill="none" stroke="#f59e0b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="374" y1="306" x2="412" y2="306" stroke="#f59e0b" stroke-width="28" stroke-linecap="round"/>
+  </g>
+  <text x="172" y="96" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="30" font-weight="600" fill="#f4f4f5">gitbook-downloader</text>
+  <text x="172" y="128" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="17" fill="#71717a">MIT &#183; python 3.10+ &#183; windows / linux / macOS</text>
+
+  <!-- headline -->
+  <text x="64" y="286" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="54" font-weight="600" fill="#fafafa">Any docs site <tspan fill="#f59e0b">&#8594;</tspan></text>
+  <text x="64" y="350" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="54" font-weight="600" fill="#fafafa">LLM-ready Markdown.</text>
+
+  <!-- subline -->
+  <text x="64" y="404" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="21" fill="#a1a1aa">Point it at a docs URL. It detects the platform &#8212;</text>
+  <text x="64" y="436" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="21" fill="#a1a1aa">GitBook, Mintlify, Docusaurus, ReadTheDocs &#8212; or any site.</text>
+
+  <!-- terminal card -->
+  <g>
+    <rect x="744" y="140" width="472" height="246" rx="16" fill="#101013" stroke="#27272a" stroke-width="1"/>
+    <circle cx="776" cy="168" r="6" fill="#27272a"/>
+    <circle cx="800" cy="168" r="6" fill="#3f3f46"/>
+    <circle cx="824" cy="168" r="6" fill="#52525b"/>
+    <line x1="744" y1="196" x2="1216" y2="196" stroke="#27272a" stroke-width="1"/>
+
+    <text x="772" y="230" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="18"><tspan fill="#f59e0b">$</tspan><tspan fill="#e4e4e7"> gitbook-dl capture \</tspan></text>
+    <text x="772" y="262" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="18" fill="#a1a1aa">    https://docs.example.com</text>
+    <text x="772" y="294" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="18"><tspan fill="#f59e0b">&#10003;</tspan><tspan fill="#a1a1aa"> provider detected: </tspan><tspan fill="#e4e4e7">mintlify</tspan></text>
+    <text x="772" y="326" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="18"><tspan fill="#f59e0b">&#10003;</tspan><tspan fill="#a1a1aa"> wrote </tspan><tspan fill="#e4e4e7">docs-example/</tspan><tspan fill="#a1a1aa"> + llms.txt</tspan></text>
+    <text x="772" y="358" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="18" fill="#52525b">$</text>
+    <rect x="794" y="344" width="11" height="18" rx="2" fill="#f59e0b"/>
+  </g>
+
+  <!-- repo footer -->
+  <text x="64" y="566" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="19" fill="#52525b">github.com/RohannShetty/gitbook-downloader</text>
+</svg>

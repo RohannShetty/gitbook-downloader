@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="74 116 365 280" role="img" aria-labelledby="gbdl-icon-title">
+  <title id="gbdl-icon-title">gitbook-downloader icon</title>
+  <desc>Document page flowing into an amber terminal prompt. Transparent background.</desc>
+  <!--
+    gitbook-downloader bare glyph — same geometry as assets/logo.svg minus the tile.
+    Transparent background: for inline UI and containers that already provide a surface.
+    On light backgrounds use assets/logo.svg (tile version) instead.
+    Minimum size 20px; below 32px prefer the tile version.
+  -->
+  <g>
+    <rect x="100" y="142" width="170" height="228" rx="30" fill="none" stroke="#d4d4d8" stroke-width="26"/>
+    <line x1="148" y1="214" x2="222" y2="214" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <line x1="148" y1="270" x2="222" y2="270" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <path d="M288 206 L344 256 L288 306" fill="none" stroke="#f59e0b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="374" y1="306" x2="412" y2="306" stroke="#f59e0b" stroke-width="28" stroke-linecap="round"/>
+  </g>
+</svg>

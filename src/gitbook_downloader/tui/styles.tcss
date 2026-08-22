@@ -1,0 +1,248 @@
+/* gitbook-downloader v7 TUI — global stylesheet.
+   Tokens come from theme.py via Textual theme variables ($hairline,
+   $ink-muted, $mono-font …). Flat surfaces + hairlines; amber only for
+   primary action / active markers / focus / highlights. */
+
+Screen {
+    background: $background;
+}
+
+/* The app shell fills the screen below the nav bar */
+#shell {
+    height: 1fr;
+}
+
+/* Terminals render a single font: the JetBrains Mono / Inter split is
+   expressed through hierarchy (weight, case, alignment, color), not
+   font switching. The `.mono` class marks data surfaces semantically. */
+.mono {
+    text-style: none;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ── Buttons: flat, hairline, amber primary ─────────────────────────── */
+
+Button {
+    background: $surface;
+    color: $foreground;
+    border: solid $hairline;
+    text-style: bold;
+    min-width: 12;
+    height: 3;
+}
+Button:hover {
+    background: $panel;
+    border: solid $hairline-strong;
+}
+Button:focus {
+    border: solid $primary;
+}
+Button.-primary {
+    background: $primary;
+    color: $on-accent;
+    border: solid $primary;
+}
+Button.-primary:hover {
+    background: $primary 85%;
+}
+Button.-error {
+    background: transparent;
+    color: $error;
+    border: solid $error;
+}
+Button.-error:hover {
+    background: $error 15%;
+}
+Button:disabled {
+    background: $surface;
+    color: $ink-faint;
+    border: solid $hairline;
+}
+
+/* Nav buttons: quiet by default, amber marker when active */
+.nav-btn {
+    background: transparent;
+    border: solid $panel;
+    color: $ink-muted;
+    min-width: 6;
+    height: 2;
+    padding: 0 1;
+    margin-top: 0;
+}
+.nav-btn:hover {
+    background: transparent;
+    color: $foreground;
+}
+.nav-btn:focus {
+    border: solid $panel;
+    text-style: bold;
+}
+.nav-btn.active {
+    color: $primary;
+    text-style: bold;
+}
+.theme-btn {
+    background: transparent;
+    border: solid $hairline;
+    color: $ink-muted;
+    min-width: 8;
+    height: 2;
+    margin-top: 0;
+}
+.theme-btn:hover {
+    color: $foreground;
+    border: solid $hairline-strong;
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────── */
+
+Input {
+    background: $surface;
+    border: solid $hairline;
+    color: $foreground;
+}
+Input:focus {
+    border: solid $primary;
+}
+Input > .input--placeholder {
+    color: $ink-faint;
+}
+Input.-invalid {
+    border: solid $error;
+}
+
+Select {
+    background: $surface;
+    border: solid $hairline;
+    color: $foreground;
+}
+Select:focus {
+    border: solid $primary;
+}
+SelectOverlay {
+    background: $surface;
+    border: solid $hairline-strong;
+}
+
+Checkbox {
+    color: $foreground;
+}
+Checkbox > .checkbox--label {
+    color: $foreground;
+}
+
+/* ── Data table: tabular data lives in mono ─────────────────────────── */
+
+DataTable {
+    background: $surface;
+    border: solid $hairline;
+}
+DataTable > .datatable--header {
+    color: $ink-faint;
+    text-style: bold;
+    background: $panel;
+}
+DataTable > .datatable--cursor {
+    background: $panel;
+    color: $foreground;
+}
+DataTable > .datatable--hover {
+    background: $panel 60%;
+}
+
+/* ── Logs & progress ────────────────────────────────────────────────── */
+
+RichLog {
+    background: $panel;
+    border: solid $hairline;
+    color: $ink-muted;
+}
+
+ProgressBar > .bar--bar {
+    color: $primary;
+    background: $surface;
+}
+ProgressBar > .bar--percentage {
+    color: $ink-muted;
+}
+
+/* ── Cards & shared bits ────────────────────────────────────────────── */
+
+.card {
+    background: $surface;
+    border: solid $hairline;
+    padding: 1 2;
+    height: auto;
+}
+
+.field-label {
+    color: $ink-muted;
+    text-style: bold;
+    margin-bottom: 0;
+}
+
+.path-row {
+    height: 1;
+}
+.path-label {
+    width: 10;
+    color: $ink-faint;
+    text-style: bold;
+}
+.path-value {
+    color: $ink-muted;
+}
+
+.stat-number {
+    text-style: bold;
+    color: $foreground;
+}
+.stat-caption {
+    color: $ink-faint;
+}
+
+.provider-chip {
+    color: $on-accent;
+    background: $primary;
+    text-style: bold;
+    padding: 0 1;
+    margin-right: 1;
+}
+
+.warn-line {
+    color: $warning;
+}
+
+.error-banner {
+    border: solid $error;
+    background: $error 10%;
+    color: $error;
+    padding: 1 2;
+}
+
+/* Diff panes */
+.diff-pane {
+    background: $surface;
+    border: solid $hairline;
+    padding: 1 2;
+}
+.diff-pane-title {
+    color: $ink-faint;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+/* Footer keeps default styling; tabs get quiet chrome */
+Tabs {
+    background: transparent;
+}
+TabbedContent {
+    background: transparent;
+}
+/* Center the capped-width surfaces (wizard/search/diagnostics) */
+TabPane {
+    align-horizontal: center;
+}

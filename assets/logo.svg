@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="gbdl-logo-title">
+  <title id="gbdl-logo-title">gitbook-downloader</title>
+  <desc>Document page flowing into an amber terminal prompt, on a near-black rounded tile.</desc>
+  <!--
+    gitbook-downloader primary mark — glyph on dark tile.
+    Works from 16px favicon to 512px app icon. Geometry spec: docs/brand/BRAND.md §3.
+    The wordmark is typeset beside this mark (JetBrains Mono Medium), never baked into SVG.
+  -->
+  <g>
+    <rect x="16" y="16" width="480" height="480" rx="104" fill="#09090b"/>
+    <rect x="17.5" y="17.5" width="477" height="477" rx="102.5" fill="none" stroke="#27272a" stroke-width="3"/>
+    <rect x="100" y="142" width="170" height="228" rx="30" fill="none" stroke="#d4d4d8" stroke-width="26"/>
+    <line x1="148" y1="214" x2="222" y2="214" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <line x1="148" y1="270" x2="222" y2="270" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <path d="M288 206 L344 256 L288 306" fill="none" stroke="#f59e0b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="374" y1="306" x2="412" y2="306" stroke="#f59e0b" stroke-width="28" stroke-linecap="round"/>
+  </g>
+</svg>
