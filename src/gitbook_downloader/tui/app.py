@@ -59,6 +59,10 @@ class GitbookDownloaderApp(App[None]):
         Binding("5", "show('diagnostics')", "Diagnostics"),
         Binding("ctrl+t", "toggle_theme", "Toggle theme"),
         Binding("ctrl+q", "quit", "Quit"),
+        # Paste: some Windows console hosts swallow Ctrl+V before the app
+        # sees it, so we own the action and read the OS clipboard directly.
+        Binding("ctrl+v", "paste_clipboard", "Paste", show=False),
+        Binding("shift+insert", "paste_clipboard", "Paste", show=False),
     ]
 
     def __init__(
@@ -125,6 +129,34 @@ class GitbookDownloaderApp(App[None]):
     def action_toggle_theme(self) -> None:
         self.theme = "gb-light" if self.theme == "gb-dark" else "gb-dark"
         self.query_one(NavBar).set_theme_label(self.theme)
+
+    # ── clipboard paste ──────────────────────────────────────────────
+
+    def _read_clipboard(self) -> str | None:
+        """OS clipboard text, or None when unavailable."""
+        try:
+            import pyperclip
+
+            text = pyperclip.paste()
+        except Exception:
+            return None
+        return text if isinstance(text, str) else None
+
+    def action_paste_clipboard(self) -> None:
+        from textual.widgets import Input
+
+        focused = self.focused
+        if not isinstance(focused, Input):
+            self.app.notify("Click an input field first, then Ctrl+V.", severity="warning")
+            return
+        text = self._read_clipboard()
+        if text is None:
+            self.app.notify(
+                "Clipboard unavailable here — right-click the field to paste.",
+                severity="warning",
+            )
+            return
+        focused.insert_text_at_cursor(" ".join(text.split()))
 
     # ── run bookkeeping ──────────────────────────────────────────────
 

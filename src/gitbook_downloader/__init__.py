@@ -1,6 +1,6 @@
 """gitbook-downloader v6.0 — Multi-provider documentation downloader."""
 
-__version__ = "7.0.0"
+__version__ = "7.0.1"
 __author__ = "Rohan Shetty"
 
 from .utils import (

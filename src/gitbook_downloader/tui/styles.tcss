@@ -246,3 +246,12 @@ TabbedContent {
 TabPane {
     align-horizontal: center;
 }
+
+/* Content columns stay capped so lines stay readable on wide terminals,
+   but the SURFACES themselves are full-width — their scrollbars must sit
+   at the true screen edge, not floating mid-screen (v7.0.1 fix). */
+WizardSurface > *,
+SearchSurface > *,
+DiagnosticsSurface > * {
+    max-width: 110;
+}

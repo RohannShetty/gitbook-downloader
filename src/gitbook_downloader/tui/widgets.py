@@ -8,9 +8,10 @@ state. No emoji, no gradients.
 from __future__ import annotations
 
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.screen import ModalScreen
-from textual.widgets import Button, Static
+from textual.widgets import Button, Input, Static
 
 # Surfaces in shell order; keys 1..5 map onto these.
 SURFACES = (
@@ -20,6 +21,24 @@ SURFACES = (
     ("diff", "Diff"),
     ("diagnostics", "Diagnostics"),
 )
+
+
+class PasteInput(Input):
+    """Input whose Ctrl+V / Shift+Insert read the OS clipboard.
+
+    Textual's stock Input paste reads the terminal's OSC-52 clipboard,
+    which most Windows console hosts never populate — so pasting appeared
+    dead (v7.0.1 fix). This subclass overrides the binding and delegates
+    to the app's pyperclip-backed action.
+    """
+
+    BINDINGS = [
+        Binding("ctrl+v", "app_paste", "Paste", show=False),
+        Binding("shift+insert", "app_paste", "Paste", show=False),
+    ]
+
+    def action_app_paste(self) -> None:
+        self.app.action_paste_clipboard()
 
 
 class NavBar(Horizontal):

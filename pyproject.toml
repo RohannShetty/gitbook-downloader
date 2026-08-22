@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "7.0.0"
+version = "7.0.1"
 description = "Download entire documentation sites — GitBook, Docusaurus, ReadTheDocs, Mintlify, or any site — and split into AI-friendly chunks."
 readme = "README.md"
 license = {text = "MIT"}
@@ -33,6 +33,7 @@ dependencies = [
     "markdownify>=0.11.0",
     "lxml>=4.9.0",
     "textual>=0.60",
+    "pyperclip>=1.8.0",
 ]
 
 [project.optional-dependencies]

@@ -10,7 +10,7 @@ from textual.widgets import Button, Checkbox, Input, ProgressBar, RichLog, Stati
 
 from ..engine_protocol import CaptureOptions, CaptureResult, Detection, ProgressEvent
 from ..theme import format_size
-from ..widgets import Kicker, esc
+from ..widgets import Kicker, PasteInput, esc
 
 
 def _is_valid_url(url: str) -> bool:
@@ -63,7 +63,7 @@ class WizardSurface(VerticalScroll):
     DEFAULT_CSS = """
     WizardSurface {
         padding: 1 2;
-        max-width: 110;
+        align-horizontal: center;
     }
     .lede {
         color: $ink-muted;
@@ -169,10 +169,10 @@ class WizardSurface(VerticalScroll):
     def compose(self):
         yield Kicker("Capture a documentation site")
         yield Static(
-            "Paste a docs URL. The provider is detected before anything downloads.",
+            "Paste a docs URL (Ctrl+V). The provider is detected before anything downloads.",
             classes="lede",
         )
-        yield Input(
+        yield PasteInput(
             placeholder="https://docs.example.com   (Enter detects the provider)",
             id="url-input",
             classes="mono",
@@ -182,14 +182,14 @@ class WizardSurface(VerticalScroll):
             with Horizontal(id="scope-row"):
                 with Vertical(classes="scope-field"):
                     yield Static("PATH SCOPE — comma-separated prefixes", classes="field-label")
-                    yield Input(
+                    yield PasteInput(
                         placeholder="/api/, /guides/   (empty = whole site)",
                         id="scope-input",
                         classes="mono",
                     )
                 with Vertical(classes="scope-field"):
                     yield Static("EXCLUSIONS — patterns inside scope", classes="field-label")
-                    yield Input(
+                    yield PasteInput(
                         placeholder="/blog/, /forum/",
                         id="exclude-input",
                         classes="mono",

@@ -19,12 +19,35 @@ import tempfile
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Entry point: the console script target from pyproject.toml. PyInstaller needs
-# a real script file, so we generate a two-line runner that imports cli:main.
+# a real script file, so we generate a runner that imports cli:main.
+#
+# Two non-obvious requirements:
+# 1. `gitbook_downloader.tui` is imported LAZILY by cli.py, so PyInstaller's
+#    static analysis never sees it — we must import it here explicitly or the
+#    frozen exe reports "TUI isn't available" (v7.0.0 release bug).
+# 2. Double-clicking an exe gives you a console that closes the instant the
+#    process exits. An unexpected crash must pause so the user can read it.
 RUNNER = """\
+import sys
+
+import gitbook_downloader.tui.app  # noqa: F401  (force-bundle the lazy TUI)
 from gitbook_downloader.cli import main
 
 if __name__ == "__main__":
-    main()
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except BaseException:
+        import traceback
+
+        traceback.print_exc()
+        if getattr(sys, "frozen", False):
+            try:
+                input("\\nAn unexpected error occurred. Press Enter to close...")
+            except EOFError:
+                pass
+        raise
 """
 
 # Hidden imports: packages imported dynamically (Textual loads widgets lazily;
@@ -38,6 +61,13 @@ HIDDEN_IMPORTS = [
     "lxml",
     "requests",
     "urllib3",
+]
+
+# Whole-package collects: modules whose submodules/data files are loaded
+# dynamically and would otherwise be missed by static analysis.
+COLLECT_ALL = [
+    "gitbook_downloader",  # submodules + package data (TUI assets)
+    "textual",             # .tcss stylesheets, drivers, widget data
 ]
 
 
@@ -55,9 +85,9 @@ def build() -> int:
             "--console",  # TUI world: console app, no windowed GUI
             "--name",
             "gitbook-dl",
-            "--collect-all",
-            "gitbook_downloader",  # submodules + package data (TUI assets)
         ]
+        for mod in COLLECT_ALL:
+            cmd += ["--collect-all", mod]
         for mod in HIDDEN_IMPORTS:
             cmd += ["--hidden-import", mod]
         cmd += ["--clean", "--noconfirm", runner]
@@ -70,10 +100,19 @@ def build() -> int:
 
     out = os.path.join(ROOT, "dist")
     if result.returncode == 0 and os.path.isdir(out):
+        # Remove stale artifacts from earlier builds/eras so dist/ only ever
+        # contains what this script just produced.
+        produced = {"gitbook-dl.exe" if sys.platform == "win32" else "gitbook-dl"}
         for name in sorted(os.listdir(out)):
             path = os.path.join(out, name)
-            size_mb = os.path.getsize(path) / (1024 * 1024)
-            print(f"Built: {path} ({size_mb:.1f} MB)")
+            if name not in produced:
+                import shutil
+
+                shutil.rmtree(path, ignore_errors=True) if os.path.isdir(path) else os.remove(path)
+                print(f"Removed stale artifact: {path}")
+            else:
+                size_mb = os.path.getsize(path) / (1024 * 1024)
+                print(f"Built: {path} ({size_mb:.1f} MB)")
     return result.returncode
 
 

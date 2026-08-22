@@ -22,7 +22,7 @@ class DiagnosticsSurface(VerticalScroll):
     DEFAULT_CSS = """
     DiagnosticsSurface {
         padding: 1 2;
-        max-width: 110;
+        align-horizontal: center;
     }
     #diag-cards {
         height: auto;

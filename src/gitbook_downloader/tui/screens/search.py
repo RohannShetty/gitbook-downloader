@@ -7,7 +7,7 @@ from textual.widgets import Button, Input, Select, Static
 
 from ..engine_protocol import SearchHit
 from ..theme import format_count
-from ..widgets import EmptyState, Kicker, esc, highlight_snippet
+from ..widgets import EmptyState, Kicker, PasteInput, esc, highlight_snippet
 
 
 class HitCard(Static, can_focus=True):
@@ -61,7 +61,7 @@ class SearchSurface(VerticalScroll):
     DEFAULT_CSS = """
     SearchSurface {
         padding: 1 2;
-        max-width: 110;
+        align-horizontal: center;
     }
     #search-controls {
         height: auto;
@@ -90,7 +90,7 @@ class SearchSurface(VerticalScroll):
     def compose(self):
         yield Kicker("Search the Library")
         with Horizontal(id="search-controls"):
-            yield Input(
+            yield PasteInput(
                 placeholder='FTS5 query — e.g. workers OR timeout, "exact phrase"',
                 id="search-query",
                 classes="mono",
