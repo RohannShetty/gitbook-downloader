@@ -72,9 +72,9 @@ def _is_excluded(path: str, patterns: tuple[str, ...]) -> bool:
 
 
 def _segment_is_lang(u: str) -> bool:
-    """True if the first path segment of *u* is a language code."""
-    segments = [s for s in urlparse(u).path.split("/") if s]
-    return bool(segments) and segments[0].lower() in _LANG_CODES
+    """True if any path segment of *u* is a language code."""
+    segments = [s.replace("_", "-").lower() for s in urlparse(u).path.split("/") if s]
+    return any(seg in _LANG_CODES for seg in segments)
 
 
 _MD_LINK_RE = re.compile(r"\[([^\]]*)\]\(\s*([^)\s]+)(?:\s+\"[^\"]*\")?\s*\)")
@@ -126,6 +126,8 @@ def _bfs_crawl(
     path_scope: str | tuple[str, ...] | list[str] | None = None,
     exclude_paths: str | tuple[str, ...] | list[str] | None = None,
     timeout: float = 20.0,
+    cancel_check: Optional[callable] = None,
+    progress_callback: Optional[callable] = None,
 ) -> list[str]:
     """BFS crawl from *start_url*, extracting same-domain ``<a>`` links.
 
@@ -142,6 +144,8 @@ def _bfs_crawl(
         path_scope:    Optional path prefix(es) to restrict URLs to.
         exclude_paths: Path substrings to skip.
         timeout:       Per-request timeout in seconds.
+        cancel_check:  Optional callback returning True when crawl is aborted.
+        progress_callback: Optional progress update callback.
 
     Returns:
         A de-duplicated list of discovered URLs (normalised), in crawl order.
@@ -153,6 +157,13 @@ def _bfs_crawl(
     from gitbook_downloader.providers.base import is_md_url, looks_like_html
 
     scope_prefixes = _as_prefixes(path_scope)
+    # If no explicit scope was given but the start URL has a subpath (e.g. /docs/latest),
+    # default to the start URL's path so generic crawler doesn't wander to homepage/news.
+    if not scope_prefixes and not path_scope:
+        start_path = urlparse(start_url).path.rstrip("/")
+        if start_path and start_path != "/":
+            scope_prefixes = (start_path,)
+
     exclude_patterns = _as_prefixes(exclude_paths)
 
     base_domain = urlparse(start_url).netloc
@@ -165,8 +176,19 @@ def _bfs_crawl(
     queue.append(start_url)
 
     while queue and (max_pages is None or len(result) < max_pages):
+        if cancel_check and cancel_check():
+            logger.info("BFS crawl cancelled by user")
+            break
         current = queue.popleft()
         result.append(current)
+
+        if progress_callback:
+            progress_callback({
+                "phase": "discovered",
+                "url": current,
+                "count": len(visited),
+                "message": f"Crawling frontier: {current}",
+            })
 
         try:
             resp = session.get(current, timeout=timeout)
@@ -227,6 +249,13 @@ def _bfs_crawl(
             if norm not in visited:
                 visited.add(norm)
                 queue.append(link)
+                if progress_callback and len(visited) % 5 == 0:
+                    progress_callback({
+                        "phase": "discovered",
+                        "url": link,
+                        "count": len(visited),
+                        "message": f"Discovered URL #{len(visited)}: {link}",
+                    })
 
     return result
 
@@ -241,6 +270,7 @@ def stream_download(
     path_scope: str | tuple[str, ...] | list[str] | None = None,
     exclude_paths: str | tuple[str, ...] | list[str] | None = None,
     timeout: float = 20.0,
+    cancel_check: Optional[callable] = None,
 ) -> str:
     """Download an entire documentation site.
 
@@ -258,12 +288,13 @@ def stream_download(
         path_scope: URL path prefix(es) to restrict the crawl to.
         exclude_paths: Path substrings to skip even inside the scope.
         timeout: Per-request timeout in seconds.
+        cancel_check: Optional callable returning True when cancellation is requested.
 
     Returns:
         Combined markdown content of all downloaded pages.
     """
     if session is None:
-        session = create_session()
+        session = create_session(timeout=timeout)
 
     parsed = urlparse(url)
     domain = parsed.netloc.replace("www.", "")
@@ -394,6 +425,8 @@ def stream_download(
             path_scope=path_scope,
             exclude_paths=exclude_paths,
             timeout=timeout,
+            cancel_check=cancel_check,
+            progress_callback=progress_callback,
         )
         # Language filter applies to BFS output too.
         if crawl_urls:
@@ -404,6 +437,9 @@ def stream_download(
                     len(crawl_urls) - len(bfs_filtered),
                 )
             crawl_urls = bfs_filtered
+
+    if cancel_check and cancel_check():
+        raise RuntimeError("Capture aborted by user")
 
     # Apply max_pages limit (None/0 = unlimited)
     if max_pages:
@@ -416,8 +452,12 @@ def stream_download(
     def download_one(url_to_fetch: str) -> tuple[Optional[str], str, Optional[str]]:
         """Download a single URL, return (content, url, error)."""
         nonlocal pages_downloaded, pages_errored, total_size_kb
+        if cancel_check and cancel_check():
+            return None, url_to_fetch, "Cancelled"
         try:
             content = provider.extract_content(url_to_fetch, session)
+            if cancel_check and cancel_check():
+                return None, url_to_fetch, "Cancelled"
             if not content or len(content.strip()) < 60:
                 return None, url_to_fetch, "Content too short"
 
@@ -454,6 +494,9 @@ def stream_download(
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = {executor.submit(download_one, u): u for u in crawl_urls}
         for future in as_completed(futures):
+            if cancel_check and cancel_check():
+                executor.shutdown(wait=False, cancel_futures=True)
+                raise RuntimeError("Capture aborted by user")
             content, fetched_url, error = future.result()
             if content:
                 url_content[fetched_url] = content

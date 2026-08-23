@@ -8,7 +8,7 @@
 
 **Native Desktop GUI · High-Performance CLI · AI Agent MCP Server**
 
-[![Version: 9.0.0](https://img.shields.io/badge/version-9.0.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 9.0.1](https://img.shields.io/badge/version-9.0.1-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-zinc?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)

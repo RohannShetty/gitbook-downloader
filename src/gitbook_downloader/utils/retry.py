@@ -13,6 +13,8 @@ from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
+# Default socket connect timeout (seconds) to prevent hung TCP handshakes.
+DEFAULT_CONNECT_TIMEOUT = 5.0
 # Default timeout (seconds) applied to every request when not overridden.
 DEFAULT_TIMEOUT = 20
 
@@ -24,17 +26,20 @@ class TimeoutHTTPAdapter(HTTPAdapter):
     request via ``kwargs["timeout"]``.
     """
 
-    def __init__(self, timeout: int | None = None, *args, **kwargs):
+    def __init__(self, timeout: int | float | tuple[float, float] | None = None, *args, **kwargs):
         self.timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
         super().__init__(*args, **kwargs)
 
     def send(self, request, **kwargs):
-        kwargs.setdefault("timeout", self.timeout)
+        timeout = self.timeout
+        if isinstance(timeout, (int, float)):
+            timeout = (DEFAULT_CONNECT_TIMEOUT, float(timeout))
+        kwargs.setdefault("timeout", timeout)
         return super().send(request, **kwargs)
 
 
 def create_session(
-    timeout: int = DEFAULT_TIMEOUT,
+    timeout: int | float | tuple[float, float] = DEFAULT_TIMEOUT,
     retries: int = 3,
     backoff_factor: float = 0.5,
     user_agent: str = (
@@ -45,7 +50,7 @@ def create_session(
     """Create a ``requests.Session`` with retry strategy and timeout.
 
     Args:
-        timeout: Per-request timeout in seconds.
+        timeout: Per-request timeout in seconds or (connect, read) tuple.
         retries: Max retry attempts on 429/5xx/connection errors.
         backoff_factor: Sleep = ``backoff_factor * (2 ** (retry - 1))``.
         user_agent: User-Agent header value.

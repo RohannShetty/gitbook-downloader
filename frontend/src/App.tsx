@@ -37,11 +37,16 @@ export function App() {
     }
   }
 
+  // Reload library on mount and whenever the active tab changes to keep UI synchronized
+  useEffect(() => {
+    loadLibrary()
+  }, [activeTab])
+
   // Set default theme class on document element
   useEffect(() => {
     document.documentElement.classList.add("dark")
-    loadLibrary()
   }, [])
+
 
   // Global Ctrl+K / Cmd+K listener
   useEffect(() => {

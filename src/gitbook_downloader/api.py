@@ -73,6 +73,7 @@ class CaptureOptions:
     local_dir: Path | None = None         # default ./<domain>-docs/
     snapshot: bool = True                 # snapshot previous before overwrite
     timeout: float = 20.0
+    cancel_check: Callable[[], bool] | None = None
 
 
 @dataclass(frozen=True)
@@ -413,17 +414,35 @@ def capture(
                                    url=data.get("url"),
                                    message=data.get("error")))
 
+        if options.cancel_check and options.cancel_check():
+            raise CaptureError("Capture aborted by user")
+
         stream_download = _load_stream_download()
         try:
-            raw = stream_download(
-                url,
-                path_scope=list(options.path_scope),
-                exclude_paths=list(options.exclude_paths),
-                timeout=options.timeout,
-                max_pages=options.max_pages,
-                workers=options.workers,
-                progress_callback=on_engine_event,
-            )
+            try:
+                raw = stream_download(
+                    url,
+                    path_scope=list(options.path_scope),
+                    exclude_paths=list(options.exclude_paths),
+                    timeout=options.timeout,
+                    max_pages=options.max_pages,
+                    workers=options.workers,
+                    progress_callback=on_engine_event,
+                    cancel_check=options.cancel_check,
+                )
+            except TypeError as exc:
+                if options.cancel_check is not None and "cancel_check" in str(exc):
+                    raw = stream_download(
+                        url,
+                        path_scope=list(options.path_scope),
+                        exclude_paths=list(options.exclude_paths),
+                        timeout=options.timeout,
+                        max_pages=options.max_pages,
+                        workers=options.workers,
+                        progress_callback=on_engine_event,
+                    )
+                else:
+                    raise
         except TypeError as exc:
             raise CaptureError(
                 f"Engine rejected the v7 stream_download signature: {exc}. "

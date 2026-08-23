@@ -37,11 +37,23 @@ class ApiBridge:
         self._window = window
         self._storage = storage_manager or StorageManager()
         self._cancel_requested = False
+        self._cancel_event = threading.Event()
         self._active_thread: threading.Thread | None = None
         self._last_run: dict[str, Any] | None = None
 
     def set_window(self, window) -> None:
         self._window = window
+
+    def cleanup(self) -> None:
+        """Called when WebView window closes or app exits."""
+        self._cancel_requested = True
+        self._cancel_event.set()
+        if self._active_thread and self._active_thread.is_alive():
+            self._active_thread.join(timeout=0.5)
+        try:
+            self._storage.clear_all_locks(force=False)
+        except Exception:
+            pass
 
     def _emit_to_js(self, func_name: str, data: Any) -> None:
         if self._window is None:
@@ -62,7 +74,7 @@ class ApiBridge:
             return {"success": False, "error": "Enter a valid http(s) URL"}
         try:
             sess = requests.Session()
-            sess.headers["User-Agent"] = "gitbook-downloader/7.0.1"
+            sess.headers["User-Agent"] = "gitbook-downloader/9.0.0"
             p = detect_provider(url, sess)
             provider_name = getattr(p, "name", "generic")
             evidence = getattr(p, "evidence", "") or f"Matched {provider_name} rules"
@@ -86,6 +98,31 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
+    # ── Lock Management ──────────────────────────────────────────────────
+
+    def get_lock_status(self, domain: str | None = None) -> dict[str, Any]:
+        """Query status of active locks and current worker thread."""
+        try:
+            all_locks = self._storage.list_active_locks()
+            target_lock = None
+            if domain:
+                norm_domain = domain.strip().lower().removeprefix("http://").removeprefix("https://").split("/")[0].removeprefix("www.")
+                for l in all_locks:
+                    if l.get("domain") == norm_domain:
+                        target_lock = l
+                        break
+
+            return {
+                "success": True,
+                "active_locks": all_locks,
+                "has_active_locks": len(all_locks) > 0,
+                "domain_locked": target_lock is not None and not target_lock.get("is_stale"),
+                "target_lock": target_lock,
+                "is_worker_alive": bool(self._active_thread and self._active_thread.is_alive()),
+            }
+        except Exception as exc:
+            return {"success": False, "error": str(exc), "active_locks": []}
+
     # ── Capture Execution ────────────────────────────────────────────────
 
     def start_capture(self, url: str, options: dict[str, Any]) -> dict[str, Any]:
@@ -97,6 +134,8 @@ class ApiBridge:
                 return {"success": False, "error": "A capture is already running"}
 
         self._cancel_requested = False
+        self._cancel_event.clear()
+
         raw_scope = options.get("path_scope") or ""
         parsed_scope = tuple(
             s.strip() for s in str(raw_scope).split(",") if s.strip()
@@ -137,6 +176,7 @@ class ApiBridge:
             timeout=timeout,
             snapshot=snapshot,
             output_mode=output_mode,
+            cancel_check=lambda: self._cancel_event.is_set(),
         )
 
         def worker():
@@ -144,7 +184,7 @@ class ApiBridge:
             stats = {"discovered": 0, "downloaded": 0, "failed": 0}
 
             def on_progress(event: ProgressEvent):
-                if self._cancel_requested:
+                if self._cancel_event.is_set() or self._cancel_requested:
                     raise RuntimeError("Capture aborted by user")
                 kind = event.kind
                 if kind == "discovered":
@@ -230,11 +270,23 @@ class ApiBridge:
         return {"success": True}
 
     def cancel_capture(self) -> dict[str, Any]:
-        """Request the current capture to cancel."""
+        """Request the current capture to cancel immediately."""
         self._cancel_requested = True
+        self._cancel_event.set()
         if self._active_thread and self._active_thread.is_alive():
-            self._active_thread.join(timeout=0.3)
+            self._active_thread.join(timeout=1.0)
         return {"success": True}
+
+    def reset_capture(self) -> dict[str, Any]:
+        """Forcefully reset the capture thread state and clear all active locks."""
+        self._cancel_requested = True
+        self._cancel_event.set()
+        if self._active_thread and self._active_thread.is_alive():
+            self._active_thread.join(timeout=1.0)
+        self._active_thread = None
+        cleared = self._storage.clear_all_locks(force=True)
+        return {"success": True, "cleared_locks": cleared}
+
 
     # ── Library Management ───────────────────────────────────────────────
 

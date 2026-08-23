@@ -52,6 +52,10 @@ def launch_gui(title: str = "GitBook Downloader v9.0 Beta", debug: bool = False)
         text_select=True,
     )
     bridge.set_window(window)
+    try:
+        window.events.closing += bridge.cleanup
+    except Exception:
+        pass
 
     # Use Edge Chromium (WebView2) on Windows for highest performance & modern web features
     gui_engine = "edgechromium" if sys.platform == "win32" else None

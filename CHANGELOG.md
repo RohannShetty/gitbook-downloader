@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.1] - 2026-08-23
+
+### 🛡️ Engine Hardening, SPA Fast Crawling, Self-Recovering Locks & Premium UI Overhaul
+
+Version 9.0.1 delivers robust multi-process lock safety with automatic dead-process PID detection, high-performance auto-scoping for single-page documentation apps (e.g. `pi.dev`), real-time discovery telemetry, and an overhauled premium Shadcn UI design contract with motion transitions.
+
+### Added & Improved in v9.0.1
+- 🔒 **Self-Recovering Domain Locks & Cross-Platform PID Liveness**:
+  - Implemented cross-platform OS process validation (`is_process_running(pid)` with Windows `OpenProcess`/`GetExitCodeProcess` and POSIX `os.kill(pid, 0)`).
+  - Automatically reclaims abandoned lock files if the owning process crashes or terminates unexpectedly.
+  - Added `StorageManager.list_active_locks()`, `StorageManager.clear_all_locks()`, and `atexit` auto-cleanup handlers.
+- 🧭 **Intelligent Path-Scope Auto-Inference for Single-Page Apps (SPAs)**:
+  - When capturing targets without sitemaps/llms.txt (such as `https://pi.dev/docs/latest`), the crawler automatically bounds discovery to the URL's subpath prefix, preventing runaway crawls into marketing homepages, news, and external assets.
+  - `_bfs_crawl` now emits live discovery events (`phase: "discovered"`) in real time to the GUI telemetry terminal.
+- ⚡ **Cooperative Non-Blocking Cancellation & Zombie Thread Elimination**:
+  - Implemented cooperative `cancel_check: Callable[[], bool]` across `stream_download` and `_bfs_crawl`.
+  - Immediate `ThreadPoolExecutor.shutdown(wait=False, cancel_futures=True)` on cancel request, releasing system resources without hung threads.
+- 🔌 **Socket Connection Timeouts**:
+  - Injected `DEFAULT_CONNECT_TIMEOUT = 5.0s` into `TimeoutHTTPAdapter` to eliminate hung TCP socket handshakes.
+- 🎨 **Premium Shadcn Desktop GUI & Motion Overhaul**:
+  - Redesigned **Capture Studio** with glowing status indicators, animated radial progress gauge with live speed metrics (pages/sec), and filterable real-time terminal logs.
+  - Added prominent **Active Storage Lock Banner** with one-click **Unlock & Force Reset** action.
+  - Upgraded **Document Library**, **Export Studio**, **Snapshot Diff**, **Search Studio**, and **Diagnostics** views with refined glassmorphism cards and micro-interactions.
+
+---
+
 ## [9.0.0] - 2026-08-23
 
 ### 🚀 Major Stable Release: Modern shadcn/ui Desktop Architecture, AI RAG Pipeline & Universal Scoper

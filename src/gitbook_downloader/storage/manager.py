@@ -97,6 +97,40 @@ def format_semver(parts: tuple[int, int, int]) -> str:
     return f"v{parts[0]}.{parts[1]}.{parts[2]}"
 
 
+import atexit
+import sys
+
+def is_process_running(pid: int) -> bool:
+    """Check whether a process with the given PID is currently active."""
+    if pid <= 0:
+        return False
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+            SYNCHRONIZE = 0x00100000
+            handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, False, pid)
+            if not handle:
+                return False
+            exit_code = ctypes.c_ulong()
+            STILL_ACTIVE = 259
+            if kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+                alive = (exit_code.value == STILL_ACTIVE)
+            else:
+                alive = False
+            kernel32.CloseHandle(handle)
+            return alive
+        except Exception:
+            return False
+    else:
+        try:
+            os.kill(pid, 0)
+            return True
+        except (OSError, ProcessLookupError):
+            return False
+
+
 class LockHeldError(RuntimeError):
     """Raised when another process holds the per-domain lock."""
 
@@ -106,7 +140,8 @@ class DomainLock:
 
     The lock file lives at ``<base>/locks/<domain>.lock`` and is created with
     ``O_CREAT | O_EXCL`` (atomic on Windows and POSIX). Locks older than
-    :data:`LOCK_STALE_SECONDS` are considered abandoned and stolen.
+    :data:`LOCK_STALE_SECONDS` or owned by dead processes are automatically
+    recovered.
     """
 
     def __init__(self, base_dir: str | Path, domain: str,
@@ -125,7 +160,7 @@ class DomainLock:
                 fd = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             except FileExistsError:
                 if self._is_stale():
-                    # Steal the abandoned lock and retry once.
+                    # Steal the abandoned / dead lock and retry once.
                     try:
                         self.path.unlink()
                     except OSError:
@@ -134,7 +169,7 @@ class DomainLock:
                 raise LockHeldError(
                     f"Another gitbook-dl run appears to be capturing "
                     f"'{self.domain}' (lock: {self.path}). "
-                    f"If this is wrong, delete the lock file."
+                    f"If this is wrong, delete the lock file or click Force Reset."
                 ) from None
             else:
                 with os.fdopen(fd, "w", encoding="utf-8") as fh:
@@ -143,11 +178,55 @@ class DomainLock:
                 return self
 
     def _is_stale(self) -> bool:
+        if not self.path.exists():
+            return True
         try:
-            age = time.time() - self.path.stat().st_mtime
+            stat = self.path.stat()
+            age = time.time() - stat.st_mtime
         except OSError:
             return True
-        return age > self.stale_seconds
+
+        if age > self.stale_seconds:
+            return True
+
+        try:
+            content = self.path.read_text(encoding="utf-8", errors="replace")
+            m_pid = re.search(r"pid=(\d+)", content)
+            if m_pid:
+                pid = int(m_pid.group(1))
+                if pid != os.getpid() and not is_process_running(pid):
+                    # Process died without releasing lock -> reclaim immediately
+                    return True
+        except Exception:
+            if age > 5.0:
+                return True
+
+        return False
+
+    def get_info(self) -> dict | None:
+        """Return metadata about the current lock holder, or None if unlocked."""
+        if not self.path.exists():
+            return None
+        try:
+            text = self.path.read_text(encoding="utf-8", errors="replace")
+            m_pid = re.search(r"pid=(\d+)", text)
+            m_at = re.search(r"at=([^\s]+)", text)
+            pid = int(m_pid.group(1)) if m_pid else None
+            timestamp = m_at.group(1) if m_at else ""
+            age = round(time.time() - self.path.stat().st_mtime, 1)
+            is_active = is_process_running(pid) if pid is not None else False
+            return {
+                "domain": self.domain,
+                "path": str(self.path),
+                "pid": pid,
+                "acquired_at": timestamp,
+                "age_seconds": age,
+                "is_active": is_active,
+                "is_stale": age > self.stale_seconds or (pid is not None and not is_active and pid != os.getpid()),
+                "owned_by_current_process": pid == os.getpid(),
+            }
+        except Exception:
+            return None
 
     def release(self) -> None:
         if not self._acquired:
@@ -239,6 +318,37 @@ class StorageManager:
                     stale_seconds: float = LOCK_STALE_SECONDS) -> DomainLock:
         """Return an un-acquired :class:`DomainLock` for *domain*."""
         return DomainLock(self.base, domain, stale_seconds=stale_seconds)
+
+    def list_active_locks(self) -> list[dict]:
+        """List metadata for all active / existing lock files."""
+        ldir = self.locks_dir()
+        if not ldir.exists():
+            return []
+        results = []
+        for f in ldir.glob("*.lock"):
+            lock = self.domain_lock(f.stem)
+            info = lock.get_info()
+            if info:
+                results.append(info)
+        return results
+
+    def clear_all_locks(self, force: bool = False) -> int:
+        """Clear lock files. If force is False, only clears stale/owned locks."""
+        ldir = self.locks_dir()
+        if not ldir.exists():
+            return 0
+        cleared = 0
+        my_pid = os.getpid()
+        for f in ldir.glob("*.lock"):
+            lock = self.domain_lock(f.stem)
+            info = lock.get_info()
+            if force or not info or info.get("is_stale") or info.get("pid") == my_pid:
+                try:
+                    f.unlink(missing_ok=True)
+                    cleared += 1
+                except Exception:
+                    pass
+        return cleared
 
     # ------------------------------------------------------------------
     # Save / Load
@@ -582,3 +692,14 @@ class StorageManager:
             {"filename": os.path.basename(fn), "size": sz} for fn, sz in chunks
         ]
         self._write_metadata(domain, meta)
+
+
+def _cleanup_process_locks():
+    """Ensure any locks created by this process PID are cleaned on exit."""
+    try:
+        StorageManager().clear_all_locks(force=False)
+    except Exception:
+        pass
+
+
+atexit.register(_cleanup_process_locks)

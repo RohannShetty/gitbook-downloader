@@ -38,6 +38,7 @@ declare global {
         detect: (url: string) => Promise<any>
         start_capture: (url: string, options: any) => Promise<any>
         cancel_capture: () => Promise<any>
+        reset_capture: () => Promise<any>
         list_library: () => Promise<any[]>
         get_library_doc: (domain: string) => Promise<any>
         delete_domain: (domain: string) => Promise<any>
@@ -48,6 +49,7 @@ declare global {
         diff_snapshots: (domain: string, v1: string, v2: string) => Promise<any>
         get_diagnostics: () => Promise<any>
         get_system_info: () => Promise<any>
+        get_lock_status: (domain?: string) => Promise<any>
         export_doc: (domain: string, format: string, customPath?: string) => Promise<any>
       }
     }
@@ -68,6 +70,14 @@ export const pyApi = {
   cancelCapture: async () => {
     if (window.pywebview?.api?.cancel_capture) return await window.pywebview.api.cancel_capture()
     return { success: true }
+  },
+  resetCapture: async () => {
+    if (window.pywebview?.api?.reset_capture) return await window.pywebview.api.reset_capture()
+    return { success: true, cleared_locks: 0 }
+  },
+  getLockStatus: async (domain?: string) => {
+    if (window.pywebview?.api?.get_lock_status) return await window.pywebview.api.get_lock_status(domain)
+    return { success: true, active_locks: [], has_active_locks: false, domain_locked: false }
   },
   listLibrary: async () => {
     if (window.pywebview?.api?.list_library) return await window.pywebview.api.list_library()
@@ -128,7 +138,7 @@ export const pyApi = {
   },
   getSystemInfo: async () => {
     if (window.pywebview?.api?.get_system_info) return await window.pywebview.api.get_system_info()
-    return { version: '9.0.0', python: '3.11.15', platform: 'win32', library_dir: 'C:\\Users\\rohan\\.gitbook-downloader\\docs' }
+    return { version: '9.0.1', python: '3.13.13', platform: 'win32', library_dir: 'C:\\Users\\rohan\\.gitbook-downloader\\docs' }
   },
   exportDoc: async (domain: string, format: string, customPath?: string) => {
     if (window.pywebview?.api?.export_doc) return await window.pywebview.api.export_doc(domain, format, customPath)
