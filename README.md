@@ -8,7 +8,7 @@
 
 **Native Desktop GUI · High-Performance CLI · AI Agent MCP Server**
 
-[![Version: 9.0.0-beta.1](https://img.shields.io/badge/version-9.0.0--beta.1-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 9.0.0](https://img.shields.io/badge/version-9.0.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-zinc?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
@@ -16,21 +16,23 @@
 
 <br />
 
-<img src="assets/capture_studio.png" alt="GitBook Downloader v9 Beta Desktop GUI — Capture Studio with 60fps motion progress, radial gauge, and live terminal logs" width="920" />
+<img src="assets/capture_studio.png" alt="GitBook Downloader v9 Desktop GUI — Capture Studio with shadcn/ui, 60fps motion progress, radial gauge, and live terminal logs" width="920" />
 
 </div>
 
 ---
 
-## ✨ What's New in v9.0 Beta
+## ✨ What's New in v9.0 Stable
 
-- 🎨 **shadcn/ui Design System**: Re-engineered frontend built with React 18, Vite, Tailwind CSS, Lucide icons, and shadcn zinc dark/light theme tokens.
-- 📂 **Collapsible Modern Sidebar**: Clean navigation with quick status pills, badge counts, and light/dark theme toggle.
+- 🎨 **shadcn/ui Design System**: Re-engineered desktop frontend built with React 18, Vite, Tailwind CSS, Lucide icons, and adaptive light/dark theme tokens.
+- 📂 **Collapsible Modern Sidebar**: Clean navigation with quick status pills, badge telemetry, and theme toggles.
 - ⚡ **Global Command Palette (`Ctrl+K` / `Cmd+K`)**: Keyboard-driven launcher for instant view switching, document search, and storage actions.
-- 📥 **Batch Capture Queue**: Queue multiple documentation websites to crawl sequentially in background.
+- 📥 **Batch Capture Queue**: Queue multiple documentation websites to crawl sequentially in the background.
+- 📄 **Pure-Python PDF Generation**: Styled documentation books with syntax highlighting, clean margins, and TOC (`fpdf2`).
 - 🚀 **AI / RAG Export Studio**: Export documentation sets directly to **JSONL** (for LangChain, LlamaIndex, OpenAI embeddings, ChromaDB), **PDF**, or unified **book.md**.
+- 🔍 **Universal Doc-Root Auto-Expansion**: Intelligently handles subpage links like `https://ui.shadcn.com/docs/installation` by capturing the entire doc suite.
 - 📖 **Split Document Reader**: In-app reader modal with page filtering, table of contents, and syntax highlighting.
-- 📦 **Zero-Config Standalone Executable**: Single 23.6 MB `gitbook-dl.exe` bundling React frontend assets with zero Node.js runtime requirement for users.
+- 📦 **Zero-Config Standalone Executable**: Single standalone `gitbook-dl.exe` with bundled React frontend assets.
 
 ---
 

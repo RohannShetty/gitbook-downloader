@@ -2,6 +2,35 @@
  * Python PyWebView API client with fallbacks for standalone dev.
  */
 
+export interface CaptureProgressPayload {
+  kind: "discovered" | "downloaded" | "failed" | "info" | "written"
+  url?: string
+  title?: string
+  size_kb?: number
+  message?: string
+  count?: number
+  done: number
+  downloaded: number
+  failed: number
+  discovered: number
+  total: number
+  percent: number
+  elapsed: number
+}
+
+export interface CaptureDonePayload {
+  success: boolean
+  error?: string
+  cancelled?: boolean
+  pages_downloaded?: number
+  result?: any
+  stats?: {
+    discovered: number
+    downloaded: number
+    failed: number
+  }
+}
+
 declare global {
   interface Window {
     pywebview?: {
@@ -13,6 +42,8 @@ declare global {
         get_library_doc: (domain: string) => Promise<any>
         delete_domain: (domain: string) => Promise<any>
         open_folder: (path: string) => Promise<any>
+        open_file: (path: string) => Promise<any>
+        read_file: (filePath: string) => Promise<any>
         search_docs: (query: string, domain?: string) => Promise<any[]>
         diff_snapshots: (domain: string, v1: string, v2: string) => Promise<any>
         get_diagnostics: () => Promise<any>
@@ -20,15 +51,15 @@ declare global {
         export_doc: (domain: string, format: string, customPath?: string) => Promise<any>
       }
     }
-    onCaptureProgress?: (data: any) => void
-    onCaptureDone?: (data: any) => void
+    onCaptureProgress?: (data: CaptureProgressPayload) => void
+    onCaptureDone?: (data: CaptureDonePayload) => void
   }
 }
 
 export const pyApi = {
   detect: async (url: string) => {
     if (window.pywebview?.api?.detect) return await window.pywebview.api.detect(url)
-    return { detected: true, provider: 'gitbook', site_versions: ['v1'] }
+    return { success: true, detected: true, provider: 'gitbook', site_versions: ['v1'] }
   },
   startCapture: async (url: string, options: any) => {
     if (window.pywebview?.api?.start_capture) return await window.pywebview.api.start_capture(url, options)
@@ -44,12 +75,11 @@ export const pyApi = {
       {
         domain: 'docs.openalgo.in',
         provider: 'gitbook',
-        pages_count: 364,
+        pages: 364,
         size_bytes: 4892011,
-        snapshots: ['v1.0.7', 'v1.0.8'],
+        snapshot_count: 2,
         last_crawled: '2026-08-23 15:00',
-        folder: 'C:\\Users\\rohan\\.gitbook-downloader\\docs\\docs.openalgo.in',
-        file_path: 'C:\\Users\\rohan\\.gitbook-downloader\\docs\\docs.openalgo.in\\docs.md'
+        path: 'C:\\Users\\rohan\\.gitbook-downloader\\docs\\docs.openalgo.in'
       }
     ]
   },
@@ -61,10 +91,14 @@ export const pyApi = {
       title: 'OpenAlgo Documentation',
       content: '# OpenAlgo Documentation\n\nWelcome to OpenAlgo documentation.\n\n## Quickstart\n\nInstall using python.',
       pages: [
-        { path: 'index.md', title: 'Introduction', size: 1024 },
-        { path: 'quickstart.md', title: 'Quickstart', size: 2048 },
+        { relpath: 'index.md', path: 'index.md', size: 1024 },
+        { relpath: 'quickstart.md', path: 'quickstart.md', size: 2048 },
       ]
     }
+  },
+  readFile: async (filePath: string) => {
+    if (window.pywebview?.api?.read_file) return await window.pywebview.api.read_file(filePath)
+    return { success: true, content: `# Page ${filePath}\n\nContent of ${filePath}`, filename: filePath }
   },
   deleteDomain: async (domain: string) => {
     if (window.pywebview?.api?.delete_domain) return await window.pywebview.api.delete_domain(domain)
@@ -72,6 +106,10 @@ export const pyApi = {
   },
   openFolder: async (path: string) => {
     if (window.pywebview?.api?.open_folder) return await window.pywebview.api.open_folder(path)
+    return { success: true }
+  },
+  openFile: async (path: string) => {
+    if (window.pywebview?.api?.open_file) return await window.pywebview.api.open_file(path)
     return { success: true }
   },
   searchDocs: async (query: string, domain?: string) => {
@@ -90,7 +128,7 @@ export const pyApi = {
   },
   getSystemInfo: async () => {
     if (window.pywebview?.api?.get_system_info) return await window.pywebview.api.get_system_info()
-    return { version: '9.0.0-beta.1', python: '3.11.15', platform: 'win32', library_dir: 'C:\\Users\\rohan\\.gitbook-downloader\\docs' }
+    return { version: '9.0.0', python: '3.11.15', platform: 'win32', library_dir: 'C:\\Users\\rohan\\.gitbook-downloader\\docs' }
   },
   exportDoc: async (domain: string, format: string, customPath?: string) => {
     if (window.pywebview?.api?.export_doc) return await window.pywebview.api.export_doc(domain, format, customPath)

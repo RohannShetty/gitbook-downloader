@@ -62,19 +62,27 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
     loadDoc()
   }, [domain])
 
-  const handleSelectPage = async (pagePath: string) => {
-    setSelectedFile(pagePath)
-    if (pagePath === "book.md" && docData) {
-      setFileContent(docData.content || "")
+  const handleSelectPage = async (pageTarget: any) => {
+    if (pageTarget === "book.md" || (typeof pageTarget === "object" && pageTarget.relpath === "book.md")) {
+      setSelectedFile("book.md")
+      setFileContent(docData?.content || docData?.book_content || "")
       return
     }
-    // Read individual subpage
+
+    const filePath = typeof pageTarget === "string" ? pageTarget : (pageTarget.path || pageTarget.relpath)
+    const relPath = typeof pageTarget === "string" ? pageTarget : (pageTarget.relpath || pageTarget.path)
+    setSelectedFile(relPath)
+
     try {
-      // In library bridge, if docData has the path or we read directly
-      setFileContent(`# ${pagePath}\n\nLoading page content...`)
-      // If we need to fetch specific file content:
-      // For now if content is in doc or loaded
-    } catch (e) {}
+      const res = await pyApi.readFile(filePath)
+      if (res.success) {
+        setFileContent(res.content || "")
+      } else {
+        toast.error(`Could not read page: ${res.error}`)
+      }
+    } catch (err: any) {
+      toast.error(`Error reading page: ${err.message}`)
+    }
   }
 
   const handleCopy = () => {
@@ -85,31 +93,31 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
   }
 
   const handleOpenFolder = () => {
-    if (docData?.folder) {
-      pyApi.openFolder(docData.folder)
+    if (docData?.folder || docData?.path) {
+      pyApi.openFolder(docData.folder || docData.path)
       toast.info("Opened folder in Windows Explorer")
     }
   }
 
   const pages = docData?.pages || []
   const filteredPages = pages.filter((p: any) => 
-    p.path.toLowerCase().includes(searchFilter.toLowerCase()) ||
+    (p.path || p.relpath || "").toLowerCase().includes(searchFilter.toLowerCase()) ||
     (p.title && p.title.toLowerCase().includes(searchFilter.toLowerCase()))
   )
 
   return (
     <Dialog open={!!domain} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden bg-zinc-950 border-white/15">
+      <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden bg-card border-border">
         {/* Header */}
-        <DialogHeader className="flex flex-row items-center justify-between border-b border-white/10 px-6 py-4 space-y-0">
+        <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-6 py-4 space-y-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/20 text-cyan-400 border border-cyan-500/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold text-white flex items-center gap-2">
+              <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
                 <span>{domain}</span>
-                <Badge variant="default" className="text-[10px] bg-cyan-500/20 text-cyan-400">
+                <Badge variant="secondary" className="text-[10px] font-mono">
                   {docData?.pages?.length || 0} Pages
                 </Badge>
               </DialogTitle>
@@ -118,22 +126,24 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
           </div>
 
           <div className="flex items-center gap-2 pr-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleOpenFolder}
-              className="h-8 gap-1.5 text-xs text-zinc-300 hover:text-white border-white/15"
-            >
-              <FolderOpen className="h-3.5 w-3.5 text-yellow-400" />
-              <span>Explorer</span>
-            </Button>
+            {(docData?.folder || docData?.path) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenFolder}
+                className="h-8 gap-1.5 text-xs border-border"
+              >
+                <FolderOpen className="h-3.5 w-3.5" />
+                <span>Explorer</span>
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
               onClick={handleCopy}
-              className="h-8 gap-1.5 text-xs text-zinc-300 hover:text-white border-white/15"
+              className="h-8 gap-1.5 text-xs border-border"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? "Copied" : "Copy Markdown"}</span>
             </Button>
           </div>
@@ -142,15 +152,15 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
         {/* Content Split Area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar / Page Tree */}
-          <div className="w-72 border-r border-white/10 bg-zinc-900/40 flex flex-col">
-            <div className="p-3 border-b border-white/10">
+          <div className="w-72 border-r border-border bg-muted/20 flex flex-col">
+            <div className="p-3 border-b border-border">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   placeholder="Filter pages..."
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
-                  className="h-8 pl-8 text-xs bg-black/40 border-white/10"
+                  className="h-8 pl-8 text-xs bg-background"
                 />
               </div>
             </div>
@@ -161,38 +171,41 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
                   onClick={() => handleSelectPage("book.md")}
                   className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors ${
                     selectedFile === "book.md"
-                      ? "bg-cyan-500/20 text-cyan-400 font-semibold border border-cyan-500/30"
-                      : "text-zinc-300 hover:bg-white/5"
+                      ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   }`}
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
                   <span className="truncate">Full Unified (book.md)</span>
                 </button>
 
-                {filteredPages.map((p: any) => (
-                  <button
-                    key={p.path}
-                    onClick={() => handleSelectPage(p.path)}
-                    className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors ${
-                      selectedFile === p.path
-                        ? "bg-cyan-500/20 text-cyan-400 font-semibold border border-cyan-500/30"
-                        : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
-                    }`}
-                  >
-                    <FileText className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                    <span className="truncate">{p.title || p.path}</span>
-                  </button>
-                ))}
+                {filteredPages.map((p: any) => {
+                  const pPath = p.relpath || p.path
+                  return (
+                    <button
+                      key={pPath}
+                      onClick={() => handleSelectPage(p)}
+                      className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors ${
+                        selectedFile === pPath
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                    >
+                      <FileText className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                      <span className="truncate">{p.title || pPath}</span>
+                    </button>
+                  )
+                })}
               </div>
             </ScrollArea>
           </div>
 
           {/* Markdown Content Viewer */}
-          <div className="flex-1 flex flex-col bg-zinc-950/60 overflow-hidden">
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-2.5 bg-black/20 text-xs text-muted-foreground font-mono">
+          <div className="flex-1 flex flex-col bg-background overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-5 py-2.5 bg-muted/10 text-xs text-muted-foreground font-mono">
               <div className="flex items-center gap-2">
-                <Layers className="h-3.5 w-3.5 text-cyan-400" />
-                <span className="text-zinc-200">{selectedFile}</span>
+                <Layers className="h-3.5 w-3.5 text-primary" />
+                <span className="text-foreground">{selectedFile}</span>
               </div>
               <span>{fileContent.length.toLocaleString()} characters</span>
             </div>
@@ -203,7 +216,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
                   Loading documentation...
                 </div>
               ) : (
-                <div className="prose prose-invert max-w-none prose-pre:bg-zinc-900 prose-pre:border prose-pre:border-white/10 prose-headings:text-zinc-100 text-zinc-300 text-sm leading-relaxed font-sans whitespace-pre-wrap selection:bg-cyan-500/30">
+                <div className="prose dark:prose-invert max-w-none text-foreground text-sm leading-relaxed font-sans whitespace-pre-wrap selection:bg-primary/20">
                   {fileContent}
                 </div>
               )}

@@ -470,7 +470,31 @@ def capture(
             )
 
         # ── Output routing ──────────────────────────────────────────
-        local_dir = options.local_dir or (Path.cwd() / f"{domain}-docs")
+        effective_output_mode = options.output_mode
+        local_dir = options.local_dir
+        if local_dir is None:
+            cwd = Path.cwd()
+            cwd_str = str(cwd).lower()
+            is_system_dir = (
+                "system32" in cwd_str
+                or "syswow64" in cwd_str
+                or cwd_str.startswith("c:\\windows")
+            )
+            if is_system_dir and effective_output_mode in ("both", "local"):
+                # Redirect away from system directory
+                if effective_output_mode == "both":
+                    effective_output_mode = "library"
+                    warnings.append(
+                        f"Current working directory ({cwd}) is a system directory; local dump skipped, saved to Library."
+                    )
+                else:
+                    local_dir = Path.home() / "Downloads" / f"{domain}-docs"
+                    warnings.append(
+                        f"Current working directory ({cwd}) is a system directory; local dump redirected to {local_dir}."
+                    )
+            elif not is_system_dir:
+                local_dir = cwd / f"{domain}-docs"
+
         library_dir = storage._domain_dir(domain)
 
         outcome: PublishOutcome = publish(
@@ -478,7 +502,7 @@ def capture(
             domain=domain,
             source_url=url,
             provider=provider,
-            output_mode=options.output_mode,
+            output_mode=effective_output_mode,
             local_dir=local_dir,
             library_dir=library_dir,
         )

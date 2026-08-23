@@ -285,3 +285,28 @@ class TestLanguageFilterAndBfs:
         assert "/gitbook" in combined          # start page crawled
         assert "/docs/intro" in combined       # nav link followed
         assert "/docs/guide" not in combined   # excluded
+
+    def test_leaf_doc_url_auto_expands_to_doc_root(
+        self, fixture_server, session, fake_storage, monkeypatch
+    ):
+        """When given a leaf doc URL like /docs/installation, discovery should retain /docs/* pages."""
+        provider = GitBookProvider()
+        monkeypatch.setattr(
+            provider,
+            "discover_urls",
+            lambda base_url, sess: {
+                fixture_server.url("/docs/intro"),
+                fixture_server.url("/docs/guide"),
+                fixture_server.url("/blog/post-1"),
+            },
+        )
+        combined = engine.stream_download(
+            fixture_server.url("/docs/installation"),
+            max_pages=None,
+            workers=2,
+            session=session,
+            provider=provider,
+        )
+        assert "/docs/intro" in combined
+        assert "/docs/guide" in combined
+        assert "/blog/post-1" not in combined

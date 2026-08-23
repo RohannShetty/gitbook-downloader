@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "9.0.0b1"
+version = "9.0.0"
 description = "Download entire documentation sites — GitBook, Docusaurus, ReadTheDocs, Mintlify, or any site — and split into AI-friendly chunks."
 readme = "README.md"
 license = {text = "MIT"}
@@ -13,7 +13,7 @@ authors = [
 ]
 keywords = ["gitbook", "documentation", "markdown", "downloader", "ai", "llm", "chunks", "splitter", "docusaurus", "readthedocs", "mintlify", "mcp"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
@@ -35,6 +35,7 @@ dependencies = [
     "textual>=0.60",
     "pyperclip>=1.8.0",
     "pywebview>=6.2.1",
+    "fpdf2>=2.8.8",
 ]
 
 [project.optional-dependencies]
@@ -60,3 +61,12 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 gitbook_downloader = ["py.typed"]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.22.2",
+    "pyinstaller-hooks-contrib>=2026.6",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-timeout>=2.4.0",
+]

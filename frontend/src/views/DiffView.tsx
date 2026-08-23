@@ -43,30 +43,29 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+    <div className="flex-1 overflow-y-auto p-8 max-w-5xl mx-auto w-full space-y-6">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Badge variant="default" className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <GitCompare className="h-6 w-6 text-primary" />
+            <span>Snapshot Diff Studio</span>
+          </h1>
+          <Badge variant="secondary" className="font-mono text-xs">
             Snapshot Engine
           </Badge>
-          <span className="text-xs text-zinc-400">Documentation Change Tracking & Changelog Diffing</span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <GitCompare className="h-6 w-6 text-purple-400" />
-          <span>Snapshot Diff Studio</span>
-        </h1>
-        <p className="text-xs text-zinc-400 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Compare modifications across captured snapshot versions to audit additions, removals, and breaking changes.
         </p>
       </div>
 
       {/* Selector Bar */}
-      <Card className="border-white/10 bg-zinc-950/70">
+      <Card className="border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
         <CardContent className="p-5">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
             <div>
-              <label className="text-xs text-zinc-400 mb-1.5 block">Documentation Source</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Documentation Source</label>
               <select
                 value={selectedDomain}
                 onChange={(e) => {
@@ -74,7 +73,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
                   setV1("")
                   setV2("")
                 }}
-                className="h-10 w-full rounded-lg border border-white/15 bg-black/60 px-3 text-xs text-zinc-200"
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
               >
                 {library.map((item) => (
                   <option key={item.domain} value={item.domain}>
@@ -85,11 +84,11 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
             </div>
 
             <div>
-              <label className="text-xs text-zinc-400 mb-1.5 block">Base Snapshot (Older)</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Base Snapshot (Older)</label>
               <select
                 value={v1}
                 onChange={(e) => setV1(e.target.value)}
-                className="h-10 w-full rounded-lg border border-white/15 bg-black/60 px-3 text-xs text-zinc-200"
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="">Select Base Snapshot</option>
                 {snapshots.map((s: string) => (
@@ -101,11 +100,11 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
             </div>
 
             <div>
-              <label className="text-xs text-zinc-400 mb-1.5 block">Target Snapshot (Newer)</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Target Snapshot (Newer)</label>
               <select
                 value={v2}
                 onChange={(e) => setV2(e.target.value)}
-                className="h-10 w-full rounded-lg border border-white/15 bg-black/60 px-3 text-xs text-zinc-200"
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="">Select Target Snapshot</option>
                 {snapshots.map((s: string) => (
@@ -119,63 +118,47 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
             <Button
               onClick={handleCompare}
               disabled={loading || !v1 || !v2}
-              className="h-10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg shadow-purple-500/20"
+              className="h-10 font-medium"
             >
-              Compare Snapshots
+              {loading ? "Diffing..." : "Compare Snapshots"}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Diff Output */}
-      {loading ? (
-        <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-          Computing snapshot diff...
-        </div>
-      ) : diffResult ? (
+      {/* Diff Result Content */}
+      {diffResult && (
         <div className="space-y-4">
-          {diffResult.changes?.length === 0 ? (
-            <Card className="border-white/10 bg-zinc-950/40 p-8 text-center">
-              <Check className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-white">Snapshots are identical</p>
-              <p className="text-xs text-zinc-400 mt-1">No differences found between {v1} and {v2}.</p>
-            </Card>
-          ) : (
-            diffResult.changes?.map((ch: any, i: number) => (
-              <Card key={i} className="border-white/10 bg-zinc-950/80 overflow-hidden">
-                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-black/40">
-                  <div className="flex items-center gap-2 font-mono text-xs text-zinc-200">
-                    <FileCode className="h-4 w-4 text-purple-400" />
-                    <span>{ch.file}</span>
-                  </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground">File Modifications</h3>
+              <Badge variant="outline" className="font-mono text-xs">
+                {diffResult.changes?.length || 0} files modified
+              </Badge>
+            </div>
+          </div>
 
-                  <div className="flex items-center gap-2">
-                    <Badge variant="emerald" className="text-[10px] font-mono gap-1">
-                      <Plus className="h-3 w-3" />
-                      <span>{ch.lines_added || 0}</span>
-                    </Badge>
-                    <Badge variant="destructive" className="text-[10px] font-mono gap-1">
-                      <Minus className="h-3 w-3" />
-                      <span>{ch.lines_removed || 0}</span>
-                    </Badge>
+          <div className="space-y-3">
+            {diffResult.changes?.map((c: any, idx: number) => (
+              <Card key={idx} className="border-border/60 bg-card/60 backdrop-blur-sm overflow-hidden">
+                <div className="flex items-center justify-between border-b border-border/50 bg-muted/30 px-4 py-2.5">
+                  <div className="flex items-center gap-2 font-mono text-xs text-foreground font-semibold">
+                    <FileCode className="h-4 w-4 text-primary" />
+                    <span>{c.file}</span>
+                  </div>
+                  <div className="flex items-center gap-2 font-mono text-xs">
+                    <span className="text-emerald-500 font-semibold">+{c.lines_added || 0}</span>
+                    <span className="text-destructive font-semibold">-{c.lines_removed || 0}</span>
                   </div>
                 </div>
 
-                <ScrollArea className="max-h-96 p-4 font-mono text-xs leading-relaxed bg-black/60">
-                  <pre className="text-zinc-300 whitespace-pre-wrap selection:bg-purple-500/30">
-                    {ch.diff_text}
-                  </pre>
-                </ScrollArea>
+                <div className="p-4 font-mono text-xs bg-background/50 overflow-x-auto">
+                  <pre className="text-foreground leading-relaxed">{c.diff_text}</pre>
+                </div>
               </Card>
-            ))
-          )}
+            ))}
+          </div>
         </div>
-      ) : (
-        <Card className="border-white/10 bg-zinc-950/40 p-8 text-center">
-          <p className="text-xs text-zinc-500">
-            Select documentation source and snapshot versions above to compute side-by-side diffs.
-          </p>
-        </Card>
       )}
     </div>
   )

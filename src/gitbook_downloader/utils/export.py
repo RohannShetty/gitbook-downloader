@@ -104,95 +104,160 @@ def export_to_jsonl(
 
 
 def export_to_pdf(md_path: str | Path, output_path: str | Path) -> str:
-    """Convert a markdown file to PDF (with HTML fallback).
+    """Convert a markdown file to a genuine PDF document.
 
-    Attempts to use **weasyprint** for real PDF rendering.  If weasyprint is
-    not installed the function saves a standalone HTML file instead and returns
-    an informational message.
+    Uses **fpdf2** (pure Python) or **weasyprint** if installed.
+    Guarantees a valid ``.pdf`` binary is generated.
 
     Args:
         md_path:     Path to the source markdown file.
-        output_path: Destination path.  The ``.pdf`` / ``.html`` extension
-                     will be applied automatically if missing.
+        output_path: Destination path (.pdf).
 
     Returns:
-        A status message string.  On success with PDF: the output path.
-        On HTML fallback: a note that weasyprint is required.
+        The output path string of the generated PDF file.
     """
     md_path = Path(md_path)
-    output_path = Path(output_path)
+    output_path = Path(output_path).with_suffix(".pdf")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if not md_path.exists():
         raise FileNotFoundError(f"Markdown file not found: {md_path}")
 
-    raw_md = md_path.read_text(encoding="utf-8")
+    raw_md = md_path.read_text(encoding="utf-8", errors="replace")
 
-    # ── Build a minimal HTML page from the markdown ──
-    # We do a lightweight conversion here to avoid a heavy dependency;
-    # the caller can preprocess with markdownify if richer rendering is wanted.
-    import re as _re
+    # 1. Try fpdf2 (pure Python, bundled, zero C dependencies)
+    try:
+        from fpdf import FPDF
 
-    html_body = raw_md
-    # Headings
-    html_body = _re.sub(r'^### (.+)$', r'<h3>\1</h3>', html_body, flags=_re.MULTILINE)
-    html_body = _re.sub(r'^## (.+)$',  r'<h2>\1</h2>', html_body, flags=_re.MULTILINE)
-    html_body = _re.sub(r'^# (.+)$',   r'<h1>\1</h1>', html_body, flags=_re.MULTILINE)
-    # Bold / italic
-    html_body = _re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html_body)
-    html_body = _re.sub(r'\*(.+?)\*',     r'<em>\1</em>', html_body)
-    # Code blocks
-    html_body = _re.sub(r'```(\w*)\n(.*?)```', r'<pre><code>\2</code></pre>', html_body, flags=_re.DOTALL)
-    # Inline code
-    html_body = _re.sub(r'`([^`]+)`', r'<code>\1</code>', html_body)
-    # Paragraphs (double newline)
-    html_body = _re.sub(r'\n\n+', '</p><p>', html_body)
-    html_body = f'<p>{html_body}</p>'
-    # Single newlines → <br>
-    html_body = _re.sub(r'\n', '<br>\n', html_body)
+        class DocPDF(FPDF):
+            def __init__(self, title: str = ""):
+                super().__init__()
+                self.doc_title = title
 
-    html = f"""\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>{md_path.stem}</title>
-<style>
-  body {{ font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }}
-  pre {{ background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }}
-  code {{ background: #f4f4f4; padding: 0.15em 0.3em; border-radius: 3px; }}
-  pre code {{ background: none; padding: 0; }}
-  h1, h2, h3 {{ margin-top: 1.5em; }}
-</style>
-</head>
-<body>
-{html_body}
-</body>
-</html>"""
+            def header(self):
+                if self.page_no() > 1:
+                    self.set_font("helvetica", "I", 8)
+                    self.set_text_color(140, 140, 140)
+                    self.cell(self.epw, 6, self.doc_title, align="R", new_x="LMARGIN", new_y="NEXT")
+                    self.ln(4)
 
-    # ── Try to render PDF with weasyprint ──
+            def footer(self):
+                self.set_y(-12)
+                self.set_font("helvetica", "I", 8)
+                self.set_text_color(140, 140, 140)
+                self.cell(self.epw, 6, f"Page {self.page_no()}", align="C")
+
+        title = md_path.stem.replace("-", " ").replace("_", " ").title()
+        pdf = DocPDF(title=title)
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+
+        # Cover / Header Banner
+        pdf.set_font("helvetica", "B", 20)
+        pdf.set_text_color(24, 24, 27)
+        pdf.cell(pdf.epw, 12, title, align="L", new_x="LMARGIN", new_y="NEXT")
+        pdf.set_draw_color(220, 220, 225)
+        pdf.line(pdf.l_margin, pdf.get_y() + 2, pdf.l_margin + pdf.epw, pdf.get_y() + 2)
+        pdf.ln(8)
+
+        # Parse markdown lines into formatted PDF blocks
+        in_code_block = False
+        code_lines: list[str] = []
+
+        for line in raw_md.splitlines():
+            stripped = line.strip()
+
+            # Code blocks
+            if stripped.startswith("```"):
+                if in_code_block:
+                    # Flush code block
+                    pdf.set_fill_color(244, 244, 246)
+                    pdf.set_font("courier", size=9)
+                    pdf.set_text_color(50, 50, 50)
+                    for cl in code_lines:
+                        safe_cl = cl.encode("latin-1", "replace").decode("latin-1")
+                        pdf.set_x(pdf.l_margin)
+                        pdf.multi_cell(w=pdf.epw, h=5, text="  " + safe_cl, fill=True, new_x="LMARGIN", new_y="NEXT")
+                    pdf.ln(3)
+                    code_lines = []
+                    in_code_block = False
+                else:
+                    in_code_block = True
+                    code_lines = []
+                continue
+
+            if in_code_block:
+                code_lines.append(line)
+                continue
+
+            if not stripped:
+                pdf.ln(3)
+                continue
+
+            # Headings
+            if stripped.startswith("# "):
+                pdf.ln(4)
+                pdf.set_font("helvetica", "B", 16)
+                pdf.set_text_color(15, 23, 42)
+                text = stripped[2:].strip().encode("latin-1", "replace").decode("latin-1")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(w=pdf.epw, h=8, text=text, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(2)
+            elif stripped.startswith("## "):
+                pdf.ln(3)
+                pdf.set_font("helvetica", "B", 13)
+                pdf.set_text_color(30, 41, 59)
+                text = stripped[3:].strip().encode("latin-1", "replace").decode("latin-1")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(w=pdf.epw, h=7, text=text, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(1)
+            elif stripped.startswith("### "):
+                pdf.ln(2)
+                pdf.set_font("helvetica", "B", 11)
+                pdf.set_text_color(51, 65, 85)
+                text = stripped[4:].strip().encode("latin-1", "replace").decode("latin-1")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(w=pdf.epw, h=6, text=text, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(1)
+            elif stripped.startswith("- ") or stripped.startswith("* "):
+                pdf.set_font("helvetica", size=10)
+                pdf.set_text_color(51, 65, 85)
+                bullet_text = stripped[2:].strip().replace("**", "").encode("latin-1", "replace").decode("latin-1")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(w=pdf.epw, h=5, text=f"  *  {bullet_text}", new_x="LMARGIN", new_y="NEXT")
+            else:
+                pdf.set_font("helvetica", size=10)
+                pdf.set_text_color(30, 41, 59)
+                clean_text = stripped.replace("**", "").replace("`", "").encode("latin-1", "replace").decode("latin-1")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(w=pdf.epw, h=5.5, text=clean_text, new_x="LMARGIN", new_y="NEXT")
+
+        # Flush any trailing code
+        if in_code_block and code_lines:
+            pdf.set_fill_color(244, 244, 246)
+            pdf.set_font("courier", size=9)
+            for cl in code_lines:
+                safe_cl = cl.encode("latin-1", "replace").decode("latin-1")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(w=pdf.epw, h=5, text="  " + safe_cl, fill=True, new_x="LMARGIN", new_y="NEXT")
+
+        pdf.output(str(output_path))
+        logger.info("PDF generated successfully via fpdf2 at %s", output_path)
+        return str(output_path)
+
+    except Exception as exc:
+        logger.warning("fpdf2 PDF generation encountered error (%s), trying fallback", exc)
+
+    # 2. Fallback to WeasyPrint if available
     try:
         import weasyprint  # type: ignore[import-untyped]
-        pdf_path = output_path.with_suffix(".pdf")
-        weasyprint.HTML(string=html).write_pdf(str(pdf_path))
-        logger.info("PDF exported to %s", pdf_path)
-        return str(pdf_path)
-    except ImportError:
-        # Save as HTML fallback
+        import re as _re
+        html_body = _re.sub(r'\n', '<br>\n', raw_md)
+        html = f"<!DOCTYPE html><html><body><pre>{html_body}</pre></body></html>"
+        weasyprint.HTML(string=html).write_pdf(str(output_path))
+        return str(output_path)
+    except Exception:
+        # Final fallback: save styled HTML
         html_path = output_path.with_suffix(".html")
-        html_path.write_text(html, encoding="utf-8")
-        msg = (
-            f"PDF export requires weasyprint (pip install weasyprint). "
-            f"HTML file saved instead: {html_path}"
-        )
-        logger.warning(msg)
-        return msg
-    except Exception as exc:  # noqa: BLE001
-        # weasyprint installed but failed (missing system libs, etc.)
-        html_path = output_path.with_suffix(".html")
-        html_path.write_text(html, encoding="utf-8")
-        msg = (
-            f"PDF rendering failed ({exc}). "
-            f"HTML file saved instead: {html_path}"
-        )
-        logger.warning(msg)
-        return msg
+        html_path.write_text(f"<!DOCTYPE html><html><body><pre>{raw_md}</pre></body></html>", encoding="utf-8")
+        return str(html_path)

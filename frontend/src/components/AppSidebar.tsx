@@ -11,7 +11,7 @@ import {
   Sparkles, 
   Sun, 
   Moon,
-  TerminalSquare
+  Command
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -48,37 +48,37 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
   return (
     <aside
-      className={`relative flex flex-col border-r border-white/10 bg-zinc-950/80 backdrop-blur-xl transition-all duration-300 select-none ${
-        isCollapsed ? "w-18" : "w-64"
+      className={`relative flex flex-col border-r border-border bg-card/90 backdrop-blur-xl transition-all duration-300 select-none ${
+        isCollapsed ? "w-16" : "w-60"
       }`}
     >
       {/* Brand Header */}
-      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
+      <div className="flex h-16 items-center justify-between border-b border-border px-3.5">
         {!isCollapsed && (
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 shadow-md shadow-cyan-500/20 text-white">
-              <Sparkles className="h-5 w-5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+              <Sparkles className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold tracking-tight text-white text-sm">GitBook DL</span>
-                <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-cyan-500/20 text-cyan-400 border-cyan-500/40 font-mono">
+                <span className="font-bold tracking-tight text-foreground text-sm">GitBook DL</span>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary bg-primary/5 font-mono">
                   v9.0
                 </Badge>
               </div>
-              <span className="text-[11px] text-muted-foreground font-medium truncate">Pro Doc Engine</span>
+              <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Engine</span>
             </div>
           </div>
         )}
         {isCollapsed && (
-          <div className="flex h-9 w-9 mx-auto items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 shadow-md shadow-cyan-500/20 text-white">
-            <Sparkles className="h-5 w-5" />
+          <div className="flex h-8 w-8 mx-auto items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <Sparkles className="h-4 w-4" />
           </div>
         )}
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 space-y-1.5 p-3">
+      <nav className="flex-1 space-y-1 p-2">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id
@@ -87,15 +87,15 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               key={item.id}
               onClick={() => onSelectTab(item.id)}
               title={isCollapsed ? item.label : undefined}
-              className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+              className={`group flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
                 isActive
-                  ? "bg-gradient-to-r from-sky-500/15 to-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm"
-                  : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
+                  ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-xs"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               }`}
             >
               <Icon
-                className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
-                  isActive ? "text-cyan-400" : "text-zinc-400"
+                className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${
+                  isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               />
               {!isCollapsed && (
@@ -103,8 +103,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   <span className="truncate">{item.label}</span>
                   {item.badge && (
                     <Badge
-                      variant="outline"
-                      className="ml-auto text-[10px] h-4.5 px-1.5 border-white/10 text-zinc-400 bg-white/5"
+                      variant="secondary"
+                      className="ml-auto text-[10px] h-4 px-1.5 font-normal"
                     >
                       {item.badge}
                     </Badge>
@@ -117,35 +117,36 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </nav>
 
       {/* Footer Controls */}
-      <div className="border-t border-white/10 p-3 space-y-2">
-        <div className={`flex items-center ${isCollapsed ? "flex-col" : "justify-between"}`}>
+      <div className="border-t border-border p-2.5 space-y-2">
+        <div className={`flex items-center ${isCollapsed ? "flex-col gap-1.5" : "justify-between"}`}>
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleTheme}
-            className="h-8 w-8 text-zinc-400 hover:text-zinc-100"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
+          {!isCollapsed && (
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono flex items-center gap-0.5">
+                <Command className="h-2.5 w-2.5" /> K
+              </kbd>
+            </div>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className="h-8 w-8 text-zinc-400 hover:text-zinc-100"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
-
-        {!isCollapsed && (
-          <div className="rounded-lg bg-white/5 p-2 text-center text-[11px] text-zinc-500 flex items-center justify-center gap-1">
-            <TerminalSquare className="h-3 w-3 text-cyan-400" />
-            <span>Press <kbd className="px-1 py-0.5 rounded bg-black/40 border border-white/10 font-mono text-[10px] text-zinc-300">Ctrl+K</kbd> for Menu</span>
-          </div>
-        )}
       </div>
     </aside>
   )

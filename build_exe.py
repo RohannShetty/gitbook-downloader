@@ -76,6 +76,9 @@ HIDDEN_IMPORTS = [
     "clr_loader",
     "pythonnet",
     "bottle",
+    "fpdf",
+    "fpdf2",
+    "PIL",
 ]
 
 # Whole-package collects: modules whose submodules/data files are loaded
@@ -84,6 +87,7 @@ COLLECT_ALL = [
     "gitbook_downloader",  # submodules + package data (TUI + GUI assets)
     "textual",             # .tcss stylesheets, drivers, widget data
     "webview",             # pywebview drivers and JS bridges
+    "fpdf2",               # fonts, metrics, and resources
 ]
 
 

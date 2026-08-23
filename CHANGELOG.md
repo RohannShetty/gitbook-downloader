@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.0] - 2026-08-23
+
+### 🚀 Major Stable Release: Modern shadcn/ui Desktop Architecture, AI RAG Pipeline & Universal Scoper
+
+Version 9.0 marks the official stable release of **GitBook Downloader v9**, featuring a complete frontend re-engineering with **React 18 + Vite + Tailwind CSS + shadcn/ui**, pure Python PDF generation via `fpdf2`, native Windows Explorer integration, automated documentation-root scoping for subpage URLs (e.g. `ui.shadcn.com/docs/installation`), and AI-ready vector JSONL RAG export pipelines.
+
+### Added & Improved in v9.0 Stable
+- 🎨 **shadcn/ui Design System**:
+  - Re-architected desktop frontend using Radix UI primitives and shadcn zinc dark/light tokens.
+  - Collapsible sidebar with active indicators, badge telemetry, and theme switching.
+  - Universal `Ctrl+K` / `Cmd+K` Command Palette for rapid view switching and document lookup.
+  - Light/Dark theme-adaptive Sonner toast notification system.
+- ⚡ **Pure Python PDF Generation Engine (`fpdf2`)**:
+  - Zero C/GTK+ external dependencies: generates true binary `%PDF-` document books with syntax-highlighted code blocks, clean typography, headers, and footers directly from markdown.
+- 📁 **Native Windows Explorer & System Reader Integration**:
+  - Added direct Windows Explorer highlighting (`explorer.exe /select,"<path>"`) and system-associated document viewing for exported PDFs, Markdown files, and JSONL datasets.
+  - Added in-app split Document Reader with live page browsing, filtering, and single-click markdown copying.
+- 🔍 **Universal Doc-Root Auto-Expansion Engine**:
+  - When given sub-page URLs (such as `https://ui.shadcn.com/docs/installation`), the engine automatically detects and expands to the documentation root (`/docs`), capturing all related documentation pages unless an explicit `--path-scope` is requested.
+- 📦 **RAG & AI Vector Dataset Export Studio**:
+  - Direct export of offline documentation sets into structured JSONL format tailored for LangChain, LlamaIndex, OpenAI embeddings, and ChromaDB.
+- 🛡️ **Zero-Crash Worker Lifecycle & Thread Safety**:
+  - Safe stop/cancel/restart state machine preventing "capture is already running" race conditions.
+  - 100% test coverage with 484 unit and integration tests.
+
+---
+
 ## [9.0.0-beta.1] - 2026-08-23
 
 ### ⚡ v9.0 Beta Release: React + shadcn/ui Desktop Architecture & RAG Export Studio

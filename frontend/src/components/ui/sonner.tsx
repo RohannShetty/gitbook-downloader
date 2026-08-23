@@ -2,15 +2,15 @@ import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = ({ theme, ...props }: ToasterProps) => {
   return (
     <Sonner
-      theme="dark"
+      theme={theme}
       className="toaster group"
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-zinc-950 group-[.toaster]:text-foreground group-[.toaster]:border-white/20 group-[.toaster]:shadow-2xl",
+            "group toast group-[.toaster]:bg-card group-[.toaster]:text-card-foreground group-[.toaster]:border-border group-[.toaster]:shadow-xl",
           description: "group-[.toast]:text-muted-foreground",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",

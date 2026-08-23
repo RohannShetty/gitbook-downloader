@@ -317,16 +317,32 @@ def stream_download(
 
     # ── Filter discovered URLs by scope + exclusions + language ──
     # Explicit path_scope prefixes win; otherwise a sub-page input URL
-    # implies its own path as scope (segment-boundary matched). Language
-    # segments (/zh-cn/, /pt/…) are always filtered out.
+    # auto-expands to its documentation root (e.g., /docs/installation -> /docs).
+    # Language segments (/zh-cn/, /pt/…) are always filtered out.
     input_path = urlparse(url).path.rstrip("/")
+    implicit_scope = input_path
+
+    _DOC_ROOT_NAMES = {
+        "docs", "doc", "documentation", "guide", "guides",
+        "manual", "handbook", "tutorial", "tutorials", "learn",
+        "api", "reference", "help",
+    }
+    if not scope_prefixes and input_path:
+        parts = [p for p in input_path.split("/") if p]
+        for i, seg in enumerate(parts):
+            if seg.lower() in _DOC_ROOT_NAMES:
+                implicit_scope = "/" + "/".join(parts[:i + 1])
+                break
+        else:
+            if len(parts) > 1 and (parts[-1].endswith((".html", ".htm", ".md")) or len(parts) >= 2):
+                implicit_scope = "/" + "/".join(parts[:-1])
 
     def _is_english_url(u: str) -> bool:
         """True if *u* is inside scope, not excluded, and not a translation."""
         p = urlparse(u).path.rstrip("/")
         if not _within_scope(p, scope_prefixes):
             return False
-        if not scope_prefixes and input_path and not _matches_prefix(p, input_path):
+        if not scope_prefixes and implicit_scope and not _matches_prefix(p, implicit_scope):
             return False
         if _is_excluded(p, exclude_patterns):
             return False
@@ -340,14 +356,14 @@ def stream_download(
             logger.info(
                 "Filtered %d → %d URLs (scope=%s excludes=%s, English only)",
                 len(discovered_urls), len(filtered),
-                scope_prefixes or input_path or "/", exclude_patterns,
+                scope_prefixes or implicit_scope or "/", exclude_patterns,
             )
         if not filtered:
             # Never fall back to the unfiltered set — surface the mismatch.
             logger.warning(
                 "All %d discovered URLs were filtered out for %s "
                 "(scope=%s); nothing to download.",
-                len(discovered_urls), url, scope_prefixes or input_path or "/",
+                len(discovered_urls), url, scope_prefixes or implicit_scope or "/",
             )
             if progress_callback:
                 progress_callback({

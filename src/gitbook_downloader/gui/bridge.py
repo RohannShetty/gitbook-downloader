@@ -6,6 +6,7 @@ import difflib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -16,6 +17,7 @@ from urllib.parse import urlparse
 
 import requests
 
+from .. import __version__
 from ..api import (
     CaptureOptions,
     ProgressEvent,
@@ -31,9 +33,9 @@ from ..storage import StorageManager
 class ApiBridge:
     """Methods exposed to the WebView JavaScript environment."""
 
-    def __init__(self, window=None) -> None:
+    def __init__(self, window=None, storage_manager=None) -> None:
         self._window = window
-        self._storage = StorageManager()
+        self._storage = storage_manager or StorageManager()
         self._cancel_requested = False
         self._active_thread: threading.Thread | None = None
         self._last_run: dict[str, Any] | None = None
@@ -89,17 +91,22 @@ class ApiBridge:
     def start_capture(self, url: str, options: dict[str, Any]) -> dict[str, Any]:
         """Launch a capture job in a dedicated background worker thread."""
         if self._active_thread and self._active_thread.is_alive():
-            return {"success": False, "error": "A capture is already running"}
+            if self._cancel_requested:
+                self._active_thread.join(timeout=1.5)
+            if self._active_thread.is_alive():
+                return {"success": False, "error": "A capture is already running"}
 
         self._cancel_requested = False
+        raw_scope = options.get("path_scope") or ""
         parsed_scope = tuple(
-            s.strip() for s in options.get("path_scope", "").split(",") if s.strip()
+            s.strip() for s in str(raw_scope).split(",") if s.strip()
         )
+        raw_exclude = options.get("exclude_paths") or ""
         parsed_exclude = tuple(
-            s.strip() for s in options.get("exclude_paths", "").split(",") if s.strip()
+            s.strip() for s in str(raw_exclude).split(",") if s.strip()
         )
         site_versions = options.get("site_versions")
-        if isinstance(site_versions, list):
+        if isinstance(site_versions, (list, tuple)):
             site_versions = tuple(site_versions) if site_versions else None
         else:
             site_versions = None
@@ -117,6 +124,10 @@ class ApiBridge:
         timeout = float(options.get("timeout", 15.0) or 15.0)
         snapshot = bool(options.get("snapshot", True))
 
+        output_mode = str(options.get("output_mode", "library") or "library")
+        if output_mode not in ("library", "both", "local"):
+            output_mode = "library"
+
         capture_opts = CaptureOptions(
             path_scope=parsed_scope,
             exclude_paths=parsed_exclude,
@@ -125,7 +136,7 @@ class ApiBridge:
             workers=workers,
             timeout=timeout,
             snapshot=snapshot,
-            output_mode="both",
+            output_mode=output_mode,
         )
 
         def worker():
@@ -143,6 +154,11 @@ class ApiBridge:
                 elif kind == "failed":
                     stats["failed"] += 1
 
+                done_count = stats["downloaded"] + stats["failed"]
+                total_count = max(stats["discovered"], done_count)
+                percent = round((done_count / total_count) * 100) if total_count > 0 else 0
+                percent = min(100, max(0, percent))
+
                 self._emit_to_js(
                     "onCaptureProgress",
                     {
@@ -150,10 +166,14 @@ class ApiBridge:
                         "url": event.url,
                         "title": event.title,
                         "size_kb": event.size_kb,
-                        "message": event.message,
+                        "message": event.message or (f"Downloaded: {event.title}" if kind == "downloaded" else f"Found: {event.url}"),
                         "count": event.count,
-                        "done": stats["downloaded"] + stats["failed"],
-                        "total": stats["discovered"],
+                        "done": done_count,
+                        "downloaded": stats["downloaded"],
+                        "failed": stats["failed"],
+                        "discovered": stats["discovered"],
+                        "total": total_count,
+                        "percent": percent,
                         "elapsed": round(time.monotonic() - start_time, 1),
                     },
                 )
@@ -175,7 +195,15 @@ class ApiBridge:
                     "duration_s": round(duration, 2),
                     "stats": stats,
                 }
-                self._emit_to_js("onCaptureDone", {"success": True, "result": self._last_run})
+                self._emit_to_js(
+                    "onCaptureDone",
+                    {
+                        "success": True,
+                        "result": self._last_run,
+                        "pages_downloaded": result.pages_captured,
+                        "stats": stats,
+                    },
+                )
             except Exception as exc:
                 duration = time.monotonic() - start_time
                 err_msg = str(exc)
@@ -189,7 +217,12 @@ class ApiBridge:
                 }
                 self._emit_to_js(
                     "onCaptureDone",
-                    {"success": False, "error": err_msg, "cancelled": is_cancelled},
+                    {
+                        "success": False,
+                        "error": err_msg,
+                        "cancelled": is_cancelled,
+                        "stats": stats,
+                    },
                 )
 
         self._active_thread = threading.Thread(target=worker, daemon=True)
@@ -199,6 +232,8 @@ class ApiBridge:
     def cancel_capture(self) -> dict[str, Any]:
         """Request the current capture to cancel."""
         self._cancel_requested = True
+        if self._active_thread and self._active_thread.is_alive():
+            self._active_thread.join(timeout=0.3)
         return {"success": True}
 
     # ── Library Management ───────────────────────────────────────────────
@@ -245,21 +280,43 @@ class ApiBridge:
             pages_dir = doc_dir / "pages"
             pages_list = []
             if pages_dir.exists():
-                for md_file in pages_dir.rglob("*.md"):
+                for md_file in sorted(pages_dir.rglob("*.md")):
                     rel = md_file.relative_to(pages_dir).as_posix()
+                    title = md_file.stem
+                    try:
+                        first_lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()[:5]
+                        for l in first_lines:
+                            if l.startswith("# "):
+                                title = l[2:].strip()
+                                break
+                    except Exception:
+                        pass
                     pages_list.append(
                         {
+                            "title": title,
                             "relpath": rel,
                             "path": str(md_file),
                             "size": md_file.stat().st_size,
                         }
                     )
 
+            if not book_content and pages_list:
+                parts = []
+                for p in pages_list:
+                    p_path = Path(p["path"])
+                    if p_path.exists():
+                        parts.append(p_path.read_text(encoding="utf-8", errors="replace"))
+                book_content = "\n\n---\n\n".join(parts)
+
             return {
                 "success": True,
                 "domain": domain,
+                "title": domain,
+                "content": book_content,
                 "book_content": book_content,
-                "pages": sorted(pages_list, key=lambda x: x["relpath"]),
+                "folder": str(doc_dir),
+                "path": str(doc_dir),
+                "pages": pages_list,
             }
         except Exception as exc:
             return {"success": False, "error": str(exc)}
@@ -287,8 +344,8 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
-    def open_local_folder(self, target: str) -> dict[str, Any]:
-        """Open a directory or file in Windows Explorer."""
+    def open_folder(self, target: str) -> dict[str, Any]:
+        """Open a directory or highlight a file in Windows Explorer / Finder."""
         try:
             p = Path(target)
             if not p.is_absolute():
@@ -297,21 +354,50 @@ class ApiBridge:
                 else:
                     p = Path.cwd() / target
 
-            if p.is_file():
-                folder = p.parent
-            else:
-                folder = p
-
-            if not folder.exists():
-                folder = Path.cwd()
+            if not p.exists():
+                if p.parent.exists():
+                    p = p.parent
+                else:
+                    p = self._storage.root_dir
 
             if sys.platform == "win32":
-                os.startfile(str(folder))
+                if p.is_file():
+                    subprocess.Popen(f'explorer.exe /select,"{p}"', shell=True)
+                else:
+                    os.startfile(str(p))
             elif sys.platform == "darwin":
-                subprocess.Popen(["open", str(folder)])
+                if p.is_file():
+                    subprocess.Popen(["open", "-R", str(p)])
+                else:
+                    subprocess.Popen(["open", str(p)])
             else:
+                folder = p.parent if p.is_file() else p
                 subprocess.Popen(["xdg-open", str(folder)])
-            return {"success": True}
+            return {"success": True, "path": str(p)}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+
+    def open_local_folder(self, target: str) -> dict[str, Any]:
+        """Alias for open_folder."""
+        return self.open_folder(target)
+
+    def open_file(self, target: str) -> dict[str, Any]:
+        """Open a document / export file directly with the operating system's default application."""
+        try:
+            p = Path(target)
+            if not p.is_absolute():
+                p = Path.cwd() / target
+
+            if not p.exists():
+                return {"success": False, "error": f"File not found: {p}"}
+
+            if sys.platform == "win32":
+                os.startfile(str(p))
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", str(p)])
+            else:
+                subprocess.Popen(["xdg-open", str(p)])
+            return {"success": True, "path": str(p)}
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
@@ -421,8 +507,29 @@ class ApiBridge:
             if not book_path.exists():
                 book_path = doc_dir / "book.md"
 
-            fmt = (format_type or "md").lower()
-            out_base = Path(custom_path) if custom_path else Path.cwd() / "exports"
+            # Synthesize book.md if needed
+            if not book_path.exists():
+                pages_dir = doc_dir / "pages"
+                if pages_dir.exists():
+                    combined = []
+                    for p_file in sorted(pages_dir.rglob("*.md")):
+                        combined.append(p_file.read_text(encoding="utf-8", errors="replace"))
+                    if combined:
+                        book_path = doc_dir / "docs.md"
+                        book_path.write_text("\n\n---\n\n".join(combined), encoding="utf-8")
+
+            fmt = (format_type or "md").lower().strip()
+
+            # Output base determination
+            if custom_path:
+                out_base = Path(custom_path)
+            else:
+                cwd_str = str(Path.cwd()).lower()
+                if "system32" in cwd_str or "syswow64" in cwd_str or "windows" in cwd_str:
+                    out_base = Path.home() / "Downloads" / "gitbook-exports"
+                else:
+                    out_base = Path.cwd() / "exports"
+
             out_base.mkdir(parents=True, exist_ok=True)
 
             if fmt == "md":
@@ -430,33 +537,63 @@ class ApiBridge:
                 if book_path.exists():
                     shutil.copy2(book_path, dest)
                     return {"success": True, "path": str(dest), "format": "md"}
-                return {"success": False, "error": "Source book.md not found"}
+                return {"success": False, "error": "Source documentation pages not found to build markdown"}
 
             elif fmt == "pdf":
                 from gitbook_downloader.utils.export import export_to_pdf
+                if not book_path.exists():
+                    return {"success": False, "error": "No markdown content found to convert to PDF"}
                 dest = out_base / f"{domain}-docs.pdf"
-                msg = export_to_pdf(book_path, dest)
-                return {"success": True, "path": str(dest), "message": msg, "format": "pdf"}
+                actual_path = export_to_pdf(book_path, dest)
+                return {"success": True, "path": str(actual_path), "format": "pdf"}
 
             elif fmt == "jsonl":
                 dest = out_base / f"{domain}-rag.jsonl"
                 pages_dir = doc_dir / "pages"
                 records = []
                 if pages_dir.exists():
-                    for md_file in pages_dir.rglob("*.md"):
+                    for md_file in sorted(pages_dir.rglob("*.md")):
                         text = md_file.read_text(encoding="utf-8", errors="replace")
                         rel = md_file.relative_to(pages_dir).as_posix()
+                        title = md_file.stem
+                        for l in text.splitlines()[:5]:
+                            if l.startswith("# "):
+                                title = l[2:].strip()
+                                break
                         records.append(
                             {
                                 "id": f"{domain}/{rel}",
                                 "domain": domain,
+                                "title": title,
                                 "path": rel,
                                 "text": text,
+                                "length": len(text),
                             }
                         )
+
+                if not records and book_path.exists():
+                    full_text = book_path.read_text(encoding="utf-8", errors="replace")
+                    sections = full_text.split("\n# ")
+                    for i, sec in enumerate(sections):
+                        if not sec.strip():
+                            continue
+                        sec_text = ("# " + sec) if i > 0 else sec
+                        first_line = sec_text.splitlines()[0].replace("#", "").strip()
+                        records.append(
+                            {
+                                "id": f"{domain}/section_{i}",
+                                "domain": domain,
+                                "title": first_line or f"Section {i}",
+                                "path": f"section_{i}.md",
+                                "text": sec_text,
+                                "length": len(sec_text),
+                            }
+                        )
+
                 with open(dest, "w", encoding="utf-8") as fh:
                     for rec in records:
                         fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
                 return {
                     "success": True,
                     "path": str(dest),
@@ -477,7 +614,7 @@ class ApiBridge:
     def get_system_info(self) -> dict[str, Any]:
         """Return app metadata."""
         return {
-            "version": "9.0.0b1",
+            "version": __version__,
             "python": sys.version.split()[0],
             "platform": sys.platform,
             "library_dir": str(self._storage.base),

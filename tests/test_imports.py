@@ -7,7 +7,7 @@ from pathlib import Path
 
 def test_package_import():
     import gitbook_downloader
-    assert gitbook_downloader.__version__ == "9.0.0b1"
+    assert gitbook_downloader.__version__ == "9.0.0"
     assert gitbook_downloader.StorageManager is not None
 
 
@@ -45,6 +45,8 @@ def test_search_imports():
 
 
 def test_mcp_imports():
+    import pytest
+    pytest.importorskip("mcp")
     from gitbook_downloader.mcp import mcp, main
     assert hasattr(mcp, "tool")
     assert callable(mcp.tool)

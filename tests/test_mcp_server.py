@@ -14,6 +14,8 @@ from typing import Any, Optional
 
 import pytest
 
+pytest.importorskip("mcp")
+
 from gitbook_downloader.mcp import server
 
 

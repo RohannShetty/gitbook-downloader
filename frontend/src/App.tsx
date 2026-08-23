@@ -37,7 +37,9 @@ export function App() {
     }
   }
 
+  // Set default theme class on document element
   useEffect(() => {
+    document.documentElement.classList.add("dark")
     loadLibrary()
   }, [])
 
@@ -85,7 +87,7 @@ export function App() {
       />
 
       {/* Main Workspace Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className="flex-1 flex flex-col overflow-y-auto relative bg-background/50">
         {activeTab === "capture" && (
           <CaptureStudio
             onCaptureCompleted={loadLibrary}
@@ -134,7 +136,7 @@ export function App() {
       />
 
       {/* Toast Notification Container */}
-      <Toaster />
+      <Toaster theme={theme} />
     </div>
   )
 }
