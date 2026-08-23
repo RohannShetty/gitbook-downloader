@@ -1,6 +1,6 @@
-"""gitbook-downloader v8.0 — Modern Desktop GUI & CLI documentation downloader."""
+"""gitbook-downloader v9.0 Beta — Modern shadcn/ui Desktop & CLI documentation downloader."""
 
-__version__ = "8.0.0"
+__version__ = "9.0.0b1"
 __author__ = "Rohan Shetty"
 
 from .utils import (

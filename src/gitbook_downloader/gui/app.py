@@ -21,7 +21,7 @@ def get_web_dir() -> Path:
     return Path(__file__).resolve().parent / "web"
 
 
-def launch_gui(title: str = "GitBook Downloader v8", debug: bool = False) -> None:
+def launch_gui(title: str = "GitBook Downloader v9.0 Beta", debug: bool = False) -> None:
     """Open the native Windows Desktop GUI application window."""
     try:
         import webview

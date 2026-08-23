@@ -88,6 +88,15 @@ COLLECT_ALL = [
 
 
 def build() -> int:
+    frontend_dir = os.path.join(ROOT, "frontend")
+    if os.path.isdir(frontend_dir) and os.path.isfile(os.path.join(frontend_dir, "package.json")):
+        print("Compiling frontend React/shadcn assets with Vite...")
+        npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
+        npm_res = subprocess.run([npm_cmd, "run", "build"], cwd=frontend_dir)
+        if npm_res.returncode != 0:
+            print("Frontend compilation failed!")
+            return npm_res.returncode
+
     with tempfile.TemporaryDirectory(prefix="gbd-build-") as tmp:
         runner = os.path.join(tmp, "gitbook_dl_entry.py")
         with open(runner, "w", encoding="utf-8") as fh:

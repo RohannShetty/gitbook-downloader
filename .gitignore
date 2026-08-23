@@ -105,4 +105,8 @@ data/
 .codegraph/
 *-docs/
 /*.exe
+node_modules/
+frontend/dist/
+exports/
+
 

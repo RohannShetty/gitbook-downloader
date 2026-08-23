@@ -7,7 +7,7 @@ from pathlib import Path
 
 def test_package_import():
     import gitbook_downloader
-    assert gitbook_downloader.__version__ == "8.0.0"
+    assert gitbook_downloader.__version__ == "9.0.0b1"
     assert gitbook_downloader.StorageManager is not None
 
 

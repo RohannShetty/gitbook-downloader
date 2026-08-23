@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "8.0.0"
+version = "9.0.0b1"
 description = "Download entire documentation sites — GitBook, Docusaurus, ReadTheDocs, Mintlify, or any site — and split into AI-friendly chunks."
 readme = "README.md"
 license = {text = "MIT"}

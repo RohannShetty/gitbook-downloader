@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.0-beta.1] - 2026-08-23
+
+### ⚡ v9.0 Beta Release: React + shadcn/ui Desktop Architecture & RAG Export Studio
+
+Version 9.0 Beta introduces a complete frontend rewrite powered by **React 18 + Vite + Tailwind CSS + shadcn/ui** running inside Edge WebView2, featuring a collapsible sidebar, universal `Ctrl+K` command palette, batch capture queue, in-app split Markdown reader with Table of Contents, RAG/AI vector JSONL export studio, and zero-runtime standalone Windows packaging.
+
+### Added
+- **Complete shadcn/ui React Frontend Architecture (`./frontend`)**:
+  - Rebuilt desktop interface using Radix UI primitives and shadcn zinc design tokens.
+  - **Collapsible Modern Sidebar (`AppSidebar`)**: Sleek navigation with active status indicators, badge counts, theme switcher, and command menu shortcuts.
+  - **Global Command Menu (`Ctrl+K` / `Cmd+K`)**: Fast keyboard-driven navigation across views, direct library doc opening, and storage actions.
+  - **Batch Capture Queue**: Queue multiple documentation websites to crawl sequentially in the background.
+  - **Export Studio**: One-click export of captured documentation sets directly to **JSONL** (formatted for LangChain, LlamaIndex, OpenAI embeddings, ChromaDB), **PDF**, or concatenated **book.md**.
+  - **Interactive Split Document Reader**: In-app reader modal with page filtering, table of contents, char count telemetry, and copy-to-clipboard.
+  - **Sonner Toast System**: Toast alerts for in-flight crawler notifications and file exports.
+- **Python Bridge Extensions (`src/gitbook_downloader/gui/bridge.py`)**:
+  - Added `export_doc(domain, format_type, custom_path)` supporting `.md`, `.pdf`, and `.jsonl`.
+- **Automated Frontend Build Pipeline (`build_exe.py`)**:
+  - `build_exe.py` automatically runs Vite compilation before PyInstaller packaging for seamless standalone distribution.
+
+---
+
 ## [8.0.0] - 2026-08-23
 
 ### 🚀 Major Release: Modern Windows Desktop GUI Application & Standalone Executable

@@ -15,8 +15,7 @@ def test_get_web_dir_exists():
     web_dir = get_web_dir()
     assert web_dir.exists()
     assert (web_dir / "index.html").exists()
-    assert (web_dir / "style.css").exists()
-    assert (web_dir / "app.js").exists()
+    assert (web_dir / "assets").exists() or (web_dir / "app.js").exists()
 
 
 def test_bridge_detect_invalid_url():
@@ -49,7 +48,7 @@ def test_bridge_detect_mocked(monkeypatch):
 def test_bridge_system_info():
     bridge = ApiBridge()
     info = bridge.get_system_info()
-    assert info["version"] == "8.0.0"
+    assert info["version"] == "9.0.0b1"
     assert info["platform"] == sys.platform
     assert Path(info["library_dir"]).exists()
 
@@ -77,3 +76,10 @@ def test_bridge_list_library():
     bridge = ApiBridge()
     entries = bridge.list_library()
     assert isinstance(entries, list)
+
+
+def test_bridge_export_doc_not_found(tmp_path):
+    bridge = ApiBridge()
+    res = bridge.export_doc("non-existent-domain", "md", custom_path=str(tmp_path))
+    assert res["success"] is False
+    assert "not found" in res["error"].lower()

@@ -406,6 +406,68 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
+    # ── Export Studio ────────────────────────────────────────────────────
+
+    def export_doc(
+        self, domain: str, format_type: str, custom_path: str | None = None
+    ) -> dict[str, Any]:
+        """Export documentation for *domain* to markdown bundle, PDF, or JSONL."""
+        try:
+            doc_dir = self._storage._domain_dir(domain)
+            if not doc_dir.exists():
+                return {"success": False, "error": f"Domain {domain} not found in library."}
+
+            book_path = doc_dir / "docs.md"
+            if not book_path.exists():
+                book_path = doc_dir / "book.md"
+
+            fmt = (format_type or "md").lower()
+            out_base = Path(custom_path) if custom_path else Path.cwd() / "exports"
+            out_base.mkdir(parents=True, exist_ok=True)
+
+            if fmt == "md":
+                dest = out_base / f"{domain}-book.md"
+                if book_path.exists():
+                    shutil.copy2(book_path, dest)
+                    return {"success": True, "path": str(dest), "format": "md"}
+                return {"success": False, "error": "Source book.md not found"}
+
+            elif fmt == "pdf":
+                from gitbook_downloader.utils.export import export_to_pdf
+                dest = out_base / f"{domain}-docs.pdf"
+                msg = export_to_pdf(book_path, dest)
+                return {"success": True, "path": str(dest), "message": msg, "format": "pdf"}
+
+            elif fmt == "jsonl":
+                dest = out_base / f"{domain}-rag.jsonl"
+                pages_dir = doc_dir / "pages"
+                records = []
+                if pages_dir.exists():
+                    for md_file in pages_dir.rglob("*.md"):
+                        text = md_file.read_text(encoding="utf-8", errors="replace")
+                        rel = md_file.relative_to(pages_dir).as_posix()
+                        records.append(
+                            {
+                                "id": f"{domain}/{rel}",
+                                "domain": domain,
+                                "path": rel,
+                                "text": text,
+                            }
+                        )
+                with open(dest, "w", encoding="utf-8") as fh:
+                    for rec in records:
+                        fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                return {
+                    "success": True,
+                    "path": str(dest),
+                    "count": len(records),
+                    "format": "jsonl",
+                }
+            else:
+                return {"success": False, "error": f"Unsupported format: {format_type}"}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+
     # ── Diagnostics & Info ───────────────────────────────────────────────
 
     def get_diagnostics(self) -> dict[str, Any]:
@@ -415,7 +477,7 @@ class ApiBridge:
     def get_system_info(self) -> dict[str, Any]:
         """Return app metadata."""
         return {
-            "version": "8.0.0",
+            "version": "9.0.0b1",
             "python": sys.version.split()[0],
             "platform": sys.platform,
             "library_dir": str(self._storage.base),
