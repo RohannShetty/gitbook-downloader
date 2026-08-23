@@ -5,12 +5,18 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for manual release (e.g. v9.0.2)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  build-binaries:
+    name: Build Binary (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -19,7 +25,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -32,7 +39,8 @@ jobs:
           npm ci || npm install
           npm run build
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -64,8 +72,80 @@ jobs:
           shutil.copyfile(src, dest)
           print(f"Staged {src} -> {dest}")
 
-      - name: Upload to Release
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.os }}
+          path: gitbook-dl-*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-release:
+    name: Generate Notes & Publish Release
+    needs: [build-binaries]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source (Full History for Changelog/Compare)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Determine Target Release Tag
+        id: get_tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG=$(python -c "import tomllib; open('pyproject.toml', 'rb') as f: print('v' + tomllib.load(f)['project']['version'])")
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Target Release Tag: $TAG"
+
+      - name: Generate Categorized Release Notes & Checksums
+        id: release_notes
+        run: |
+          python scripts/generate_release_notes.py \
+            --tag "${{ steps.get_tag.outputs.tag }}" \
+            --changelog "CHANGELOG.md" \
+            --artifacts-dir "release-artifacts" \
+            --repo "${{ github.repository }}" \
+            --output "RELEASE_NOTES.md" \
+            --write-checksums
+
+      - name: Check Prerelease Status
+        id: check_prerelease
+        shell: python
+        env:
+          TAG: ${{ steps.get_tag.outputs.tag }}
+        run: |
+          import os
+          tag = os.environ.get("TAG", "").lower()
+          is_prerelease = any(x in tag for x in ["alpha", "beta", "rc", "preview"])
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"is_prerelease={'true' if is_prerelease else 'false'}\n")
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: gitbook-dl-*
-          generate_release_notes: true
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: ${{ steps.get_tag.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            release-artifacts/*
+          draft: false
+          prerelease: ${{ steps.check_prerelease.outputs.is_prerelease == 'true' }}
+          generate_release_notes: false

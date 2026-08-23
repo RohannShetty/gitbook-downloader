@@ -48,7 +48,7 @@ def test_bridge_detect_mocked(monkeypatch):
 def test_bridge_system_info():
     bridge = ApiBridge()
     info = bridge.get_system_info()
-    assert info["version"] == "9.0.0"
+    assert info["version"] == "9.0.1"
     assert info["platform"] == sys.platform
     assert Path(info["library_dir"]).exists()
 

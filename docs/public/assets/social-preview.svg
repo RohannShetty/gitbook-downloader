@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="docharvest-social-title">
+  <title id="docharvest-social-title">DocHarvest &#8212; Turn Any Documentation Site into LLM-Ready Markdown</title>
+  <desc>GitHub social preview card: dark canvas, DocHarvest logo, tagline, and a terminal showing a real capture command.</desc>
+  <defs>
+    <pattern id="dotgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#27272a"/>
+    </pattern>
+    <linearGradient id="headline-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- canvas + texture -->
+  <rect width="1280" height="640" fill="#09090b"/>
+  <rect width="1280" height="640" fill="url(#dotgrid)" opacity="0.45"/>
+  <rect x="24.5" y="24.5" width="1231" height="591" rx="24" fill="none" stroke="#27272a" stroke-width="1.5"/>
+
+  <!-- logo lockup -->
+  <g transform="translate(64 56) scale(0.172)">
+    <rect x="16" y="16" width="480" height="480" rx="104" fill="#09090b"/>
+    <rect x="17.5" y="17.5" width="477" height="477" rx="102.5" fill="none" stroke="#27272a" stroke-width="6"/>
+    <rect x="100" y="142" width="170" height="228" rx="30" fill="none" stroke="#e4e4e7" stroke-width="26"/>
+    <line x1="148" y1="214" x2="222" y2="214" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <line x1="148" y1="270" x2="222" y2="270" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <path d="M288 206 L344 256 L288 306" fill="none" stroke="url(#brand-grad)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="374" y1="306" x2="412" y2="306" stroke="#00e5ff" stroke-width="28" stroke-linecap="round"/>
+  </g>
+  <text x="172" y="96" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="32" font-weight="700" fill="#f4f4f5">DocHarvest</text>
+  <text x="172" y="128" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="16" fill="#00e5ff">v9.0.1 &#183; MIT License &#183; 100% Local &amp; Private &#183; FastMCP</text>
+
+  <!-- headline -->
+  <text x="64" y="270" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="50" font-weight="800" fill="#fafafa">Turn Any Docs Site into</text>
+  <text x="64" y="330" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="50" font-weight="800" fill="url(#headline-grad)">LLM-Ready Markdown.</text>
+
+  <!-- subline -->
+  <text x="64" y="390" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="20" fill="#a1a1aa">GitBook &#183; Mintlify &#183; Docusaurus &#183; Nextra &#183; ReadMe &#183; VitePress</text>
+  <text x="64" y="422" font-family="Inter,'Segoe UI',system-ui,sans-serif" font-size="18" fill="#71717a">Clean AST chunking &#183; RAG JSONL &#183; SQLite FTS5 &#183; Pure Python PDF</text>
+
+  <!-- terminal card -->
+  <g>
+    <rect x="710" y="130" width="506" height="270" rx="16" fill="#121216" stroke="#27272a" stroke-width="1.5"/>
+    <circle cx="740" cy="158" r="6" fill="#ef4444"/>
+    <circle cx="762" cy="158" r="6" fill="#f59e0b"/>
+    <circle cx="784" cy="158" r="6" fill="#10b981"/>
+    <text x="810" y="163" font-family="'JetBrains Mono',monospace" font-size="13" fill="#71717a">zsh &#8212; 80x24</text>
+    <line x1="710" y1="184" x2="1216" y2="184" stroke="#27272a" stroke-width="1"/>
+
+    <text x="734" y="218" font-family="'JetBrains Mono',monospace" font-size="16"><tspan fill="#00e5ff">❯</tspan><tspan fill="#f4f4f5"> docharvest capture \</tspan></text>
+    <text x="734" y="246" font-family="'JetBrains Mono',monospace" font-size="15" fill="#a1a1aa">    https://docs.openalgo.in/ --export jsonl,pdf</text>
+    <text x="734" y="278" font-family="'JetBrains Mono',monospace" font-size="15"><tspan fill="#10b981">✓</tspan><tspan fill="#a1a1aa"> Platform: </tspan><tspan fill="#38bdf8">GitBook Space</tspan><tspan fill="#71717a"> (673 pages)</tspan></text>
+    <text x="734" y="308" font-family="'JetBrains Mono',monospace" font-size="15"><tspan fill="#10b981">✓</tspan><tspan fill="#a1a1aa"> Wrote </tspan><tspan fill="#f4f4f5">pages/ + book.md + llms.txt</tspan></text>
+    <text x="734" y="338" font-family="'JetBrains Mono',monospace" font-size="15"><tspan fill="#10b981">✓</tspan><tspan fill="#a1a1aa"> Exports: </tspan><tspan fill="#6366f1">rag.jsonl</tspan><tspan fill="#71717a"> + </tspan><tspan fill="#ec4899">handbook.pdf</tspan></text>
+    <text x="734" y="368" font-family="'JetBrains Mono',monospace" font-size="15"><tspan fill="#00e5ff">❯</tspan> <tspan fill="#10b981">Indexed SQLite FTS5 in 18.2s ✨</tspan></text>
+  </g>
+
+  <!-- badges footer -->
+  <text x="64" y="566" font-family="'JetBrains Mono',monospace" font-size="18" fill="#71717a">pip install gitbook-downloader &#183; uvx docharvest</text>
+  <text x="780" y="566" font-family="'JetBrains Mono',monospace" font-size="18" fill="#52525b">github.com/RohannShetty/gitbook-downloader</text>
+</svg>

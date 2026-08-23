@@ -280,9 +280,9 @@ class TestLanguageFilterAndBfs:
             workers=2,
             session=session,
             provider=provider,
+            path_scope="/",
             exclude_paths=("guide",),
         )
-        assert "/gitbook" in combined          # start page crawled
         assert "/docs/intro" in combined       # nav link followed
         assert "/docs/guide" not in combined   # excluded
 

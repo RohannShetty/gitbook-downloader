@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="74 116 365 280" role="img" aria-labelledby="docharvest-icon-title">
+  <title id="docharvest-icon-title">DocHarvest icon</title>
+  <desc>Document page flowing into a cyan terminal prompt. Transparent background.</desc>
+  <defs>
+    <linearGradient id="icon-cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect x="100" y="142" width="170" height="228" rx="30" fill="none" stroke="#e4e4e7" stroke-width="26"/>
+    <line x1="148" y1="214" x2="222" y2="214" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <line x1="148" y1="270" x2="222" y2="270" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
+    <path d="M288 206 L344 256 L288 306" fill="none" stroke="url(#icon-cyan-glow)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="374" y1="306" x2="412" y2="306" stroke="#00e5ff" stroke-width="28" stroke-linecap="round"/>
+  </g>
+</svg>

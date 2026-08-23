@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "9.0.1"
-description = "Download entire documentation sites — GitBook, Docusaurus, ReadTheDocs, Mintlify, or any site — and split into AI-friendly chunks."
+version = "10.0.0"
+description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
     {name = "Rohan Shetty", email = "shettyrohan2@gmail.com"},
 ]
-keywords = ["gitbook", "documentation", "markdown", "downloader", "ai", "llm", "chunks", "splitter", "docusaurus", "readthedocs", "mintlify", "mcp"]
+keywords = ["docharvest", "gitbook", "documentation", "markdown", "downloader", "ai", "rag", "llms-txt", "mcp-server", "vector-db", "docusaurus", "readthedocs", "mintlify", "offline-docs", "pdf-generator"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -70,3 +70,8 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "pytest-timeout>=2.4.0",
 ]
+
+[tool.pytest.ini_options]
+tmp_path_retention_policy = "none"
+tmp_path_retention_count = 0
+

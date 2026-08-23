@@ -107,6 +107,12 @@ data/
 /*.exe
 node_modules/
 frontend/dist/
+docs/dist/
 exports/
+
+# Multi-agent internal coordination artifacts
+.agents/sentinel/
+.agents/teamwork_preview_*/
+.agents/ORIGINAL_REQUEST.md
 
 

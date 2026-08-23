@@ -12,7 +12,21 @@ from pathlib import Path
 
 import pytest
 
+# Gracefully handle Windows symlink cleanup permission error in pytest
+try:
+    import _pytest.pathlib
+    _orig_cleanup = _pytest.pathlib.cleanup_dead_symlinks
+    def _safe_cleanup(root, *args, **kwargs):
+        try:
+            return _orig_cleanup(root, *args, **kwargs)
+        except (PermissionError, OSError):
+            pass
+    _pytest.pathlib.cleanup_dead_symlinks = _safe_cleanup
+except Exception:
+    pass
+
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
 
 # Request path -> (fixture filename, Content-Type)
 ROUTES = {

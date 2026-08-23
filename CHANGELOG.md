@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.0.0] - 2026-08-23
+
+### 🌾 The DocHarvest Rebrand, GitHub Pages Showcase Site & Release Automation
+
+Version 10.0.0 marks the official rebranding to **DocHarvest** (*Turn Any Documentation Site into LLM-Ready Markdown, Vector Context & Offline Books*), introducing a modern React + shadcn/ui showcase landing site, single-job release automation with structured markdown release notes, and a complete multi-channel distribution kit.
+
+### Added & Improved in v10.0.0
+- 🏷️ **DocHarvest Brand Identity & Marketing Engine**:
+  - Transitioned project identity from legacy single-purpose downloader to the comprehensive **DocHarvest** AI knowledge engineering platform.
+  - Canonical `.agents/product-marketing.md` established across all three core ICPs (AI/RAG engineers, offline developers, and DevOps/archival teams).
+- 🌐 **React + shadcn/ui GitHub Pages Showcase Site**:
+  - Fully responsive landing page in `docs/` built with React 18, Vite, Tailwind CSS, and shadcn/ui design tokens.
+  - Interactive Doc-Type selector (GitBook, Mintlify, Docusaurus, Nextra, ReadMe, VitePress), live terminal simulator, and direct binary download matrix.
+  - Automated `.github/workflows/pages.yml` deployment workflow.
+- 🔧 **Single-Job Release Workflow & Automated Notes Generation**:
+  - Refactored `.github/workflows/build-release.yml` to decouple binary builds from release publishing.
+  - Added `scripts/generate_release_notes.py` for automated categorization (Features, Fixes, Architecture, Downloads, and SHA-256 checksums), eliminating duplicate changelog links on GitHub.
+- 📢 **Comprehensive Social Launch Kit & Distribution Strategy**:
+  - Multi-platform launch templates for X/Twitter, Reddit (`r/LocalLLaMA`, `r/Python`, `r/selfhosted`, `r/OpenAI`), Hacker News (Show HN), and Dev.to under `marketing/`.
+  - Detailed `docs/SEO_GUIDE.md` for GitHub repository topics, description, and OpenGraph social preview assets.
+
 ---
 
 ## [9.0.1] - 2026-08-23
