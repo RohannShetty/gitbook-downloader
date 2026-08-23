@@ -358,3 +358,23 @@ class TestWarnings:
         ])
         result = run_capture(tmp_path, engine=engine)
         assert result.pages_captured == 0
+
+
+# ── Multi-page string normalization ─────────────────────────────────────
+
+
+class TestMultiPageStringNormalization:
+    def test_parses_multiple_pages_from_combined_string(self, tmp_path, library):
+        raw_text = (
+            "Source: https://docs.example.com/p1\n\n# Page 1\n\nContent 1\n\n---\n\n"
+            "Source: https://docs.example.com/p2\n\n# Page 2\n\nContent 2"
+        )
+        engine = FakeEngine(raw_override=raw_text)
+        result = run_capture(tmp_path, engine=engine)
+        assert result.pages_captured == 2
+        assert (tmp_path / "out" / "pages" / "p1.md").exists()
+        assert (tmp_path / "out" / "pages" / "p2.md").exists()
+        assert (tmp_path / "out" / "book.md").exists()
+        assert (tmp_path / "out" / "llms.txt").exists()
+
+

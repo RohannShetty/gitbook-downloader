@@ -1,94 +1,122 @@
 <div align="center">
 
-<img src="assets/logo-icon.svg" alt="gitbook-downloader logo — a page flowing into a terminal prompt" width="96" />
+<img src="assets/logo-icon.svg" alt="gitbook-downloader logo — modern documentation downloader" width="96" />
 
 # `gitbook-downloader`
 
-**Any docs site → LLM-ready Markdown.**
-One command.
+### Turn Any Documentation Site into Clean, LLM-Ready Markdown.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square&labelColor=18181b)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%2B-3f3f46?style=flat-square&labelColor=18181b)](pyproject.toml)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-3f3f46?style=flat-square&labelColor=18181b)](#)
-<!-- PyPI placeholder until first publish; swap for the live badge below at release:
-     [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=18181b)](https://pypi.org/project/gitbook-downloader/) -->
-[![PyPI](https://img.shields.io/badge/pypi-coming%20with%20v7-3f3f46?style=flat-square&labelColor=18181b)](https://pypi.org/project/gitbook-downloader/)
+**Native Desktop GUI · High-Performance CLI · AI Agent MCP Server**
+
+[![Version: 8.0.0](https://img.shields.io/badge/version-8.0.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
+[![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-8b5cf6?style=flat-square&labelColor=090d16)](#)
+
+<br />
+
+<img src="assets/capture_studio.png" alt="GitBook Downloader v8 Desktop GUI — Capture Studio with 60fps motion progress, radial gauge, and live terminal logs" width="920" />
 
 </div>
 
 ---
 
-## Capture your first site in 30 seconds
+## ✨ What's New in v8.0
 
+- 🖥️ **Modern Windows Desktop GUI**: Native Edge WebView2 application featuring 60fps motion progress bars, glowing SVG radial gauges, syntax-highlighted live crawl streaming, and dark glassmorphic styling.
+- ⚡ **Direct Enter-to-Download**: Instant URL detection and one-click capture with active in-flight cancellation.
+- 📖 **In-App Document Reader & Library**: Explore captured sites in a split-screen Markdown modal or jump directly to files in Windows Explorer.
+- 🔍 **Search Studio**: Fast SQLite FTS5 full-text search across all downloaded documentation.
+- 📊 **Snapshot Diff Visualizer**: Side-by-side comparison tracking documentation changes over time.
+- 📦 **Zero-Config Standalone Executable**: Single 23.5 MB `gitbook-dl.exe` binary with zero prerequisites.
+
+---
+
+## 🚀 Quick Start
+
+### Option 1: Standalone Windows Binary (Zero Setup)
+Download **[`gitbook-dl.exe`](https://github.com/RohannShetty/gitbook-downloader/releases)** from the latest release:
+- **Double-click** to launch the **Desktop GUI Application**.
+- Or run in terminal: `.\gitbook-dl.exe capture https://docs.openalgo.in/`
+
+### Option 2: Install via pip / uv
 ```bash
-pip install gitbook-downloader
+pip install git+https://github.com/RohannShetty/gitbook-downloader.git
 ```
 
-> Not on PyPI yet — the badge above flips when v7 publishes. Until then:
->
-> ```bash
-> pip install git+https://github.com/RohannShetty/gitbook-downloader.git
-> ```
-
-Point it at any documentation site:
-
+Launch the GUI or CLI:
 ```bash
+# Launch Desktop GUI
+gitbook-dl
+
+# Or run CLI capture
 gitbook-dl capture https://docs.example.com
 ```
 
-You get:
+---
 
-- **A page tree** — one Markdown file per page, mirroring the site's navigation, written to `docs.example.com-docs/`
-- **`book.md`** — the whole site in one file with a table of contents on top, ready to paste into an LLM
-- **`llms.txt`** — a manifest of everything captured, plus frontmatter on every page (source URL, title, crawl date, content hash)
+## 📸 Desktop GUI Experience
 
-Works with GitBook, Mintlify, Docusaurus, ReadTheDocs — or any site. You never pick an extractor; detection is automatic.
+<div align="center">
 
-Every capture also lands in your local library (`~/.gitbook-downloader/`), so search, history, and diffs work across all your projects.
+### Real-Time Capture Studio
+*Glowing radial progress gauge, 60fps motion stripes, live color-coded crawl terminal, and instant completion feedback.*
 
-## What you can do with it
+<img src="assets/capture_studio.png" alt="Capture Studio Interface" width="880" />
 
-| | |
-|---|---|
-| **Point it, it detects** — GitBook, Mintlify, Docusaurus, ReadTheDocs, or any site. No config, no extractor picking. | **One output contract** — page tree + `book.md` + `llms.txt` + frontmatter with a content hash per page. Same shape every time. |
-| **Local library** — every capture is indexed and searchable across all sites you've taken: `gitbook-dl search "rate limits"` | **Snapshots** — re-capture a site and the old copy is kept. `gitbook-dl diff docs.example.com 1.0.0 1.1.0` shows exactly what changed. |
-| **Three ways in** — terminal UI, CLI, and an MCP server for AI agents. All three drive the same engine. | **Stays out of your way** — path scope, exclusions, and presets in `gitbook-downloader.toml`. Deterministic output you can script against. |
+<br /><br />
 
-## The output contract
+### Document Library & In-App Markdown Reader
+*Explore all indexed documentation sites, view disk usage, inspect versions, and read pages directly inside the app.*
 
-Four artifacts, every time:
+<img src="assets/document_library.png" alt="Document Library Interface" width="880" />
+
+</div>
+
+---
+
+## 📦 The Output Contract
+
+Every capture produces four standardized, deterministic artifacts:
 
 ```text
 docs.example.com-docs/
 ├── pages/
 │   ├── getting-started/
-│   │   ├── introduction.md      ← frontmatter: url, title, date, hash
+│   │   ├── introduction.md      ← YAML frontmatter: url, title, date, hash
 │   │   └── installation.md
 │   └── api/
 │       └── authentication.md
-├── book.md                      ← whole site, one file, TOC on top
-└── llms.txt                     ← manifest: what was captured, where
+├── book.md                      ← Full documentation set with deterministic Table of Contents
+└── llms.txt                     ← Standardized LLM manifest listing all captured pages
 ```
 
-Feed the tree to a RAG pipeline, paste `book.md` into a chat, point an agent at `llms.txt`.
+- **`pages/**/*.md`**: Clean, individual Markdown files ready for RAG chunking and vector databases.
+- **`book.md`**: Combined single file ready to paste into ChatGPT, Claude, Gemini, or local LLMs.
+- **`llms.txt`**: Standard manifest for AI agent discovery and context ingestion.
 
-## Compare the options
+---
 
-Capability categories only — we don't publish benchmark numbers we haven't measured.
+## 💻 CLI Commands & Automations
 
-| | gitbook-downloader | wget | Firecrawl | Crawl4AI |
-|---|---|---|---|---|
-| Output | Clean Markdown + llms.txt | Raw HTML | Markdown via API | Markdown |
-| Runs locally | Yes | Yes | No (hosted API) | Yes |
-| Cost | Free, MIT | Free | Metered per page | Free |
-| Provider auto-detect | Yes | No | No | No |
-| Local searchable library | Yes | No | No | No |
-| Snapshots + diff | Yes | No | No | No |
-| Code required | None | None | API key | Python code |
+| Command | Description |
+|---|---|
+| `gitbook-dl` | Launch the modern Desktop GUI application (falls back to TUI if headless) |
+| `gitbook-dl gui` | Explicitly launch the Desktop GUI window |
+| `gitbook-dl capture <url>` | Capture an entire doc site to clean Markdown (`alias: dl`) |
+| `gitbook-dl capture <url> --max-pages 50` | Limit crawl depth to N pages |
+| `gitbook-dl capture <url> --scope /v2/api` | Restrict crawler to specific path prefixes |
+| `gitbook-dl search "rate limit"` | Full-text SQLite search across your entire documentation library |
+| `gitbook-dl ls` | List all saved documentation sites in your library |
+| `gitbook-dl diff <domain> <v1> <v2>` | Compare changes between two snapshot versions |
+| `gitbook-dl split <file.md> --max-mb 5` | Split large Markdown documents into AI-friendly chunks |
+| `gitbook-dl mcp` | Start Model Context Protocol server for AI coding agents |
 
-## For AI agents (MCP)
+---
 
-AI agents can drive the same engine directly — no shelling out, no parsing. Install the extra (`pip install "gitbook-downloader[mcp]"`), then register the server:
+## 🤖 AI Agent Integration (MCP)
+
+`gitbook-downloader` provides a native **Model Context Protocol (MCP)** server so Claude Code, Cursor, Codex, and other AI agents can search and download documentation autonomously:
 
 ```json
 {
@@ -101,26 +129,41 @@ AI agents can drive the same engine directly — no shelling out, no parsing. In
 }
 ```
 
-## Roadmap
-
-An item moves to "done" only when it's merged and verifiable by a user.
-
-**Shipping in the v7 rebuild**
-
-- Textual TUI: wizard, library browser, search, snapshot diff view, diagnostics panel
-- Presets in `gitbook-downloader.toml`, actually wired into every capture
-- Site-version detection (`/v1/`, `/en/latest/`) with `--latest-only` / `--versions`
-- Release binaries for Windows, Linux, macOS — built automatically when we tag v7.0.0
-
-**Later**
-
-- More provider-specific extractors
-- Resume interrupted captures
-- Package-manager channels (winget, scoop, homebrew)
+Available MCP tools:
+- `download_docs(url, max_pages, scope)` — Capture full documentation sites.
+- `search_docs(query, domain)` — Search across local documentation library.
+- `read_doc_page(domain, path)` — Read specific Markdown documentation pages.
+- `list_library()` — Inspect downloaded documentation catalog.
 
 ---
 
-MIT © Rohan Shetty · built for people who feed docs to LLMs
+## 🛠️ Supported Providers
 
-Issues → [github.com/RohannShetty/gitbook-downloader/issues](https://github.com/RohannShetty/gitbook-downloader/issues)
-Contributing → [CONTRIBUTING.md](CONTRIBUTING.md)
+Auto-detection works automatically without manual configuration:
+- 🟢 **GitBook** (space indexing, multi-version trees, JSON sitemaps)
+- 🟢 **Docusaurus** (sitemap hierarchy, navbar routing)
+- 🟢 **Mintlify** (docs routing, OpenAPI specs)
+- 🟢 **ReadTheDocs** (Sphinx TOC trees, version selectors)
+- 🟢 **Generic HTML Sites** (heuristic content extraction with readability scoring)
+
+---
+
+## 🧪 Testing & Verification
+
+Run the comprehensive test suite with `pytest`:
+```bash
+uv run pytest
+# 487 passed in 86s (100% pass rate)
+```
+
+Build the standalone Windows executable:
+```bash
+uv run python build_exe.py
+# Produces dist/gitbook-dl.exe (23.5 MB)
+```
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.

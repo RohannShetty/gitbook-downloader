@@ -1,6 +1,7 @@
-"""gitbook-downloader v7 — CLI surface (plan §5).
+"""gitbook-downloader v8 — Desktop GUI and CLI surface.
 
-    gitbook-dl                        → TUI
+    gitbook-dl                        → Desktop GUI (or TUI fallback)
+    gitbook-dl gui                    → Desktop GUI
     gitbook-dl capture <url> [--scope P]... [--exclude P]... [--max-pages N]
                   [--workers N] [--latest-only] [--versions v1,v2]
                   [--output both|library|local] [-o DIR] [--no-snapshot]
@@ -25,10 +26,20 @@ from pathlib import Path
 try:
     from . import __version__
 except ImportError:  # pragma: no cover - direct-script fallback
-    __version__ = "7.0.0"
+    __version__ = "8.0.0"
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
+
+
+def _configure_console_streams() -> None:
+    """Ensure standard output and error streams handle Unicode without charmap crashes."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
 
 
 def _looks_like_url(text: str) -> bool:
@@ -64,6 +75,20 @@ def _launch_tui() -> int:
         return 1
     tui_run()
     return 0
+
+
+def _launch_gui() -> int:
+    """Launch the Desktop GUI; fall back to TUI if pywebview is unavailable."""
+    try:
+        from .gui import launch_gui
+        launch_gui()
+        return 0
+    except ImportError:
+        return _launch_tui()
+    except Exception as exc:
+        print(f"Note: Desktop GUI unavailable ({exc}). Starting TUI…", file=sys.stderr)
+        return _launch_tui()
+
 
 
 def _print_progress(event) -> None:
@@ -401,6 +426,11 @@ def cmd_mcp(args) -> int:
     return 0
 
 
+def cmd_gui(args) -> int:
+    """Launch the Desktop GUI."""
+    return _launch_gui()
+
+
 def cmd_tui(args) -> int:
     """Launch the interactive TUI."""
     return _launch_tui()
@@ -496,13 +526,17 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("config_command", nargs="?", default=None,
                     choices=["init", "show", "path"])
     cp.add_argument("--project", action="store_true",
-                    help="(with init) write ./gitbook-downloader.toml instead "
-                         "of the global config")
+                     help="(with init) write ./gitbook-downloader.toml instead "
+                          "of the global config")
     cp.set_defaults(func=cmd_config)
 
     # mcp
     mp = sub.add_parser("mcp", help="Start MCP server for AI assistants")
     mp.set_defaults(func=cmd_mcp)
+
+    # gui
+    gp = sub.add_parser("gui", help="Launch the Desktop GUI application")
+    gp.set_defaults(func=cmd_gui)
 
     # tui
     tp = sub.add_parser("tui", help="Launch the interactive TUI")
@@ -512,11 +546,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    _configure_console_streams()
     argv = list(sys.argv[1:] if argv is None else argv)
 
-    # Bare invocation → TUI.
+    # Bare invocation → Desktop GUI (or TUI fallback)
     if not argv:
-        return _launch_tui()
+        return _launch_gui()
 
     # Bare-URL sugar: `gitbook-dl https://…` == `gitbook-dl capture https://…`
     if _looks_like_url(argv[0]):

@@ -30,7 +30,17 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 RUNNER = """\
 import sys
 
+# Ensure UTF-8 output on Windows consoles so Unicode box chars and emojis never crash cp1252/cp437
+if sys.platform == "win32":
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
 import gitbook_downloader.tui.app  # noqa: F401  (force-bundle the lazy TUI)
+import gitbook_downloader.gui.app  # noqa: F401  (force-bundle the Desktop GUI)
 from gitbook_downloader.cli import main
 
 if __name__ == "__main__":
@@ -51,7 +61,7 @@ if __name__ == "__main__":
 """
 
 # Hidden imports: packages imported dynamically (Textual loads widgets lazily;
-# markdownify/bs4 are plugin-style). Stdlib modules need no entries.
+# markdownify/bs4 are plugin-style; webview loads edgechromium/pythonnet dynamically).
 HIDDEN_IMPORTS = [
     "textual",
     "textual.widgets",
@@ -61,13 +71,19 @@ HIDDEN_IMPORTS = [
     "lxml",
     "requests",
     "urllib3",
+    "pyperclip",
+    "webview",
+    "clr_loader",
+    "pythonnet",
+    "bottle",
 ]
 
 # Whole-package collects: modules whose submodules/data files are loaded
 # dynamically and would otherwise be missed by static analysis.
 COLLECT_ALL = [
-    "gitbook_downloader",  # submodules + package data (TUI assets)
+    "gitbook_downloader",  # submodules + package data (TUI + GUI assets)
     "textual",             # .tcss stylesheets, drivers, widget data
+    "webview",             # pywebview drivers and JS bridges
 ]
 
 
@@ -77,14 +93,20 @@ def build() -> int:
         with open(runner, "w", encoding="utf-8") as fh:
             fh.write(RUNNER)
 
+        web_src = os.path.join(ROOT, "src", "gitbook_downloader", "gui", "web")
+        data_sep = ";" if sys.platform == "win32" else ":"
+        add_data = f"{web_src}{data_sep}gitbook_downloader/gui/web"
+
         cmd = [
             sys.executable,
             "-m",
             "PyInstaller",
             "--onefile",
-            "--console",  # TUI world: console app, no windowed GUI
+            "--console",  # Console bootloader that launches Desktop GUI or CLI
             "--name",
             "gitbook-dl",
+            "--add-data",
+            add_data,
         ]
         for mod in COLLECT_ALL:
             cmd += ["--collect-all", mod]

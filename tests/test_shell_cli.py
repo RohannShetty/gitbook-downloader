@@ -22,8 +22,9 @@ def isolated_env(tmp_path, monkeypatch):
 
 @pytest.fixture
 def no_tui(monkeypatch):
-    """Replace the TUI launcher so bare invocations don't open a terminal UI."""
+    """Replace GUI and TUI launchers so bare invocations don't open windows."""
     calls = []
+    monkeypatch.setattr(cli, "_launch_gui", lambda: calls.append("gui") or 0)
     monkeypatch.setattr(cli, "_launch_tui", lambda: calls.append("tui") or 0)
     return calls
 
@@ -59,13 +60,13 @@ class TestCommandSurface:
         assert exc.value.code == 0
         out = capsys.readouterr().out
         for command in ("capture", "search", "ls", "history", "diff",
-                        "split", "config", "mcp", "tui"):
+                        "split", "config", "mcp", "tui", "gui"):
             assert command in out
 
-    def test_gui_subcommand_is_gone(self, capsys):
+    def test_gui_subcommand_exists(self, no_tui):
         parser = cli.build_parser()
-        with pytest.raises(SystemExit):
-            parser.parse_args(["gui"])
+        args = parser.parse_args(["gui"])
+        assert args.command == "gui"
 
     def test_no_customtkinter_references(self):
         source = cli.__file__
@@ -90,9 +91,13 @@ class TestCommandSurface:
 
 
 class TestBareInvocation:
-    def test_bare_invocation_launches_tui(self, no_tui):
+    def test_bare_invocation_launches_gui(self, no_tui):
         assert cli.main([]) == 0
-        assert no_tui == ["tui"]
+        assert no_tui == ["gui"]
+
+    def test_gui_subcommand_launches_gui(self, no_tui):
+        assert cli.main(["gui"]) == 0
+        assert no_tui == ["gui"]
 
     def test_tui_subcommand_launches_tui(self, no_tui):
         assert cli.main(["tui"]) == 0
@@ -111,20 +116,16 @@ class TestBareInvocation:
         assert fake_capture["url"] == url
 
     def test_missing_tui_prints_friendly_message(self, monkeypatch, capsys):
-        # Patch the lazy-import seam inside cli._launch_tui instead of
-        # intercepting builtins.__import__: CPython hands *relative* imports
-        # to __import__ with the dot-stripped name ("tui", level=1), so a
-        # "gitbook_downloader.tui" prefix check never fires and the real
-        # Textual app boots (fullscreen hang under pytest-timeout).
         def missing_tui():
             raise ImportError("No module named 'textual'")
 
         monkeypatch.setattr(cli, "_import_tui_run", missing_tui)
-        rc = cli.main([])
+        rc = cli._launch_tui()
         assert rc == 1
         err = capsys.readouterr().err
         assert "TUI" in err
         assert "gitbook-dl capture" in err
+
 
 
 # ── Capture flag parsing ────────────────────────────────────────────────
@@ -255,3 +256,26 @@ class TestHistoryAndDiff:
         assert cli.main(["history", "d.com"]) == 0
         out = capsys.readouterr().out
         assert "v1.0.1" in out
+
+
+# ── Console encoding robustness ─────────────────────────────────────────
+
+
+class TestConsoleEncoding:
+    def test_configure_console_streams_handles_non_utf8(self, monkeypatch):
+        class FakeStream:
+            def __init__(self):
+                self.reconfigured_with = None
+
+            def reconfigure(self, **kwargs):
+                self.reconfigured_with = kwargs
+
+        fake_out = FakeStream()
+        fake_err = FakeStream()
+        monkeypatch.setattr(cli.sys, "stdout", fake_out)
+        monkeypatch.setattr(cli.sys, "stderr", fake_err)
+
+        cli._configure_console_streams()
+        assert fake_out.reconfigured_with == {"encoding": "utf-8", "errors": "replace"}
+        assert fake_err.reconfigured_with == {"encoding": "utf-8", "errors": "replace"}
+

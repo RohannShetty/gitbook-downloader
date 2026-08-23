@@ -259,12 +259,58 @@ def _coerce_page(item, fallback_url: str) -> CapturedPage | None:
                         site_version=str(version))
 
 
+def _parse_pages_from_text(text: str, fallback_url: str) -> list[dict]:
+    """Parse combined markdown text that may contain one or multiple pages.
+
+    Pages created by engine.stream_download follow the pattern:
+    Source: <url>
+
+    # Title
+    <content>
+
+    ---
+
+    Source: <url>
+    ...
+    """
+    if not text or not text.strip():
+        return []
+
+    # Split by page delimiter with Source: header
+    parts = re.split(r"(?:^|\n\n)---\n\n(?=Source:\s*https?://)", text.strip())
+    if not parts or (len(parts) == 1 and not parts[0].startswith("Source:")):
+        return [{"url": fallback_url, "title": "", "content": text}]
+
+    parsed_items: list[dict] = []
+    source_pattern = re.compile(r"^Source:\s*(https?://[^\s\n]+)\s*\n\n?", re.MULTILINE)
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        m = source_pattern.match(part)
+        if m:
+            page_url = m.group(1).strip()
+            content = part[m.end():].strip()
+        else:
+            page_url = fallback_url
+            content = part
+
+        title = ""
+        title_m = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+        if title_m:
+            title = title_m.group(1).strip()
+
+        parsed_items.append({"url": page_url, "title": title, "content": content})
+
+    return parsed_items or [{"url": fallback_url, "title": "", "content": text}]
+
+
 def normalize_engine_result(raw, source_url: str):
     """Normalise the engine's return value into ``(pages, provider, discovered, failed)``.
 
     Accepted shapes (Lane A's final return type may be any of these):
 
-    - ``str`` — legacy combined markdown blob → single pseudo-page.
+    - ``str`` — combined markdown blob → parsed into individual pages via Source headers.
     - ``list`` of dicts/objects with ``url``/``content`` keys.
     - ``dict`` mapping ``url → markdown``.
     - ``dict`` with a ``"pages"`` key plus optional ``provider`` /
@@ -276,7 +322,7 @@ def normalize_engine_result(raw, source_url: str):
     items = raw
 
     if isinstance(raw, str):
-        items = [{"url": source_url, "title": "", "content": raw}]
+        items = _parse_pages_from_text(raw, source_url)
     elif isinstance(raw, dict):
         if "pages" in raw:
             items = raw.get("pages") or []
@@ -388,6 +434,16 @@ def capture(
 
         pages, provider_name, discovered_hint, failed_hint = \
             normalize_engine_result(raw, url)
+
+        if not provider_name:
+            try:
+                import requests
+                from .providers import detect_provider
+                sess = requests.Session()
+                p = detect_provider(url, sess)
+                provider_name = getattr(p, "name", "")
+            except Exception:
+                pass
 
         provider = (provider_name or "generic").lower()
         site_versions_found = detect_site_versions([p.url for p in pages])

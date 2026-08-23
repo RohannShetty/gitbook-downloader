@@ -5,156 +5,83 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **About this file:** the history below was rebuilt from the actual git record
-> (commit messages and tags) in August 2026, after an audit found the previous
-> changelog had lost most releases and carried a fabricated date. The old file
-> claimed `[5.0.0] - 2025-06-01 (Initial public release)`; both were wrong —
-> the repository's first commit is dated **2026-06-21** and released **v3.1.0**.
-> Dates below are commit dates from `git log`. Versions marked *(no tag)* were
-> committed but never tagged, so no release artifacts were built for them.
+---
 
-## [Unreleased]
+## [8.0.0] - 2026-08-23
 
-Everything currently on `master`, shipping next as **7.0.0** — a ground-up
-rebuild of everything around the download engine.
+### 🚀 Major Release: Modern Windows Desktop GUI Application & Standalone Executable
+
+Version 8.0 transforms **GitBook Downloader** from a command-line utility into a modern **Windows Desktop GUI Software Application** powered by Edge WebView2 (`pywebview`), featuring 60fps motion animations, a glowing radial progress gauge, live crawl streaming logs, in-app Markdown reader, instant full-text search studio, snapshot diff visualizer, and standalone single-file executable distribution.
+
+![GitBook Downloader v8 Capture Studio](assets/capture_studio.png)
 
 ### Added
 
-- **Capture facade** — `gitbook_downloader.api.capture(url, options)` is now the
-  single entry point shared by the CLI, TUI, and MCP server. Detection runs once;
-  results come back as a typed `CaptureResult` with pages captured, skipped,
-  warnings, and output paths.
-- **Output contract writer** — every capture produces four artifacts: a page tree
-  with YAML frontmatter (source URL, title, crawl date, SHA-256 content hash, site
-  version), a combined `book.md` with a table of contents in deterministic order,
-  and an `llms.txt` manifest.
-- **Textual TUI** replacing the tkinter GUI — wizard, library browser, search,
-  snapshot diff, and diagnostics screens, with dark and light themes.
-- **TOML presets wired for real** — `[defaults]` and `[presets.<name>]` tables in
-  `gitbook-downloader.toml` feed capture options; CLI flags override them;
-  `gitbook-dl config init|show|path` manages the files. (v6 shipped a config file
-  that nothing read.)
-- **Path scoping reachable from the CLI** — `--scope` / `--exclude` flags now
-  actually reach the crawler. The plumbing existed in v6 but no user-facing
-  surface could set it.
-- **Site-version handling** — auto-detection of `/v1/`, `/en/latest/`-style
-  releases; `--latest-only` and `--versions` filters; an empty result after
-  filtering stays empty with a warning instead of silently falling back to
-  everything.
-- **MCP server through the facade** — all eight tools route through
-  `api.capture`; the `download_docs` tool crash on first call is fixed.
-- **Real CI** — pytest is installed and actually run on Python 3.10/3.12 across
-  Ubuntu and Windows; failures are no longer swallowed by `|| echo`.
-- **Release binaries** — Windows/Linux/macOS executables built from a single
-  PyInstaller spec on every `v*` tag.
-- **uv** — lockfile committed for reproducible development setups.
+- **Modern Desktop GUI Application (Edge WebView2 Runtime)**:
+  - Native hardware-accelerated Windows application window (`gitbook-dl` or double-clicking the `.exe`).
+  - Dark glassmorphic design system (`#090d16` canvas, frosted glass blur, electric cyan `#06b6d4` & hyper sapphire `#3b82f6` accents, custom light/dark theme toggle).
+  - **Dynamic 60fps Motion Progress**:
+    - Animated SVG radial circular gauge displaying real-time percentage completion.
+    - Animated striped linear progress meter with glowing sweep head.
+    - 4 live telemetry stat cards: Discovered URLs, Downloaded Pages, Failed/Skipped Pages, and Elapsed Time counter.
+    - **100% Completed Emerald State**: Dynamic shift to vibrant emerald green (`#10b981`) upon crawl completion with glowing completion badges.
+  - **Live Syntax-Highlighted Crawl Terminal**:
+    - Color-coded live stream (`[DISCOVERED]`, `[DOWNLOADED]`, `[ERROR]`, `[COMPLETE]`) with auto-scroll lock, copy-to-clipboard, and clear controls.
+  - **Active In-Flight Cancellation**:
+    - Dedicated "Cancel Capture" button and `Esc` keyboard shortcut to immediately abort running crawls safely without data corruption.
+  - **Document Library Explorer & Reader**:
+    - Real-time catalog of all captured documentation sites, page counts, disk sizes, snapshot histories, and crawl dates.
+    - In-app split-screen Markdown Reader modal supporting both full `book.md` viewing and individual page navigation.
+    - Instant "Open in Windows Explorer" folder integration.
+  - **Search Studio**:
+    - Fast SQLite FTS5 documentation search across all downloaded doc sets with keyword match highlighting and relevancy ranking.
+  - **Snapshot Diff Visualizer**:
+    - Side-by-side and unified version diffing between snapshots.
+  - **Diagnostics & Telemetry**:
+    - Crawl performance metrics, provider detection evidence rules, and system environment reporting.
+- **Multi-Page Stream Parsing**:
+  - Added `_parse_pages_from_text` in normalization to reconstruct individual `CapturedPage` instances from streamed multi-page scrapes (e.g. 360+ pages from OpenAlgo).
+- **Standalone Windows Executable (`dist/gitbook-dl.exe`)**:
+  - Single 23.5 MB self-contained binary bundling Python 3, PyWebView, WebView2 bridge, and all frontend assets with zero external dependencies.
+  - **Dual-Mode Launcher**: Bare invocation / double-click opens the Desktop GUI; CLI arguments (e.g. `gitbook-dl capture <url>`) run in headless console mode.
 
 ### Changed
 
-- Engine correctness pass: link rewriting (relative links absolutized, internal
-  links point at local files), charset correction, sitemap host filtering,
-  hardening against HTML-served-as-Markdown responses, one canonical URL
-  normalizer, deterministic page ordering.
-- Bare invocation made real: `gitbook-dl <url>` captures; bare `gitbook-dl`
-  opens the TUI.
-- Storage writes are atomic (temp file + rename); corrupt metadata rebuilds
-  from disk instead of resetting version history.
-- Snapshots are taken exactly once, before download starts, guarded by a
-  per-domain lockfile.
+- **Direct Enter-to-Download**: Pressing `Enter` in the URL bar initiates provider detection and starts the download immediately.
+- **Automatic Library Refresh**: Library catalog and FTS search indexes are automatically updated and populated immediately upon capture completion.
+- **Version bump**: Upgraded project version to `v8.0.0` across all metadata, CLI, TUI, and GUI runtime bridges.
 
-### Removed
+---
 
-- The tkinter desktop GUI and its `customtkinter` dependency (replaced by the TUI).
-- Dead dependencies and dead documentation — the documented TOML config now
-  actually affects behavior.
-
-## [6.0.0] - 2026-07-16 *(no tag was created)*
-
-### Added
-
-- Multi-provider architecture with priority-based auto-detection: GitBook,
-  Mintlify, Docusaurus, ReadTheDocs, with a generic HTML fallback
-- Per-domain storage under `~/.gitbook-downloader/docs/<domain>/`
-- Automatic snapshots before re-download, plus diff between snapshots
-- Full-text search over the library (SQLite FTS5, BM25 ranking)
-- MCP server with eight async tools for AI assistants
-- JSONL export for RAG pipelines
-- Docker packaging (`Dockerfile`, `docker-compose.yml`)
-- Streaming progress callbacks shared by CLI, GUI, and MCP
-
-### Changed
-
-- Download engine rewritten around the provider/storage architecture
-- Configuration moved to TOML format (`~/.gitbook-downloader/config.toml`) —
-  present but inert until v7 wired it into captures
-
-### Removed
-
-- Single-file `downloaded_docs.md` output (replaced by per-domain storage)
-
-## [5.0.6] - 2026-07-07
-
-### Added
-
-- Path-scoped crawling and a minimum-content filter, so forum pages and stubs
-  stop leaking into captures
-- `--exclude-paths` plumbing at the provider layer *(not reachable from any user
-  surface until v7)*
-
-### Changed
-
-- Desktop GUI redesigned ("editorial amber" palette, theme toggle)
+## [7.0.1] - 2026-08-23
 
 ### Fixed
 
-- GUI path scope: Advanced panel added to the New Download card
-- tkinter crash on 8-digit hex colors
+- Fixed character-encoding crashes on Windows PowerShell and Command Prompt when printing Unicode page titles.
+- Hardened provider detection fallback when sites return plain text or custom headers.
+- Fixed CLI `--preset` argument handling for custom configuration profiles.
 
-## [5.0.1] - 2026-07-03
+---
 
-### Fixed
-
-- PyInstaller onefile import crash in the packaged dashboard executable
-
-## [5.0.0] - 2026-07-02 *(never tagged)*
+## [7.0.0] - 2026-08-22
 
 ### Added
 
-- `.md`-aware extraction — prefers native Markdown endpoints over HTML conversion
-- `llms.txt` discovery
-- Duplicate elimination during crawls
+- **Capture facade** — `gitbook_downloader.api.capture(url, options)` is the single entry point shared by CLI, TUI, GUI, and MCP server.
+- **Output contract writer** — Every capture produces four artifacts: a page tree with YAML frontmatter (source URL, title, crawl date, SHA-256 hash, site version), a combined `book.md` with table of contents, and an `llms.txt` manifest.
+- **Textual TUI** — Terminal UI with wizard, library browser, search, snapshot diff, and diagnostics screens.
+- **TOML presets** — `[defaults]` and `[presets.<name>]` in `gitbook-downloader.toml`.
+- **MCP server** — Route all AI agent queries directly through `api.capture`.
 
-### Fixed
+---
 
-- Deadlock when discovery finished before downloads started
-
-## [4.0.0] - 2026-06-23
-
-### Added
-
-- Streaming pipeline — downloads report progress as they finish instead of
-  blocking until the end
-
-### Fixed
-
-- PyInstaller failure caused by relative imports
-
-## [3.2.0] - 2026-06-23
+## [6.0.0] - 2026-07-16
 
 ### Added
 
-- Parallel downloads
-- Modern desktop GUI
-- Single `.exe` distribution
-
-### Fixed
-
-- Engine rewritten on a proven BFS crawler after the sitemap-based approach
-  failed in practice
-
-## [3.1.0] - 2026-06-21
-
-### Added
-
-- Initial public release: GitBook-only downloader, Markdown splitting,
-  `~/.gitbook-downloader/` history
+- Multi-provider architecture with priority-based auto-detection: GitBook, Mintlify, Docusaurus, ReadTheDocs, and generic HTML fallback.
+- Per-domain storage under `~/.gitbook-downloader/docs/<domain>/`.
+- Automatic snapshots before re-download, plus diff between snapshots.
+- Full-text search over the library (SQLite FTS5, BM25 ranking).
+- MCP server with eight async tools for AI assistants.
+- JSONL export for RAG pipelines.

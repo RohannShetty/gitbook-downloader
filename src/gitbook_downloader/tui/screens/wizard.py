@@ -60,6 +60,10 @@ class WizardFailed(Message):
 class WizardSurface(VerticalScroll):
     """The one action that matters: paste a URL, get Markdown."""
 
+    BINDINGS = [
+        ("escape", "cancel_capture", "Cancel"),
+    ]
+
     DEFAULT_CSS = """
     WizardSurface {
         padding: 1 2;
@@ -124,9 +128,19 @@ class WizardSurface(VerticalScroll):
         height: auto;
         margin-top: 1;
     }
+    #progress-status-row {
+        height: auto;
+        align-vertical: middle;
+        margin-top: 1;
+        margin-bottom: 1;
+    }
     #status-line {
         color: $ink-muted;
-        padding: 1 0;
+        width: 1fr;
+    }
+    #cancel-btn {
+        min-width: 16;
+        height: 3;
     }
     #event-log {
         height: 8;
@@ -160,6 +174,7 @@ class WizardSurface(VerticalScroll):
         self._detection_url: str | None = None
         self._pending_start = False
         self._capture_running = False
+        self._capture_worker = None
         self._options_used: CaptureOptions | None = None
         self._counts: dict[str, int] = {}
         self._started_at: float = 0.0
@@ -173,7 +188,7 @@ class WizardSurface(VerticalScroll):
             classes="lede",
         )
         yield PasteInput(
-            placeholder="https://docs.example.com   (Enter detects the provider)",
+            placeholder="https://docs.example.com   (Enter to capture)",
             id="url-input",
             classes="mono",
         )
@@ -202,7 +217,7 @@ class WizardSurface(VerticalScroll):
             with Horizontal(id="start-row"):
                 yield Button("Capture site", variant="primary", id="start-btn")
                 yield Static(
-                    "Enter in the URL field runs detection first.", id="form-hint"
+                    "Press Enter or click Capture site to start.", id="form-hint"
                 )
         yield Static("", id="error-banner", classes="hidden error-banner")
         # Result first, process detail below: the outcome must not sit
@@ -217,7 +232,9 @@ class WizardSurface(VerticalScroll):
                 yield Button("New capture", id="new-capture-btn")
         with Vertical(id="progress-region", classes="hidden"):
             yield ProgressBar(total=100, show_eta=False, id="progress-bar")
-            yield Static("", id="status-line", classes="mono")
+            with Horizontal(id="progress-status-row"):
+                yield Static("", id="status-line", classes="mono")
+                yield Button("Cancel capture", variant="error", id="cancel-btn")
             yield RichLog(id="event-log", markup=True, wrap=True, max_lines=400)
 
     def on_mount(self) -> None:
@@ -294,13 +311,14 @@ class WizardSurface(VerticalScroll):
     # ── capture flow ─────────────────────────────────────────────────
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        if event.input.id == "url-input":
-            self._run_detect()
+        self._request_start()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         bid = event.button.id
         if bid == "start-btn":
             self._request_start()
+        elif bid == "cancel-btn":
+            self.action_cancel_capture()
         elif bid == "open-folder-btn":
             self._open_output_folder()
         elif bid == "view-diag-btn":
@@ -308,9 +326,27 @@ class WizardSurface(VerticalScroll):
         elif bid == "new-capture-btn":
             self.reset()
 
+    def action_cancel_capture(self) -> None:
+        if not self._capture_running:
+            return
+        if self._capture_worker is not None:
+            self._capture_worker.cancel()
+            self._capture_worker = None
+        self._capture_running = False
+        self.query_one("#form-region", Vertical).disabled = False
+        self.query_one("#start-btn", Button).disabled = False
+        banner = self.query_one("#error-banner", Static)
+        banner.remove_class("hidden")
+        banner.update("Capture cancelled.")
+        self.app.notify("Capture cancelled.", severity="warning")
+
     def _request_start(self) -> None:
         url = self.query_one("#url-input", Input).value.strip()
         if not _is_valid_url(url):
+            line = self.query_one("#detect-line", Static)
+            line.remove_class("hidden")
+            line.add_class("detect-failed")
+            line.update("Enter a full http(s) URL to detect the provider.")
             self.app.notify("Enter a valid http(s) URL first.", severity="warning")
             return
         if self._detection and self._detection_url == url:
@@ -378,7 +414,7 @@ class WizardSurface(VerticalScroll):
                     self.post_message, WizardDone(result, duration)
                 )
 
-        self.run_worker(job, thread=True, group="capture", exclusive=True)
+        self._capture_worker = self.run_worker(job, thread=True, group="capture", exclusive=True)
 
     def on_wizard_progress(self, event: WizardProgress) -> None:
         ev = event.event

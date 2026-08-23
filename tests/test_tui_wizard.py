@@ -50,7 +50,7 @@ async def detect_url(pilot, wizard, url="https://docs.example.com"):
     url_input = wizard.query_one("#url-input", Input)
     url_input.focus()
     await pilot.press(*url)
-    await pilot.press("enter")
+    wizard._run_detect()
     assert await wait_until(
         pilot,
         lambda: "Detected" in str(wizard.query_one("#detect-line", Static).content),
@@ -118,6 +118,29 @@ def test_wizard_happy_path_detection_to_summary():
             assert options_used.snapshot is True
             assert options_used.path_scope == ()
             assert options_used.site_versions is None  # all versions == no filter
+
+    run_async(scenario())
+
+
+def test_wizard_enter_in_url_input_immediately_starts_capture():
+    async def scenario():
+        app, engine, _opened = make_app()
+        async with app.run_test(size=(120, 42)) as pilot:
+            for _ in range(5):
+                await pilot.pause()
+            wizard = app.surface("wizard")
+
+            url_input = wizard.query_one("#url-input", Input)
+            url_input.focus()
+            await pilot.press(*"https://docs.example.com")
+            await pilot.press("enter")
+
+            summary = wizard.query_one("#summary-card")
+            assert await wait_until(pilot, lambda: not summary.has_class("hidden"))
+
+            captures = [c for c in engine.calls if c[0] == "capture"]
+            assert len(captures) == 1
+            assert captures[0][1][0] == "https://docs.example.com"
 
     run_async(scenario())
 
@@ -239,5 +262,21 @@ def test_library_recrawl_prefills_wizard_url():
                 lambda: "Detected"
                 in str(wizard.query_one("#detect-line", Static).content),
             )
+
+    run_async(scenario())
+
+
+def test_wizard_cancel_capture_resets_form():
+    async def scenario():
+        app, _engine, _opened = make_app()
+        async with app.run_test(size=(120, 42)) as pilot:
+            for _ in range(5):
+                await pilot.pause()
+            wizard = app.surface("wizard")
+            wizard._capture_running = True
+            wizard.action_cancel_capture()
+            assert wizard._capture_running is False
+            banner = wizard.query_one("#error-banner", Static)
+            assert "cancelled" in str(banner.content).lower()
 
     run_async(scenario())

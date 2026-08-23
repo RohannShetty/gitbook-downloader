@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitBook Downloader v8</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- App Shell -->
+  <div id="app">
+    <!-- Top Navigation Bar -->
+    <header id="topbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            <path d="M12 6v6"></path>
+            <path d="M9 9l3 3 3-3"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="title">gitbook-downloader</span>
+          <span class="badge">v8.0</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="wizard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+          Capture Studio
+        </button>
+        <button class="nav-btn" data-tab="library">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Library
+        </button>
+        <button class="nav-btn" data-tab="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          Search
+        </button>
+        <button class="nav-btn" data-tab="diff">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+          Snapshot Diff
+        </button>
+        <button class="nav-btn" data-tab="diagnostics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+          Diagnostics
+        </button>
+      </nav>
+
+      <div class="top-actions">
+        <button id="theme-btn" class="icon-btn" title="Toggle Theme">
+          <svg class="sun-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <!-- ── TAB 1: CAPTURE STUDIO ──────────────────────────────────── -->
+      <section id="tab-wizard" class="tab-pane active">
+        <div class="pane-container">
+          <!-- Hero Capture Card -->
+          <div class="glass-card capture-card">
+            <div class="card-header">
+              <h2>Capture Documentation Site</h2>
+              <p class="subtitle">Turn any GitBook, Mintlify, Docusaurus, or generic doc site into clean Markdown.</p>
+            </div>
+
+            <!-- URL Input Bar -->
+            <div class="url-input-wrapper">
+              <div class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              </div>
+              <input type="text" id="url-input" placeholder="https://docs.example.com (Paste URL & press Enter)" autofocus autocomplete="off" spellcheck="false">
+              <button id="paste-btn" class="btn-ghost" title="Paste from Clipboard">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                Paste
+              </button>
+              <button id="start-btn" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Capture Site</span>
+              </button>
+            </div>
+
+            <!-- Detection Banner -->
+            <div id="detection-banner" class="detection-banner hidden">
+              <div class="detection-status">
+                <div class="pulse-indicator"></div>
+                <span id="detection-text">Detecting provider…</span>
+              </div>
+              <div id="detection-details" class="detection-details hidden">
+                <span id="provider-badge" class="badge-pill">GITBOOK</span>
+                <span id="evidence-text" class="evidence-text">Matched GitBook API</span>
+              </div>
+            </div>
+
+            <!-- Versions Selector -->
+            <div id="versions-region" class="versions-region hidden">
+              <span class="section-label">Site Versions:</span>
+              <div id="versions-checkboxes" class="checkbox-group"></div>
+            </div>
+
+            <!-- Advanced Options Accordion -->
+            <details class="options-accordion">
+              <summary>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Advanced Scoping & Crawler Options
+              </summary>
+              <div class="options-grid">
+                <div class="field-group">
+                  <label for="scope-input">Path Scope (prefixes)</label>
+                  <input type="text" id="scope-input" placeholder="/api/, /guides/ (empty = all)">
+                </div>
+                <div class="field-group">
+                  <label for="exclude-input">Exclusions (patterns)</label>
+                  <input type="text" id="exclude-input" placeholder="/blog/, /community/">
+                </div>
+                <div class="field-group">
+                  <label for="workers-input">Parallel Workers</label>
+                  <input type="number" id="workers-input" value="5" min="1" max="20">
+                </div>
+                <div class="field-group">
+                  <label for="maxpages-input">Max Pages Limit</label>
+                  <input type="number" id="maxpages-input" placeholder="Unlimited" min="1">
+                </div>
+                <div class="field-group full-width checkbox-row">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="snapshot-check" checked>
+                    <span class="checkmark"></span>
+                    Create snapshot version of existing capture before overwrite
+                  </label>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- ── MOTION PROGRESS SECTION ──────────────────────────────── -->
+          <div id="progress-card" class="glass-card progress-card hidden">
+            <div class="progress-top-row">
+              <div class="progress-hero">
+                <!-- Radial Motion Gauge -->
+                <div class="radial-gauge-container">
+                  <svg class="radial-gauge" viewBox="0 0 100 100">
+                    <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                    <circle id="gauge-bar" class="gauge-progress" cx="50" cy="50" r="42"></circle>
+                  </svg>
+                  <div class="gauge-content">
+                    <span id="gauge-percent" class="gauge-number">0%</span>
+                    <span class="gauge-label">Progress</span>
+                  </div>
+                </div>
+
+                <div class="progress-info">
+                  <h3 id="progress-heading">Initiating Capture…</h3>
+                  <p id="progress-sub" class="mono">Connecting to documentation endpoint…</p>
+                  
+                  <!-- Motion Striped Linear Progress Bar -->
+                  <div class="linear-bar-wrapper">
+                    <div id="linear-progress-bar" class="linear-progress-bar" style="width: 0%;">
+                      <div class="bar-glow-head"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="progress-actions">
+                <button id="cancel-btn" class="btn-danger">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                  Cancel Capture
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats Metric Cards -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span class="stat-label">Discovered</span>
+                <span id="stat-discovered" class="stat-value">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Downloaded</span>
+                <span id="stat-downloaded" class="stat-value accent">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Failed / Skipped</span>
+                <span id="stat-failed" class="stat-value">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Elapsed Time</span>
+                <span id="stat-elapsed" class="stat-value">0.0s</span>
+              </div>
+            </div>
+
+            <!-- Live Terminal Log -->
+            <div class="terminal-box">
+              <div class="terminal-header">
+                <div class="terminal-dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
+                <span class="terminal-title">LIVE CRAWL LOG</span>
+                <div class="terminal-controls">
+                  <label class="auto-scroll-label">
+                    <input type="checkbox" id="autoscroll-check" checked> Auto-scroll
+                  </label>
+                  <button id="copy-log-btn" class="btn-mini" title="Copy Log">Copy</button>
+                  <button id="clear-log-btn" class="btn-mini" title="Clear Log">Clear</button>
+                </div>
+              </div>
+              <div id="terminal-body" class="terminal-body mono">
+                <div class="log-line info">[INIT] Ready to capture documentation.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── COMPLETION SUMMARY CARD ──────────────────────────────── -->
+          <div id="summary-card" class="glass-card summary-card hidden">
+            <div class="summary-header">
+              <div class="success-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <div>
+                <h3 id="summary-title">Capture Complete!</h3>
+                <p id="summary-subtitle" class="subtitle">All pages downloaded, formatted, and indexed.</p>
+              </div>
+            </div>
+
+            <div id="summary-details" class="summary-details">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <div class="summary-actions">
+              <button id="open-out-btn" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                Open Output Folder
+              </button>
+              <button id="view-library-btn" class="btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                View in Library
+              </button>
+              <button id="new-capture-btn" class="btn-ghost">
+                New Capture
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 2: LIBRARY ─────────────────────────────────────────── -->
+      <section id="tab-library" class="tab-pane">
+        <div class="pane-container">
+          <div class="glass-card library-card">
+            <div class="card-header flex-between">
+              <div>
+                <h2>Document Library</h2>
+                <p class="subtitle">All locally saved and indexed documentation sites.</p>
+              </div>
+              <button id="refresh-lib-btn" class="btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                Refresh
+              </button>
+            </div>
+
+            <!-- Library Table -->
+            <div class="table-wrapper">
+              <table id="library-table" class="modern-table">
+                <thead>
+                  <tr>
+                    <th>DOMAIN</th>
+                    <th>PROVIDER</th>
+                    <th>PAGES</th>
+                    <th>SIZE</th>
+                    <th>SNAPSHOTS</th>
+                    <th>LAST CRAWLED</th>
+                    <th class="actions-col">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody id="library-tbody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+              <div id="library-empty" class="empty-state hidden">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <h3>No documentation sources yet</h3>
+                <p>Use Capture Studio to download your first documentation set.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- In-App Document Viewer Modal/Drawer -->
+          <div id="doc-viewer-modal" class="modal-overlay hidden">
+            <div class="modal-card doc-viewer-card">
+              <div class="modal-header">
+                <h3 id="doc-viewer-title">Documentation Viewer</h3>
+                <button id="close-viewer-btn" class="icon-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+              <div class="doc-viewer-layout">
+                <div class="doc-tree-sidebar">
+                  <div class="sidebar-header">PAGES</div>
+                  <ul id="doc-pages-tree" class="pages-list mono"></ul>
+                </div>
+                <div class="doc-content-body">
+                  <pre id="doc-markdown-content" class="markdown-preview mono"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 3: SEARCH ──────────────────────────────────────────── -->
+      <section id="tab-search" class="tab-pane">
+        <div class="pane-container">
+          <div class="glass-card search-card">
+            <div class="card-header">
+              <h2>Full-Text Documentation Search</h2>
+              <p class="subtitle">Lightning-fast SQLite FTS5 search across all captured sites and sections.</p>
+            </div>
+
+            <div class="search-bar-row">
+              <div class="search-input-wrapper">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="search-query-input" placeholder='e.g. "webhook signature", authentication, timeout' autocomplete="off">
+              </div>
+              <select id="search-domain-select">
+                <option value="all">All Domains</option>
+              </select>
+              <button id="search-btn" class="btn-primary">Search</button>
+            </div>
+
+            <div id="search-results-info" class="results-info"></div>
+            <div id="search-results-list" class="results-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 4: SNAPSHOT DIFF ───────────────────────────────────── -->
+      <section id="tab-diff" class="tab-pane">
+        <div class="pane-container">
+          <div class="glass-card diff-card">
+            <div class="card-header">
+              <h2>Snapshot Diff Visualizer</h2>
+              <p class="subtitle">Compare documentation versions between re-crawls to see exact changes.</p>
+            </div>
+
+            <div class="diff-controls-row">
+              <div class="select-group">
+                <label>Domain:</label>
+                <select id="diff-domain-select"><option value="">Select domain...</option></select>
+              </div>
+              <div class="select-group">
+                <label>Old Snapshot:</label>
+                <select id="diff-old-select"><option value="">Select version...</option></select>
+              </div>
+              <div class="select-group">
+                <label>New Snapshot:</label>
+                <select id="diff-new-select"><option value="">Select version...</option></select>
+              </div>
+              <button id="diff-compare-btn" class="btn-primary">Compare</button>
+            </div>
+
+            <div id="diff-summary-row" class="diff-summary-row hidden"></div>
+            <div id="diff-output-container" class="diff-output-container">
+              <div class="empty-state">Select a domain and two snapshot versions to compare.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 5: DIAGNOSTICS ─────────────────────────────────────── -->
+      <section id="tab-diagnostics" class="tab-pane">
+        <div class="pane-container">
+          <div class="glass-card diagnostics-card">
+            <div class="card-header">
+              <h2>Capture Diagnostics & System</h2>
+              <p class="subtitle">Deep inspection of the latest crawl run, engine decisions, and system info.</p>
+            </div>
+
+            <div class="diag-grid">
+              <div class="diag-card">
+                <h3>PROVIDER & DETECTION</h3>
+                <div id="diag-provider-info" class="diag-content mono">No run recorded yet.</div>
+              </div>
+              <div class="diag-card">
+                <h3>CRAWL EXECUTION METRICS</h3>
+                <div id="diag-metrics-info" class="diag-content mono">No run recorded yet.</div>
+              </div>
+              <div class="diag-card">
+                <h3>SCOPING & STORAGE CONTRACT</h3>
+                <div id="diag-scoping-info" class="diag-content mono">No run recorded yet.</div>
+              </div>
+              <div class="diag-card">
+                <h3>SYSTEM & ENVIRONMENT</h3>
+                <div id="diag-system-info" class="diag-content mono">Loading…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Global Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
