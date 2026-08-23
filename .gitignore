@@ -101,14 +101,14 @@ graphify-out/
 skills/
 
 # Local runtime data
-data/
+/data/
 .codegraph/
 *-docs/
 /*.exe
 node_modules/
 frontend/dist/
 docs/dist/
-exports/
+/exports/
 
 # Multi-agent internal coordination artifacts
 .agents/sentinel/
