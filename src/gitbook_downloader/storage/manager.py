@@ -677,6 +677,32 @@ class StorageManager:
             return True
         return False
 
+    def rename_domain(self, old_domain: str, new_domain: str) -> bool:
+        """Rename a domain directory and update its metadata. Returns True on success."""
+        old_domain = old_domain.strip()
+        new_domain = new_domain.strip()
+        if not old_domain or not new_domain:
+            return False
+        if old_domain == new_domain:
+            return True
+
+        old_dir = self._domain_dir(old_domain)
+        new_dir = self._domain_dir(new_domain)
+        if not old_dir.exists():
+            return False
+        if new_dir.exists() and old_dir.resolve() != new_dir.resolve():
+            return False
+
+        try:
+            old_dir.rename(new_dir)
+            meta = self.get_metadata(new_domain) or {}
+            if meta:
+                meta["domain"] = new_domain
+                self._write_metadata(new_domain, meta)
+            return True
+        except Exception:
+            return False
+
     # ------------------------------------------------------------------
     # Chunks
     # ------------------------------------------------------------------

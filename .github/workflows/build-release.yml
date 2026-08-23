@@ -63,20 +63,25 @@ jobs:
           import glob, os, shutil
 
           os_tag = os.environ["OS_TAG"]
-          candidates = glob.glob("dist/gitbook-dl*")
-          if not candidates:
-              raise SystemExit(f"No built binary found in dist/: {os.listdir('dist')}")
-          src = candidates[0]
-          ext = os.path.splitext(src)[1]  # .exe on Windows, '' elsewhere
-          dest = f"gitbook-dl-{os_tag}{ext}"
-          shutil.copyfile(src, dest)
-          print(f"Staged {src} -> {dest}")
+          dist_files = os.listdir("dist")
+          print(f"Files in dist/: {dist_files}")
+
+          for name in ["docharvest", "gitbook-dl"]:
+            matches = glob.glob(f"dist/{name}*")
+            if matches:
+              src = matches[0]
+              ext = os.path.splitext(src)[1]
+              dest = f"{name}-{os_tag}{ext}"
+              shutil.copyfile(src, dest)
+              print(f"Staged {src} -> {dest}")
 
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.os }}
-          path: gitbook-dl-*
+          path: |
+            docharvest-*
+            gitbook-dl-*
           if-no-files-found: error
           retention-days: 1
 

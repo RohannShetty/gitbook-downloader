@@ -9,12 +9,15 @@ import {
   Layers, 
   Calendar, 
   HardDrive, 
-  Sparkles,
-  ExternalLink,
-  RefreshCw,
-  ArrowUpDown,
-  FileCode,
-  Check
+  Sparkles, 
+  ExternalLink, 
+  RefreshCw, 
+  ArrowUpDown, 
+  FileCode, 
+  Check,
+  Pencil,
+  Edit3,
+  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,6 +46,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 }) => {
   const [filter, setFilter] = useState<string>("")
   const [sortBy, setSortBy] = useState<SortField>("date")
+  const [renamingDomain, setRenamingDomain] = useState<string | null>(null)
+  const [renameInput, setRenameInput] = useState<string>("")
+  const [isRenaming, setIsRenaming] = useState<boolean>(false)
 
   const filteredAndSorted = useMemo(() => {
     const q = filter.toLowerCase().trim()
@@ -68,6 +74,40 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       return 0
     })
   }, [library, filter, sortBy])
+
+  const handleStartRename = (domain: string) => {
+    setRenamingDomain(domain)
+    setRenameInput(domain)
+  }
+
+  const handleSaveRename = async () => {
+    if (!renamingDomain) return
+    const target = renameInput.trim()
+    if (!target) {
+      toast.error("Project name cannot be empty")
+      return
+    }
+    if (target === renamingDomain) {
+      setRenamingDomain(null)
+      return
+    }
+
+    setIsRenaming(true)
+    try {
+      const res = await pyApi.renameDomain(renamingDomain, target)
+      if (res.success) {
+        toast.success(`Renamed '${renamingDomain}' to '${target}'`)
+        setRenamingDomain(null)
+        onRefresh()
+      } else {
+        toast.error(`Rename failed: ${res.error || "Unknown error"}`)
+      }
+    } catch (err: any) {
+      toast.error(`Rename failed: ${err.message}`)
+    } finally {
+      setIsRenaming(false)
+    }
+  }
 
   const handleDelete = async (domain: string) => {
     if (confirm(`Are you sure you want to delete ${domain} from your local library?`)) {
@@ -99,6 +139,69 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   return (
     <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-6 animate-in fade-in-50 duration-300">
+      {/* Rename Dialog Modal */}
+      {renamingDomain && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl backdrop-blur-xl animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-semibold text-foreground">Rename Documentation Project</h3>
+              </div>
+              <button
+                onClick={() => setRenamingDomain(null)}
+                className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-foreground mb-4">
+              Enter a new folder/domain identifier for <span className="font-mono text-foreground font-semibold">{renamingDomain}</span>. This updates your local storage and search index.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-medium text-foreground mb-1.5 block">
+                  New Project Identifier
+                </label>
+                <Input
+                  value={renameInput}
+                  onChange={(e) => setRenameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveRename()
+                    if (e.key === "Escape") setRenamingDomain(null)
+                  }}
+                  autoFocus
+                  placeholder="e.g. docs.myproject.com or my-framework-docs"
+                  className="font-mono text-xs h-9"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRenamingDomain(null)}
+                  disabled={isRenaming}
+                  className="h-8 text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveRename}
+                  disabled={isRenaming || !renameInput.trim()}
+                  className="h-8 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  {isRenaming ? "Renaming..." : "Save Name"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -230,6 +333,16 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                       <span>Read in Studio</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleStartRename(item.domain)}
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground border-border interactive-scale"
+                      title="Rename project"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
 
                     <Button

@@ -11,7 +11,9 @@ import {
   Sparkles, 
   Sun, 
   Moon,
-  Command
+  Command,
+  Heart,
+  Info
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -25,7 +27,8 @@ interface AppSidebarProps {
   onToggleCollapse: () => void
   theme: "dark" | "light"
   onToggleTheme: () => void
-  libraryCount: number
+  libraryCount?: number
+  onOpenAbout?: () => void
 }
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({
@@ -35,11 +38,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   onToggleCollapse,
   theme,
   onToggleTheme,
-  libraryCount
+  onOpenAbout
 }) => {
   const navItems = [
     { id: "capture" as TabId, label: "Capture Studio", icon: Download, badge: null },
-    { id: "library" as TabId, label: "Document Library", icon: Library, badge: libraryCount > 0 ? `${libraryCount}` : null },
+    { id: "library" as TabId, label: "Document Library", icon: Library, badge: null },
     { id: "search" as TabId, label: "Search Studio", icon: Search, badge: null },
     { id: "diff" as TabId, label: "Snapshot Diff", icon: GitCompare, badge: null },
     { id: "export" as TabId, label: "Export Studio", icon: FileUp, badge: "RAG" },
@@ -61,12 +64,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold tracking-tight text-foreground text-sm">GitBook DL</span>
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary bg-primary/5 font-mono">
-                  v9.0
+                <span className="font-bold tracking-tight text-foreground text-sm font-mono">DocHarvest</span>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-cyan-500/30 text-cyan-400 bg-cyan-500/10 font-mono">
+                  v10.0.1
                 </Badge>
               </div>
-              <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Engine</span>
+              <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Harvester</span>
             </div>
           </div>
         )}
@@ -119,15 +122,29 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       {/* Footer Controls */}
       <div className="border-t border-border p-2.5 space-y-2">
         <div className={`flex items-center ${isCollapsed ? "flex-col gap-1.5" : "justify-between"}`}>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleTheme}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleTheme}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+
+            {onOpenAbout && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onOpenAbout}
+                className="h-8 w-8 text-muted-foreground hover:text-cyan-400"
+                title="About DocHarvest & Author"
+              >
+                <Heart className="h-3.5 w-3.5 text-rose-500/80 hover:text-rose-500" />
+              </Button>
+            )}
+          </div>
 
           {!isCollapsed && (
             <div className="flex items-center gap-1 text-[11px] text-muted-foreground">

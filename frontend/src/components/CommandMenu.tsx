@@ -27,6 +27,7 @@ interface CommandMenuProps {
   onSelectTab: (tab: TabId) => void
   libraryItems: any[]
   onOpenDocReader: (domain: string) => void
+  onOpenAbout?: () => void
 }
 
 export const CommandMenu: React.FC<CommandMenuProps> = ({
@@ -34,7 +35,8 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   onOpenChange,
   onSelectTab,
   libraryItems,
-  onOpenDocReader
+  onOpenDocReader,
+  onOpenAbout
 }) => {
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
@@ -100,7 +102,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
             }}
           >
             <Activity className="mr-2 h-4 w-4 text-rose-400" />
-            <span>Diagnostics</span>
+            <span>Diagnostics &amp; System</span>
             <CommandShortcut>Tab 6</CommandShortcut>
           </CommandItem>
         </CommandGroup>
@@ -117,7 +119,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               >
                 <Sparkles className="mr-2 h-4 w-4 text-cyan-400" />
                 <span className="font-mono text-xs">{item.domain}</span>
-                <span className="ml-2 text-xs text-muted-foreground">({item.pages_count || 0} pages)</span>
+                <span className="ml-2 text-xs text-muted-foreground">({item.pages || item.page_count || 0} pages)</span>
                 <CommandShortcut>Open Reader</CommandShortcut>
               </CommandItem>
             ))}
@@ -137,6 +139,18 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
             <FolderOpen className="mr-2 h-4 w-4 text-yellow-400" />
             <span>Open Library Storage Folder in Explorer</span>
           </CommandItem>
+
+          {onOpenAbout && (
+            <CommandItem
+              onSelect={() => {
+                onOpenAbout()
+                onOpenChange(false)
+              }}
+            >
+              <Sparkles className="mr-2 h-4 w-4 text-rose-400" />
+              <span>About DocHarvest &amp; Author (Rohan Shetty)</span>
+            </CommandItem>
+          )}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

@@ -27,7 +27,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenInstallModal }) => {
         {/* Top Release Pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-xs text-zinc-300 mb-8 backdrop-blur-md hover:border-cyan-500/50 transition-all cursor-default shadow-lg shadow-cyan-950/20">
           <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="font-semibold text-cyan-300">DocHarvest v10.0.0 Released</span>
+          <span className="font-semibold text-cyan-300">DocHarvest v10.0.1 Released</span>
           <span className="text-zinc-600">•</span>
           <span className="text-zinc-400">Universal AST Engine &amp; FastMCP Server</span>
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />

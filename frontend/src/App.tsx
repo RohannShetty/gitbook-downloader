@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { AppSidebar, TabId } from "@/components/AppSidebar"
 import { CommandMenu } from "@/components/CommandMenu"
 import { DocReaderModal } from "@/components/DocReaderModal"
+import { AboutModal } from "@/components/AboutModal"
 import { CaptureStudio } from "@/views/CaptureStudio"
 import { LibraryView } from "@/views/LibraryView"
 import { SearchView } from "@/views/SearchView"
@@ -16,6 +17,8 @@ export function App() {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
   const [theme, setTheme] = useState<"dark" | "light">("dark")
   const [cmdMenuOpen, setCmdMenuOpen] = useState<boolean>(false)
+  const [aboutOpen, setAboutOpen] = useState<boolean>(false)
+  const [systemInfo, setSystemInfo] = useState<any>(null)
   
   // Library State
   const [library, setLibrary] = useState<any[]>([])
@@ -37,7 +40,13 @@ export function App() {
     }
   }
 
-  // Reload library on mount and whenever the active tab changes to keep UI synchronized
+  // Fetch system info and library on mount
+  useEffect(() => {
+    pyApi.getSystemInfo().then(setSystemInfo).catch(console.error)
+    loadLibrary()
+  }, [])
+
+  // Reload library whenever the active tab changes to keep UI synchronized
   useEffect(() => {
     loadLibrary()
   }, [activeTab])
@@ -89,6 +98,7 @@ export function App() {
         theme={theme}
         onToggleTheme={handleToggleTheme}
         libraryCount={library.length}
+        onOpenAbout={() => setAboutOpen(true)}
       />
 
       {/* Main Workspace Area */}
@@ -132,12 +142,20 @@ export function App() {
         onSelectTab={setActiveTab}
         libraryItems={library}
         onOpenDocReader={setReaderDomain}
+        onOpenAbout={() => setAboutOpen(true)}
       />
 
       {/* Split-View Markdown Reader Modal */}
       <DocReaderModal
         domain={readerDomain}
         onClose={() => setReaderDomain(null)}
+      />
+
+      {/* About DocHarvest & Author Modal */}
+      <AboutModal
+        open={aboutOpen}
+        onOpenChange={setAboutOpen}
+        systemInfo={systemInfo}
       />
 
       {/* Toast Notification Container */}

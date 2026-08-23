@@ -396,6 +396,28 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
+    def rename_domain(self, old_domain: str, new_domain: str) -> dict[str, Any]:
+        """Rename a domain in the library and search index."""
+        try:
+            old_domain = (old_domain or "").strip()
+            new_domain = (new_domain or "").strip()
+            if not old_domain or not new_domain:
+                return {"success": False, "error": "Domain name cannot be empty."}
+            if old_domain == new_domain:
+                return {"success": True, "domain": new_domain}
+
+            res = self._storage.rename_domain(old_domain, new_domain)
+            if not res:
+                return {"success": False, "error": f"Could not rename '{old_domain}' to '{new_domain}'. Destination may already exist."}
+
+            try:
+                SearchIndex().rename_domain(old_domain, new_domain)
+            except Exception:
+                pass
+            return {"success": True, "domain": new_domain}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+
     def open_folder(self, target: str) -> dict[str, Any]:
         """Open a directory or highlight a file in Windows Explorer / Finder."""
         try:
@@ -666,7 +688,10 @@ class ApiBridge:
     def get_system_info(self) -> dict[str, Any]:
         """Return app metadata."""
         return {
+            "name": "DocHarvest",
             "version": __version__,
+            "engine": f"DocHarvest Engine v{__version__} (AST + FastMCP + fpdf2)",
+            "author": "Rohan Shetty",
             "python": sys.version.split()[0],
             "platform": sys.platform,
             "library_dir": str(self._storage.base),

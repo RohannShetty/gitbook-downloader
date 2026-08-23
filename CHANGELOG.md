@@ -5,6 +5,30 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.0.1] - 2026-08-23
+
+### 🛠️ Quality & UI Polish Hotfix: Binary Naming, Project Rename & About Telemetry
+
+Version 10.0.1 resolves key UI state discrepancies, completes the standalone executable renaming (`docharvest.exe`), adds project renaming inside the Document Library, and introduces an interactive About section with full creator attribution.
+
+### Fixed & Improved in v10.0.1
+- 🏷️ **Universal Brand & Binary Propagation**:
+  - Standalone build pipeline (`build_exe.py`) updated to produce `docharvest.exe` (primary) alongside `gitbook-dl.exe` for backwards compatibility.
+  - Added `docharvest` CLI command entry point in `pyproject.toml` (`[project.scripts]`).
+  - Desktop GUI window title, sidebar header, and Capture Studio badges updated to `DocHarvest v10.0.1` and `v10.0 Engine`.
+  - `.github/workflows/build-release.yml` now stages and publishes both `docharvest-*` and `gitbook-dl-*` cross-platform binaries.
+- ⚡ **Document Library Badge Race Condition Fixed**:
+  - Eliminated the tick-0 mock fallback in `frontend/src/lib/bridge.ts` that caused the count badge to flash `(1)` before the WebView2 Python bridge attached.
+  - Cleaned the sidebar navigation item badge for a distraction-free library view.
+- ✏️ **Project Rename Feature in Document Library**:
+  - Added `StorageManager.rename_domain` and `SearchIndex.rename_domain` to safely update directory paths, metadata JSON, and SQLite FTS5 search index entries.
+  - Added a **Rename (✏️)** action button on library cards and an interactive rename modal dialog in `frontend/src/views/LibraryView.tsx`.
+- ❤️ **Interactive About Modal & Creator Attribution**:
+  - Added `frontend/src/components/AboutModal.tsx` displaying engine specifications (AST + FastMCP + fpdf2), runtime telemetry, GitHub/Showcase links, and **"Made with ❤️ by Rohan Shetty"**.
+  - Accessible via the sidebar footer heart trigger and the `Ctrl+K` command menu.
+
+---
+
 ## [10.0.0] - 2026-08-23
 
 ### 🌾 The DocHarvest Rebrand, GitHub Pages Showcase Site & Release Automation

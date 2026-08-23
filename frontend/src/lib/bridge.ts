@@ -42,6 +42,7 @@ declare global {
         list_library: () => Promise<any[]>
         get_library_doc: (domain: string) => Promise<any>
         delete_domain: (domain: string) => Promise<any>
+        rename_domain: (oldDomain: string, newDomain: string) => Promise<any>
         open_folder: (path: string) => Promise<any>
         open_file: (path: string) => Promise<any>
         read_file: (filePath: string) => Promise<any>
@@ -61,7 +62,7 @@ declare global {
 export const pyApi = {
   detect: async (url: string) => {
     if (window.pywebview?.api?.detect) return await window.pywebview.api.detect(url)
-    return { success: true, detected: true, provider: 'gitbook', site_versions: ['v1'] }
+    return { success: true, detected: true, provider: 'generic', site_versions: [] }
   },
   startCapture: async (url: string, options: any) => {
     if (window.pywebview?.api?.start_capture) return await window.pywebview.api.start_capture(url, options)
@@ -81,29 +82,16 @@ export const pyApi = {
   },
   listLibrary: async () => {
     if (window.pywebview?.api?.list_library) return await window.pywebview.api.list_library()
-    return [
-      {
-        domain: 'docs.openalgo.in',
-        provider: 'gitbook',
-        pages: 364,
-        size_bytes: 4892011,
-        snapshot_count: 2,
-        last_crawled: '2026-08-23 15:00',
-        path: 'C:\\Users\\rohan\\.gitbook-downloader\\docs\\docs.openalgo.in'
-      }
-    ]
+    return []
   },
   getLibraryDoc: async (domain: string) => {
     if (window.pywebview?.api?.get_library_doc) return await window.pywebview.api.get_library_doc(domain)
     return {
       success: true,
       domain,
-      title: 'OpenAlgo Documentation',
-      content: '# OpenAlgo Documentation\n\nWelcome to OpenAlgo documentation.\n\n## Quickstart\n\nInstall using python.',
-      pages: [
-        { relpath: 'index.md', path: 'index.md', size: 1024 },
-        { relpath: 'quickstart.md', path: 'quickstart.md', size: 2048 },
-      ]
+      title: `${domain} Documentation`,
+      content: `# ${domain} Documentation\n\nNo document content loaded.`,
+      pages: []
     }
   },
   readFile: async (filePath: string) => {
@@ -113,6 +101,10 @@ export const pyApi = {
   deleteDomain: async (domain: string) => {
     if (window.pywebview?.api?.delete_domain) return await window.pywebview.api.delete_domain(domain)
     return { success: true }
+  },
+  renameDomain: async (oldDomain: string, newDomain: string) => {
+    if (window.pywebview?.api?.rename_domain) return await window.pywebview.api.rename_domain(oldDomain, newDomain)
+    return { success: true, domain: newDomain }
   },
   openFolder: async (path: string) => {
     if (window.pywebview?.api?.open_folder) return await window.pywebview.api.open_folder(path)
@@ -124,13 +116,11 @@ export const pyApi = {
   },
   searchDocs: async (query: string, domain?: string) => {
     if (window.pywebview?.api?.search_docs) return await window.pywebview.api.search_docs(query, domain)
-    return [
-      { domain: 'docs.openalgo.in', title: 'Quickstart Guide', snippet: 'Fast start with OpenAlgo Python API', score: 10 }
-    ]
+    return []
   },
   diffSnapshots: async (domain: string, v1: string, v2: string) => {
     if (window.pywebview?.api?.diff_snapshots) return await window.pywebview.api.diff_snapshots(domain, v1, v2)
-    return { success: true, changes: [{ file: 'docs.md', lines_added: 12, lines_removed: 4, diff_text: '@@ -1,4 +1,12 @@\n+ Added feature' }] }
+    return { success: true, changes: [] }
   },
   getDiagnostics: async () => {
     if (window.pywebview?.api?.get_diagnostics) return await window.pywebview.api.get_diagnostics()
@@ -138,7 +128,15 @@ export const pyApi = {
   },
   getSystemInfo: async () => {
     if (window.pywebview?.api?.get_system_info) return await window.pywebview.api.get_system_info()
-    return { version: '9.0.1', python: '3.13.13', platform: 'win32', library_dir: 'C:\\Users\\rohan\\.gitbook-downloader\\docs' }
+    return {
+      name: 'DocHarvest',
+      version: '10.0.1',
+      engine: 'DocHarvest Engine v10.0.1 (AST + FastMCP + fpdf2)',
+      author: 'Rohan Shetty',
+      python: '3.12.0',
+      platform: 'win32',
+      library_dir: '~/.gitbook-downloader/docs'
+    }
   },
   exportDoc: async (domain: string, format: string, customPath?: string) => {
     if (window.pywebview?.api?.export_doc) return await window.pywebview.api.export_doc(domain, format, customPath)

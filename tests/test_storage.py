@@ -475,3 +475,47 @@ class TestVersionManagerChangelog:
             assert "version" in entries[0]
             assert "added_lines" in entries[0]
             assert "removed_lines" in entries[0]
+
+
+class TestStorageManagerRename:
+    """Tests for StorageManager.rename_domain."""
+
+    def test_rename_existing_domain(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            sm.save_doc(
+                domain="old.example.com",
+                content="# Old Content",
+                url="https://old.example.com",
+                title="Old Title",
+                pages=5,
+                provider="gitbook",
+                new_pages=5,
+                size_kb=10.0,
+            )
+            assert sm.domain_exists("old.example.com")
+            assert not sm.domain_exists("new.example.com")
+
+            res = sm.rename_domain("old.example.com", "new.example.com")
+            assert res is True
+            assert not sm.domain_exists("old.example.com")
+            assert sm.domain_exists("new.example.com")
+
+            meta = sm.get_metadata("new.example.com")
+            assert meta is not None
+            assert meta["domain"] == "new.example.com"
+            assert meta["title"] == "Old Title"
+
+    def test_rename_nonexistent_domain(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            res = sm.rename_domain("does.not.exist", "new.name")
+            assert res is False
+
+    def test_rename_to_same_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            sm.save_doc(domain="same.com", content="C", url="u", title="T", pages=1, provider="generic", new_pages=1, size_kb=1.0)
+            res = sm.rename_domain("same.com", "same.com")
+            assert res is True
+

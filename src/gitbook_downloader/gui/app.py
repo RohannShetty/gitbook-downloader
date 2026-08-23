@@ -6,6 +6,7 @@ import os
 import sys
 from pathlib import Path
 
+from .. import __version__
 from .bridge import ApiBridge
 
 
@@ -21,8 +22,10 @@ def get_web_dir() -> Path:
     return Path(__file__).resolve().parent / "web"
 
 
-def launch_gui(title: str = "GitBook Downloader v9.0 Beta", debug: bool = False) -> None:
+def launch_gui(title: str | None = None, debug: bool = False) -> None:
     """Open the native Windows Desktop GUI application window."""
+    if title is None:
+        title = f"DocHarvest v{__version__}"
     try:
         import webview
     except ImportError as exc:

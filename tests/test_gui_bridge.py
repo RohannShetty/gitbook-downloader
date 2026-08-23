@@ -48,7 +48,10 @@ def test_bridge_detect_mocked(monkeypatch):
 def test_bridge_system_info():
     bridge = ApiBridge()
     info = bridge.get_system_info()
-    assert info["version"] == "9.0.1"
+    assert info["version"] == "10.0.1"
+    assert info["name"] == "DocHarvest"
+    assert "DocHarvest Engine" in info["engine"]
+    assert info["author"] == "Rohan Shetty"
     assert info["platform"] == sys.platform
     assert Path(info["library_dir"]).exists()
 
@@ -76,6 +79,19 @@ def test_bridge_list_library():
     bridge = ApiBridge()
     entries = bridge.list_library()
     assert isinstance(entries, list)
+
+
+def test_bridge_rename_domain(tmp_path):
+    from gitbook_downloader.storage import StorageManager
+    sm = StorageManager(base_dir=tmp_path)
+    sm.save_doc(domain="test.domain", content="# Content", url="u", title="T", pages=1, provider="generic", new_pages=1, size_kb=1.0)
+    bridge = ApiBridge(storage_manager=sm)
+
+    res = bridge.rename_domain("test.domain", "renamed.domain")
+    assert res["success"] is True
+    assert res["domain"] == "renamed.domain"
+    assert sm.domain_exists("renamed.domain")
+    assert not sm.domain_exists("test.domain")
 
 
 def test_bridge_export_doc_not_found(tmp_path):

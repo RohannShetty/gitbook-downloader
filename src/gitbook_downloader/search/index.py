@@ -321,6 +321,16 @@ class SearchIndex:
         finally:
             conn.close()
 
+    def rename_domain(self, old_domain: str, new_domain: str):
+        """Update domain name in the search index."""
+        conn = _get_connection(self.base_dir)
+        try:
+            conn.execute("UPDATE pages_meta SET domain = ? WHERE domain = ?", (new_domain, old_domain))
+            conn.execute("UPDATE domains SET name = ? WHERE name = ?", (new_domain, old_domain))
+            conn.commit()
+        finally:
+            conn.close()
+
     # ------------------------------------------------------------------
     # Stats
     # ------------------------------------------------------------------

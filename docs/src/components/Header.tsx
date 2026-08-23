@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenInstallModal }) => {
                 DocHarvest
               </span>
               <span className="px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-md">
-                v10.0.0
+                v10.0.1
               </span>
             </div>
             <span className="text-[11px] text-zinc-400 font-mono hidden sm:inline-block">

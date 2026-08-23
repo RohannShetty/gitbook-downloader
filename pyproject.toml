@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "10.0.0"
+version = "10.0.1"
 description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}
@@ -47,6 +47,7 @@ dev = [
 ]
 
 [project.scripts]
+docharvest = "gitbook_downloader.cli:main"
 gitbook-downloader = "gitbook_downloader.cli:main"
 gitbook-dl = "gitbook_downloader.cli:main"
 

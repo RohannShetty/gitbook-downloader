@@ -363,8 +363,8 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               <Download className="h-6 w-6 text-primary" />
               <span>Capture Studio</span>
             </h1>
-            <Badge variant="outline" className="text-xs font-mono font-medium border-primary/30 text-primary bg-primary/10">
-              v9.0 Engine
+            <Badge variant="outline" className="text-xs font-mono font-medium border-cyan-500/30 text-cyan-400 bg-cyan-500/10">
+              v10.0 Engine
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
