@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+import Link from 'next/link';
 import { Mail, ArrowUp } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, TwitterIcon } from './Icons';
 
@@ -47,16 +49,16 @@ export default function Footer() {
             </span>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <a href="#about" className="hover:text-foreground transition-colors">// about</a>
+                <Link href="/#about" className="hover:text-foreground transition-colors">// about</Link>
               </li>
               <li>
-                <a href="#projects" className="hover:text-foreground transition-colors">// projects</a>
+                <Link href="/#projects" className="hover:text-foreground transition-colors">// projects</Link>
               </li>
               <li>
-                <a href="#skills" className="hover:text-foreground transition-colors">// skills</a>
+                <Link href="/#skills" className="hover:text-foreground transition-colors">// skills</Link>
               </li>
               <li>
-                <a href="#blog" className="hover:text-foreground transition-colors">// blog</a>
+                <Link href="/#blog" className="hover:text-foreground transition-colors">// blog</Link>
               </li>
             </ul>
           </div>

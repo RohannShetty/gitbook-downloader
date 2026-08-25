@@ -29,19 +29,19 @@ export default function Navbar() {
 
         {/* Navigation links */}
         <nav className="hidden md:flex items-center gap-8 font-mono text-xs font-medium text-muted-foreground">
-          <Link href="#about" className="hover:text-foreground transition-colors">
+          <Link href="/#about" className="hover:text-foreground transition-colors">
             // about
           </Link>
-          <Link href="#projects" className="hover:text-foreground transition-colors">
+          <Link href="/#projects" className="hover:text-foreground transition-colors">
             // projects
           </Link>
-          <Link href="#skills" className="hover:text-foreground transition-colors">
+          <Link href="/#skills" className="hover:text-foreground transition-colors">
             // skills
           </Link>
-          <Link href="#blog" className="hover:text-foreground transition-colors">
+          <Link href="/#blog" className="hover:text-foreground transition-colors">
             // blog
           </Link>
-          <Link href="#github" className="hover:text-foreground transition-colors">
+          <Link href="/#github" className="hover:text-foreground transition-colors">
             // git-activity
           </Link>
         </nav>
