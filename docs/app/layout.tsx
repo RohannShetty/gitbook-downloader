@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DocHarvest — Turn Any Docs into LLM-Ready Markdown & RAG Datasets",
     description: "Universal documentation harvester for GitBook, Mintlify, Docusaurus, Nextra, and ReadMe. FastMCP server included.",
-    creator: "@rohannshetty",
+    creator: "@rohan__shetty",
   },
 };
 

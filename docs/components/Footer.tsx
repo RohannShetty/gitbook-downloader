@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Terminal, Heart, ArrowUp, Mail } from 'lucide-react';
-import { GithubIcon, LinkedinIcon } from './Icons';
+import { GithubIcon, LinkedinIcon, XIcon } from './Icons';
 
 export function Footer() {
   const scrollToTop = () => {
@@ -85,22 +85,31 @@ export function Footer() {
             
             <div className="flex gap-2">
               <a
-                href="https://github.com/RohannShetty/gitbook-downloader"
+                href="https://github.com/RohannShetty"
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
-                title="GitHub Repository"
+                title="GitHub Profile"
               >
                 <GithubIcon className="h-4 w-4" />
               </a>
               <a
-                href="https://linkedin.com/in/rohannshetty"
+                href="https://www.linkedin.com/in/rohan-shettyy/"
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
-                title="LinkedIn"
+                title="LinkedIn Profile"
               >
                 <LinkedinIcon className="h-4 w-4" />
+              </a>
+              <a
+                href="https://x.com/rohan__shetty"
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
+                title="X / Twitter"
+              >
+                <XIcon className="h-4 w-4" />
               </a>
               <a
                 href="mailto:shettyrohan2@gmail.com"
