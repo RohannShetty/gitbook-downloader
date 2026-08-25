@@ -53,6 +53,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         <script
+          async
+          src="https://startupbar.co/widget/loader.js"
+          data-startup-id="6e9a63c4-5bc5-4b8b-b297-37a9450c7f1f"
+        />
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
