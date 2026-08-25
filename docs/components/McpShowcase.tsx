@@ -1,0 +1,159 @@
+'use client';
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Cpu, Terminal, Copy, Check, Sparkles, Bot, ArrowRight } from 'lucide-react';
+
+const MCP_CONFIGS = {
+  cursor: {
+    title: "Cursor IDE",
+    filename: ".cursor/mcp.json",
+    snippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "python",
+      "args": ["-m", "gitbook_downloader.mcp_server"]
+    }
+  }
+}`
+  },
+  claude: {
+    title: "Claude Desktop",
+    filename: "claude_desktop_config.json",
+    snippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uvx",
+      "args": ["gitbook-downloader", "--mcp"]
+    }
+  }
+}`
+  },
+  windsurf: {
+    title: "Windsurf / Codeium",
+    filename: "~/.codeium/windsurf/mcp_config.json",
+    snippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}`
+  }
+};
+
+const MCP_TOOLS = [
+  { name: "docharvest_search", desc: "SQLite FTS5 BM25 keyword query across all harvested documentation." },
+  { name: "docharvest_read_page", desc: "Retrieves clean markdown article for a given URL or title anchor." },
+  { name: "docharvest_crawl", desc: "Initiates background AST crawl on any external doc portal." },
+  { name: "docharvest_export_rag", desc: "Generates chunked JSONL vector payload for vector embeddings." },
+];
+
+export function McpShowcase() {
+  const [selectedClient, setSelectedClient] = useState<keyof typeof MCP_CONFIGS>('cursor');
+  const [copied, setCopied] = useState(false);
+
+  const current = MCP_CONFIGS[selectedClient];
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(current.snippet);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <section id="mcp" className="border-b border-border bg-card/20 py-20 scroll-mt-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Title */}
+        <div className="space-y-3 mb-12">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-cyan-400 font-bold tracking-widest uppercase flex items-center gap-1.5">
+              <Bot className="h-4 w-4 text-cyan-400" />
+              // 05 / MODEL CONTEXT PROTOCOL (FASTMCP)
+            </span>
+            <div className="h-px flex-1 bg-border/60" />
+          </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Give Cursor &amp; Claude Native Documentation Powers
+          </h2>
+          <p className="text-sm text-muted-foreground font-mono max-w-2xl">
+            Connect DocHarvest to your AI agent via FastMCP stdio in 30 seconds. Your agent gains tools to crawl, index, and query external documentation on demand.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Column: Config Generator */}
+          <div className="lg:col-span-7 space-y-4">
+            
+            {/* Client Selector Buttons */}
+            <div className="flex items-center gap-2">
+              {Object.entries(MCP_CONFIGS).map(([key, item]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedClient(key as any)}
+                  className={`px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all cursor-pointer ${
+                    selectedClient === key
+                      ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
+                      : 'border-border bg-card text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {item.title}
+                </button>
+              ))}
+            </div>
+
+            {/* Config Snippet Card */}
+            <div className="border border-border rounded-xl bg-[#09090d] shadow-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-zinc-950/80 font-mono text-[11px] text-muted-foreground">
+                <span className="text-cyan-400 font-bold">{current.filename}</span>
+                <button
+                  onClick={handleCopy}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer text-xs"
+                >
+                  {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                  <span>{copied ? 'Copied' : 'Copy JSON'}</span>
+                </button>
+              </div>
+
+              <div className="p-4 bg-[#07070a] font-mono text-xs leading-relaxed overflow-x-auto">
+                <pre className="text-zinc-300">
+                  <code>{current.snippet}</code>
+                </pre>
+              </div>
+            </div>
+
+            <div className="text-[11px] font-mono text-muted-foreground">
+              💡 Zero configuration needed. Once registered, ask your agent: <span className="text-foreground font-semibold">&quot;Search DocHarvest for OpenAlgo order payload schema.&quot;</span>
+            </div>
+
+          </div>
+
+          {/* Right Column: Native Agent Tools */}
+          <div className="lg:col-span-5 space-y-3">
+            <div className="font-mono text-xs font-bold text-foreground uppercase tracking-wider mb-2">
+              8 Available Agent Tool Endpoints:
+            </div>
+
+            <div className="space-y-2.5">
+              {MCP_TOOLS.map((tool) => (
+                <div key={tool.name} className="p-3.5 rounded-lg border border-border bg-card font-mono text-xs space-y-1 hover:border-cyan-500/30 transition-colors">
+                  <div className="text-cyan-400 font-bold">
+                    @{tool.name}()
+                  </div>
+                  <div className="text-muted-foreground text-[11px]">
+                    {tool.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  );
+}
