@@ -1,0 +1,29 @@
+---
+title: "DocHarvest (GitBook Downloader)"
+description: "Turn documentation portals into LLM-ready Markdown, vector RAG JSONL, and styled offline PDFs."
+category: "Developer Tooling"
+tags: ["Python", "React", "SQLite FTS5", "FastMCP"]
+featured: true
+githubUrl: "https://github.com/RohannShetty/gitbook-downloader"
+demoUrl: "https://rohannshetty.github.io/gitbook-downloader/"
+---
+
+## Problem Statement
+
+AI coding agents (like Cursor or Claude Code) and local LLMs require up-to-date documentation context to prevent hallucinations. Scrapy/curl scripts pull messy, unstructured HTML files with navbars, headers, and footers, which bloat the context window.
+
+## Approach
+
+DocHarvest parses GitBook, Mintlify, Docusaurus, and ReadTheDocs portals, extracts the main article contents, and transforms them into clean, structured Markdown, LLM-ready `llms.txt`, styled PDFs, and vector-ready JSONL files.
+
+## Technical Decisions
+
+1. **AST & SPA Scoping**: Integrated a custom BeautifulSoup AST filter that isolates documentation text from wrappers and templates. It auto-scopes crawl boundaries for SPA docs (e.g. `pi.dev`).
+2. **Cooperative Multi-Process Locks**: Implemented cross-platform PID locks (`win32` API and POSIX signals) to prevent concurrent crawlers from corrupting SQLite indices.
+3. **SQLite FTS5**: Leveraged FTS5 for local BM25 documentation index searches, enabling high-speed keyword queries.
+
+## Results & Impact
+
+- Scraped and clean-indexed `docs.openalgo.in` (364 pages) in **18.39 seconds**.
+- Formats context directly as RAG-ready vector datasets.
+- Released v10.0.1 with standalone binaries and native FastMCP server integration.

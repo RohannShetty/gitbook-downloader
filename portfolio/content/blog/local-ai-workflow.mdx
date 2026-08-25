@@ -1,0 +1,66 @@
+---
+title: "Optimizing Local AI Workflows with Customized Claude CLI Hooks"
+description: "A deep dive into reducing token costs and accelerating local AI context gathering by scripting codebase AST indexers."
+date: "2026-08-25"
+category: "AI"
+tags: ["AI Tools", "LLM", "Developer Tooling", "CLI"]
+---
+
+## The Cost of Context
+
+Large Language Models (LLMs) are only as smart as the context you feed them. When debugging a bug, dumping three 500-line files into Cursor or Claude Code consumes significant context window, inflating latency and cost.
+
+For a quantitative developer, local iteration speed is paramount. To solve this, I built a custom **Claude CLI hook** that queries codebase indexes locally using a lightweight AST parser.
+
+Here is how the workflow compiles context:
+
+```
+[User Request: "How is OpenAlgo handling ZeroMQ retry?"]
+                  │
+                  ▼
+          [Claude CLI Hook]
+                  │
+       ┌──────────┴──────────┐
+       ▼                     ▼
+[AST Signature Parser]    [Semantic Index Search]
+(Finds retry.py signatures) (Retrieves matching vectors)
+       │                     │
+       └──────────┬──────────┘
+                  ▼
+  [Merged Minimal Context Payload]
+                  │
+                  ▼
+         [Claude API Dispatch]
+```
+
+## Creating the Hook
+
+The CLI script intercepts user prompts. If a prompt references a codebase symbol, the CLI queries a local SQLite vector table and retrieves the matching code block.
+
+Here is a simplified Python representation of the token-saving parser:
+
+```python
+import ast
+
+def extract_signatures(filepath: str) -> str:
+    """Extract class/function signatures to avoid dumping full method bodies."""
+    with open(filepath, "r", encoding="utf-8") as f:
+        node = ast.parse(f.read(), filename=filepath)
+    
+    signatures = []
+    for child in node.body:
+        if isinstance(child, ast.FunctionDef):
+            args = [a.arg for a in child.args.args]
+            signatures.append(f"def {child.name}({', '.join(args)})")
+        elif isinstance(child, ast.ClassDef):
+            signatures.append(f"class {child.name}:")
+            
+    return "\n".join(signatures)
+```
+
+## Results
+
+By sending only structural signatures and semantically relevant code segments, I achieved:
+- **70% Token Savings**: Prompt payloads shrunk significantly.
+- **Improved Accuracy**: Limiting noise prevents the model from hallucinating or outputting unrelated logic.
+- **Offline Reliability**: The semantic search index runs completely locally on SQLite.

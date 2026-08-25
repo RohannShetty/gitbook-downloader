@@ -1,0 +1,30 @@
+---
+title: "ProjectOS"
+description: "Interactive task management and developer project lifecycle tracking dashboard."
+category: "Productivity Tools"
+tags: ["Next.js", "React", "Tailwind CSS", "Prisma"]
+featured: true
+githubUrl: "https://github.com/rohannshetty/projectos"
+demoUrl: ""
+---
+
+## Problem Statement
+
+Traditional project management tools like Jira or Trello are heavy, cluttered, and disconnected from the active developer workstation. Tasks become stale because developers must context-switch to update them manually.
+
+## Approach
+
+ProjectOS is a keyboard-driven, minimal developer cockpit. It runs locally and integrates with GitHub issues, local folder paths, and git commits to synchronize project status automatically.
+
+## Technical Decisions
+
+1. **Next.js App Router**: Used Next.js with React Server Components for instant page loading and server-side cache invalidation.
+2. **Prisma with SQLite**: Local SQLite engine managed via Prisma ORM for quick database migrations and type-safe schemas.
+3. **Keyboard-First Design**: Implemented CMD+K menus and keyboard shortcuts to allow complete navigation without touching the mouse.
+
+## Results & Impact
+
+- 100% keyboard-driven execution that matches the developer's CLI flow.
+- Instantly syncs local Git commits to issue cards.
+- Provides a clean, dark, distraction-free interface for single-developer sprints.
+---
