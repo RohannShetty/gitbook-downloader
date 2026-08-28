@@ -282,6 +282,39 @@ crawl_date: "2026-08-23T16:42:19Z"
 # Material for MkDocs
 
 > ℹ️ **Note:** Built with Python and modern CSS.`
+  },
+  {
+    id: "readthedocs",
+    name: "ReadTheDocs",
+    badge: "Sphinx / reStructuredText AST",
+    color: "from-teal-500/20 to-cyan-500/20 border-teal-500/30 text-teal-400",
+    sampleUrl: "https://docs.readthedocs.io/en/stable/",
+    heuristicMatch: "readthedocs-data + div.rst-content + div.document",
+    detectionPriority: 60,
+    description: "Converts Sphinx and ReadTheDocs portals. Handles multi-version flyouts, strips Sphinx search bars, and converts reStructuredText directive blocks to clean CommonMark.",
+    features: [
+      "Translates Sphinx directives (.. note::, .. code-block::) into Markdown blocks",
+      "Strips RTD flyout menus, search modals, and build version banners",
+      "Extracts full API signatures, method docstrings, and parameter tables",
+      "Preserves cross-page intersphinx reference links"
+    ],
+    rawHtmlSnippet: `<!-- Raw Scraper Output (41.3 KB Sphinx HTML) -->
+<div class="rst-content">
+  <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <h1>Read the Docs Documentation</h1>
+    <div class="admonition tip"><p class="admonition-title">Tip</p><p>Sphinx documentation builder.</p></div>
+  </div>
+</div>`,
+    cleanMarkdownSnippet: `---
+source_url: https://docs.readthedocs.io/en/stable/
+title: "Read the Docs Documentation"
+crawl_date: "2026-08-28T16:42:19Z"
+framework: "readthedocs"
+---
+
+# Read the Docs Documentation
+
+> 💡 **Tip:** Built with Sphinx documentation builder.`
   }
 ]
 

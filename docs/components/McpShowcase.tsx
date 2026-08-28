@@ -11,32 +11,45 @@ const MCP_CONFIGS = {
     snippet: `{
   "mcpServers": {
     "docharvest": {
-      "command": "python",
-      "args": ["-m", "gitbook_downloader.mcp_server"]
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
     }
   }
 }`
   },
   claude: {
-    title: "Claude Desktop",
+    title: "Claude Code / Desktop",
     filename: "claude_desktop_config.json",
     snippet: `{
   "mcpServers": {
     "docharvest": {
-      "command": "uvx",
-      "args": ["gitbook-downloader", "--mcp"]
+      "command": "uv",
+      "args": ["run", "docharvest", "mcp"]
     }
   }
 }`
   },
   windsurf: {
-    title: "Windsurf / Codeium",
+    title: "Windsurf",
     filename: "~/.codeium/windsurf/mcp_config.json",
     snippet: `{
   "mcpServers": {
     "docharvest": {
-      "command": "docharvest",
-      "args": ["--mcp"]
+      "command": "python",
+      "args": ["-m", "gitbook_downloader.mcp"]
+    }
+  }
+}`
+  },
+  vscode: {
+    title: "VS Code (Copilot)",
+    filename: ".vscode/mcp.json",
+    snippet: `{
+  "servers": {
+    "docharvest": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
     }
   }
 }`
@@ -44,10 +57,14 @@ const MCP_CONFIGS = {
 };
 
 const MCP_TOOLS = [
-  { name: "docharvest_search", desc: "SQLite FTS5 BM25 keyword query across all harvested documentation." },
-  { name: "docharvest_read_page", desc: "Retrieves clean markdown article for a given URL or title anchor." },
-  { name: "docharvest_crawl", desc: "Initiates background AST crawl on any external doc portal." },
-  { name: "docharvest_export_rag", desc: "Generates chunked JSONL vector payload for vector embeddings." },
+  { name: "search_docs", desc: "BM25 ranked full-text search with token-efficient ~200 token snippets." },
+  { name: "download_docs", desc: "Harvests any documentation URL into Markdown, book.md & llms.txt." },
+  { name: "query_doc_graph", desc: "Non-linear semantic concept navigation and prerequisite entity graphs." },
+  { name: "get_related_concepts", desc: "Retrieves symbols, API endpoints, and connected architectural concepts." },
+  { name: "get_doc", desc: "Reads full compiled book.md or targeted chapter markdown." },
+  { name: "list_domains", desc: "Lists all locally indexed and cached documentation portals." },
+  { name: "diff_versions", desc: "Calculates unified structural diffs between two snapshot versions." },
+  { name: "export_docs", desc: "Exports docset into Markdown, vector JSONL RAG chunks, or printable PDF." },
 ];
 
 export function McpShowcase() {

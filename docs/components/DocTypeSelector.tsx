@@ -29,7 +29,7 @@ export function DocTypeSelector() {
         </div>
 
         {/* Framework Selector Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mb-8">
           {DOC_FRAMEWORKS.map((framework) => {
             const isSelected = selectedFramework.id === framework.id;
             return (
