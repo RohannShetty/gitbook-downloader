@@ -67,7 +67,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-xs font-mono text-cyan-300"
             >
               <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-              <span>DocHarvest v11.0.0 — Local-First AI AST Compiler</span>
+              <span>DocHarvest v11.0.1 — Local-First AI AST Compiler</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -125,7 +125,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="flex flex-wrap items-center gap-3 pt-1 w-full"
             >
               <a
-                href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe"
+                href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-windows-latest.exe"
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-xs font-mono font-bold text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all duration-200"
               >
                 <WindowsIcon className="h-4 w-4" />
@@ -196,7 +196,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   <span className="ml-2 font-mono text-[11px] text-muted-foreground">
-                    docharvest@terminal — v11.0.0
+                    docharvest@terminal — v11.0.1
                   </span>
                 </div>
                 

@@ -366,7 +366,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               <span>Capture Studio</span>
             </h1>
             <Badge variant="outline" className="text-xs font-mono font-medium border-cyan-500/30 text-cyan-400 bg-cyan-500/10">
-              v10.0 Engine
+              v11.0 Engine
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
@@ -531,7 +531,22 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   type="button"
                   variant={renderSpa ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setRenderSpa(!renderSpa)}
+                  onClick={async () => {
+                    const nextState = !renderSpa
+                    setRenderSpa(nextState)
+                    if (nextState) {
+                      try {
+                        const status = await pyApi.isRenderAvailable()
+                        if (status && !status.available) {
+                          toast.warning("Playwright is not installed. To render client-side SPAs: pip install 'gitbook-downloader[render]' && playwright install chromium")
+                        } else {
+                          toast.info("Headless SPA rendering enabled via Playwright")
+                        }
+                      } catch {
+                        // ignore
+                      }
+                    }
+                  }}
                   disabled={isCapturing}
                   className={`h-7 px-2.5 text-xs gap-1.5 font-medium transition-all ${
                     renderSpa ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-xs" : "border-border text-muted-foreground hover:text-foreground"

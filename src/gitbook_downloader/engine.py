@@ -461,7 +461,12 @@ def stream_download(
             content = ""
             if render:
                 try:
-                    from .utils.renderer import HeadlessRenderer
+                    from .utils.renderer import HeadlessRenderer, is_render_available
+                    if not is_render_available():
+                        raise RuntimeError(
+                            "Headless rendering requires Playwright. Install with: "
+                            "pip install \"gitbook-downloader[render]\" && playwright install chromium"
+                        )
                     renderer = HeadlessRenderer()
                     html = renderer.render_url(url_to_fetch)
                     if hasattr(provider, "_extract_md_from_html"):
@@ -470,7 +475,13 @@ def stream_download(
                         from markdownify import markdownify as md
                         content = md(html, heading_style="ATX").strip()
                 except Exception as exc:
-                    logger.debug("Render failed for %s: %s; falling back to provider extract", url_to_fetch, exc)
+                    logger.warning("Render failed for %s: %s; falling back to provider extract", url_to_fetch, exc)
+                    if progress_callback:
+                        progress_callback({
+                            "phase": "error",
+                            "url": url_to_fetch,
+                            "error": f"Render failed: {exc}",
+                        })
                     content = provider.extract_content(url_to_fetch, session)
             else:
                 content = provider.extract_content(url_to_fetch, session)

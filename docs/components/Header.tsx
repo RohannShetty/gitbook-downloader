@@ -28,8 +28,8 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
               <span className="font-mono text-base font-extrabold tracking-tight text-foreground">
                 DocHarvest
               </span>
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                v11.0.0
+              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-mono text-cyan-400">
+                v11.0.1
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-mono tracking-wider">

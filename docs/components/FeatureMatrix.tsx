@@ -34,7 +34,7 @@ export function FeatureMatrix() {
                   Engine Capability
                 </th>
                 <th className="p-4 sm:p-5 text-cyan-400 font-bold bg-cyan-500/5 text-center">
-                  DocHarvest v11.0.0
+                  DocHarvest v11.0.1
                 </th>
                 <th className="p-4 sm:p-5 text-zinc-400 font-semibold text-center hidden sm:table-cell">
                   Raw Scrapers (curl/Scrapy)

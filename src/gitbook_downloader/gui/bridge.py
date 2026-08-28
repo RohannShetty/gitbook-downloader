@@ -705,10 +705,18 @@ class ApiBridge:
         return {
             "name": "DocHarvest",
             "version": __version__,
-            "engine": f"DocHarvest Engine v{__version__} (AST + FastMCP + fpdf2)",
+            "engine": f"DocHarvest Engine v{__version__} (AST + FastMCP v2 + fpdf2)",
             "author": "Rohan Shetty",
             "python": sys.version.split()[0],
             "platform": sys.platform,
             "library_dir": str(self._storage.base),
             "cwd": str(Path.cwd()),
         }
+
+    def is_render_available(self) -> dict[str, Any]:
+        """Check if Playwright headless browser rendering is installed and available."""
+        try:
+            from ..utils.renderer import is_render_available
+            return {"available": is_render_available()}
+        except Exception:
+            return {"available": False}

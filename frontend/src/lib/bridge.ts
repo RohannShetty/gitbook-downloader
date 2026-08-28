@@ -51,6 +51,7 @@ declare global {
         get_diagnostics: () => Promise<any>
         get_system_info: () => Promise<any>
         get_lock_status: (domain?: string) => Promise<any>
+        is_render_available: () => Promise<any>
         export_doc: (domain: string, format: string, customPath?: string) => Promise<any>
       }
     }
@@ -132,11 +133,13 @@ export const pyApi = {
       name: 'DocHarvest',
       version: '11.0.0',
       engine: 'DocHarvest Engine v11.0.0 (AST + FastMCP v2 + fpdf2)',
-      author: 'Rohan Shetty',
-      python: '3.12.0',
       platform: 'win32',
       library_dir: '~/.gitbook-downloader/docs'
     }
+  },
+  isRenderAvailable: async () => {
+    if (window.pywebview?.api?.is_render_available) return await window.pywebview.api.is_render_available()
+    return { available: false }
   },
   exportDoc: async (domain: string, format: string, customPath?: string) => {
     if (window.pywebview?.api?.export_doc) return await window.pywebview.api.export_doc(domain, format, customPath)

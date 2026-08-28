@@ -506,10 +506,16 @@ def capture(
                     "The target site blocked static HTTP requests."
                 )
             elif is_spa:
-                warnings.append(
-                    "No content was captured for this source. This documentation site appears to be "
-                    "client-rendered JavaScript (SPA) — try --render to execute JavaScript with a headless browser."
-                )
+                if options.render:
+                    warnings.append(
+                        "No content was captured for this source despite headless rendering (--render) being enabled. "
+                        "The target page did not render content within the timeout, or Playwright/Chromium failed to launch."
+                    )
+                else:
+                    warnings.append(
+                        "No content was captured for this source. This documentation site appears to be "
+                        "client-rendered JavaScript (SPA) — try --render to execute JavaScript with a headless browser."
+                    )
             else:
                 warnings.append("No content was captured for this source.")
 

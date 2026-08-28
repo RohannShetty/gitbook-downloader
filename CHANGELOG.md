@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.1] - 2026-08-28
+
+### 🛠️ Fixed & Improved: Playwright Error Handling, Capability Check & Badge Synchronization
+
+- **Loud Playwright Rendering Diagnostics & Error Propagation**:
+  - Fixed an issue in `engine.py` where Playwright missing errors were caught silently during `--render` mode, causing unexpected fallback to static scraping.
+  - When `--render` is active and Playwright/Chromium is unavailable, the engine now immediately reports the missing dependency and provides the exact installation command.
+- **Context-Aware SPA Warnings in `api.py`**:
+  - Differentiated zero-page capture warnings when `--render` is active versus when static capture is attempted, preventing recursive "try --render" suggestions when `--render` was already used.
+- **Dynamic Render Capability Check in Desktop GUI**:
+  - Added `is_render_available` method to the PyWebView API bridge and client.
+  - Toggling `Headless SPA (ON)` now verifies local Playwright availability in real time and prompts with actionable installation steps if needed.
+- **Engine Badge & Version Consistency**:
+  - Synchronized `CaptureStudio.tsx`, `AppSidebar.tsx`, `AboutModal.tsx`, `OnboardingTour.tsx`, and `bridge.ts` to `v11.0.1`.
+
+---
+
 ## [11.0.0] - 2026-08-28
 
 ### 🚀 Major Architectural Rehaul: Impeccable shadcn/ui Desktop, MCP v2 Protocol, Semantic DocGraph & 8 Verified Providers
