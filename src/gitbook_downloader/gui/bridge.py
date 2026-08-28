@@ -162,6 +162,7 @@ class ApiBridge:
         workers = int(options.get("workers", 5) or 5)
         timeout = float(options.get("timeout", 15.0) or 15.0)
         snapshot = bool(options.get("snapshot", True))
+        render = bool(options.get("render", False))
 
         output_mode = str(options.get("output_mode", "library") or "library")
         if output_mode not in ("library", "both", "local"):
@@ -176,6 +177,7 @@ class ApiBridge:
             timeout=timeout,
             snapshot=snapshot,
             output_mode=output_mode,
+            render=render,
             cancel_check=lambda: self._cancel_event.is_set(),
         )
 
@@ -221,6 +223,18 @@ class ApiBridge:
             try:
                 result = capture(url, capture_opts, progress=on_progress)
                 duration = time.monotonic() - start_time
+
+                # Emit warnings to JS progress log
+                for warning_msg in result.warnings:
+                    self._emit_to_js(
+                        "onCaptureProgress",
+                        {
+                            "kind": "failed" if result.pages_captured == 0 else "warn",
+                            "message": f"⚠ {warning_msg}",
+                            "elapsed": round(duration, 1),
+                        },
+                    )
+
                 self._last_run = {
                     "url": url,
                     "provider": result.provider,
@@ -238,7 +252,8 @@ class ApiBridge:
                 self._emit_to_js(
                     "onCaptureDone",
                     {
-                        "success": True,
+                        "success": result.pages_captured > 0,
+                        "error": result.warnings[0] if (result.pages_captured == 0 and result.warnings) else None,
                         "result": self._last_run,
                         "pages_downloaded": result.pages_captured,
                         "stats": stats,

@@ -69,14 +69,24 @@ class HeadlessRenderer:
                 # Navigate with domcontentloaded
                 page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
 
-                # Wait for main content selector or network idle
+                # Wait for network idle state (essential for client-rendered React/Vite SPAs)
                 try:
-                    target_selector = wait_selector or "main, article, div.content, div.md-content, [role='main']"
-                    page.wait_for_selector(target_selector, timeout=min(timeout_ms, 7000))
+                    page.wait_for_load_state("networkidle", timeout=min(timeout_ms, 8000))
                 except Exception:
-                    # Best-effort wait
+                    pass
+
+                # Wait for main content selector or populated text
+                if wait_selector:
                     try:
-                        page.wait_for_load_state("networkidle", timeout=3000)
+                        page.wait_for_selector(wait_selector, timeout=min(timeout_ms, 6000))
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        page.wait_for_function(
+                            "() => (document.querySelector('main, article, div.content, div.md-content, [role=\"main\"], div#root')?.innerText?.trim().length || 0) > 60",
+                            timeout=min(timeout_ms, 6000),
+                        )
                     except Exception:
                         pass
 

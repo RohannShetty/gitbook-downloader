@@ -72,6 +72,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
   const [pathScope, setPathScope] = useState<string>("")
   const [excludePaths, setExcludePaths] = useState<string>("")
   const [outputMode, setOutputMode] = useState<string>("library")
+  const [renderSpa, setRenderSpa] = useState<boolean>(false)
 
   // Batch Queue
   const [batchUrls, setBatchUrls] = useState<string[]>([])
@@ -260,6 +261,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
       exclude_paths: excludePaths.trim() || null,
       output_mode: outputMode || "library",
       site_versions: selectedVersions.length > 0 ? selectedVersions : null,
+      render: renderSpa,
     }
 
     try {
@@ -525,6 +527,21 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               </div>
 
               <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant={renderSpa ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setRenderSpa(!renderSpa)}
+                  disabled={isCapturing}
+                  className={`h-7 px-2.5 text-xs gap-1.5 font-medium transition-all ${
+                    renderSpa ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-xs" : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Execute client-side JavaScript before extracting markdown using Playwright (required for dynamic SPAs like omp.sh)"
+                >
+                  <Zap className={`h-3 w-3 ${renderSpa ? "text-amber-300" : "text-muted-foreground"}`} />
+                  <span>Headless SPA ({renderSpa ? "ON" : "OFF"})</span>
+                </Button>
+
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground">Concurrency:</span>
                   <select
@@ -542,6 +559,23 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Smart SPA Hint Banner */}
+            {url.includes("omp.sh") && !renderSpa && (
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-300 animate-in fade-in-50">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  <span><strong>SPA Detected:</strong> <code>omp.sh</code> is a client-rendered JavaScript SPA. Enable Headless SPA mode for complete rendering.</span>
+                </span>
+                <Button 
+                  size="sm" 
+                  onClick={() => setRenderSpa(true)} 
+                  className="h-6 text-[11px] px-2.5 bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 ml-2"
+                >
+                  Enable SPA Mode
+                </Button>
+              </div>
+            )}
 
             {/* Advanced Scoping Accordion */}
             <Accordion type="single" collapsible className="w-full">

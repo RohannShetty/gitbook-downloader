@@ -70,7 +70,7 @@ _FLATTEN_SECTIONS = frozenset({"defaults", "download", "output", "capture"})
 # Keys understood by CaptureOptions.
 _CAPTURE_OPTION_KEYS = frozenset({
     "workers", "max_pages", "path_scope", "exclude_paths", "site_versions",
-    "output_mode", "local_dir", "snapshot", "timeout",
+    "output_mode", "local_dir", "snapshot", "timeout", "render",
 })
 
 
@@ -264,6 +264,7 @@ def capture_options_from_config(
         if local_dir_raw else None,
         snapshot=bool(merged.get("snapshot", True)),
         timeout=float(merged.get("timeout") or 20.0),
+        render=bool(merged.get("render", False)),
     )
 
 
