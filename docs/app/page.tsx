@@ -2,6 +2,7 @@ import React from 'react';
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { DocTypeSelector } from '@/components/DocTypeSelector';
+import { AgentEcosystemShowcase } from '@/components/AgentEcosystemShowcase';
 import { OutputContract } from '@/components/OutputContract';
 import { ExportStudioPreview } from '@/components/ExportStudioPreview';
 import { FeatureMatrix } from '@/components/FeatureMatrix';
@@ -22,33 +23,37 @@ export default async function Page() {
     <ClientContainer githubData={githubData}>
       {/* 1. Header is rendered in ClientContainer to manage install modal state */}
       <main>
-        {/* 2. Hero with interactive terminal demo */}
-        {/* 3. DocTypeSelector */}
+        {/* 2. Hero with interactive terminal demo (rendered inside ClientContainer) */}
+        
+        {/* 3. Supported AI Agent & IDE Ecosystem Directory */}
+        <AgentEcosystemShowcase />
+
+        {/* 4. Framework Intelligence & AST Heuristic Inspection */}
         <DocTypeSelector />
 
-        {/* 4. Four-Part Output Contract */}
+        {/* 5. Four-Part Output Contract */}
         <OutputContract />
 
-        {/* 5. Export Studio Code Inspection */}
+        {/* 6. Export Studio Code Inspection */}
         <ExportStudioPreview />
 
-        {/* 6. Capability Comparison Matrix */}
+        {/* 7. Capability Comparison Matrix vs Raw Scrapers & Cloud APIs */}
         <FeatureMatrix />
 
-        {/* 7. FastMCP Agent Tooling Showcase */}
+        {/* 8. FastMCP Agent Tooling Showcase */}
         <McpShowcase />
 
-        {/* 8. Three Persona Workflows */}
+        {/* 9. Three Persona Workflows */}
         <PersonaShowcase />
 
-        {/* 9. Live GitHub Release Feed & Telemetry */}
+        {/* 10. Live GitHub Release Feed & Telemetry */}
         <GithubReleaseFeed data={githubData} />
 
-        {/* 10. Frequently Asked Questions */}
+        {/* 11. Frequently Asked Questions */}
         <FaqSection />
       </main>
 
-      {/* 11. Footer */}
+      {/* 12. Footer */}
       <Footer />
     </ClientContainer>
   );

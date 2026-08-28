@@ -88,7 +88,7 @@ export function McpShowcase() {
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-cyan-400 font-bold tracking-widest uppercase flex items-center gap-1.5">
               <Bot className="h-4 w-4 text-cyan-400" />
-              // 05 / MODEL CONTEXT PROTOCOL (FASTMCP)
+              <span>Model Context Protocol (FastMCP v2)</span>
             </span>
             <div className="h-px flex-1 bg-border/60" />
           </div>
@@ -111,7 +111,7 @@ export function McpShowcase() {
                 <button
                   key={key}
                   onClick={() => setSelectedClient(key as any)}
-                  className={`px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                     selectedClient === key
                       ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
                       : 'border-border bg-card text-muted-foreground hover:text-foreground'

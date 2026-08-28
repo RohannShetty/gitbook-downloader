@@ -1,8 +1,8 @@
-# DocHarvest — X (Twitter) 7-Tweet Visual Launch Thread
+# DocHarvest v11 — X (Twitter) Viral Launch Thread
 
 > **Launch Day Thread Copy for @X / Twitter**  
 > **Posting Schedule:** Tuesday / Wednesday at 06:00 AM PST (14:00 UTC)  
-> **Target Audience:** AI Engineers, LLM Developers, RAG Practitioners, Open Source Enthusiasts  
+> **Target Audience:** AI Engineers, Cursor & Claude Code Users, OpenCode/Pi Devs, RAG Architects, Open Source Practitioners  
 > **Goal:** Drive GitHub Stars, PyPI installations, and showcase site traffic.
 
 ---
@@ -11,138 +11,145 @@
 
 | Tweet # | Theme / Objective | Key Content Hook | Media / Visual Asset Attached |
 |---|---|---|---|
-| **Tweet 1** | The Hook & Solution | The 3-hour copy-paste pain; Meet DocHarvest (1-click docs to RAG/PDF). | `assets/demo-capture.gif` (15s terminal recording) |
-| **Tweet 2** | The Core Problem | Why `wget` & raw web scrapers fail (85% token waste, broken code). | `assets/comparison-html-vs-markdown.png` (Side-by-side) |
-| **Tweet 3** | Invisible Intelligence | Auto-detection (GitBook, Mintlify, Docusaurus) & direct `.md` probing. | Code snippet / Provider detection diagram |
-| **Tweet 4** | Four-Part Output Contract | Deterministic outputs: `pages/`, `book.md`, `llms.txt`, and vector `jsonl`. | ASCII tree diagram / Screenshot of output folder |
-| **Tweet 5** | AI Agent FastMCP Server | Wire directly to Cursor & Claude Code via Model Context Protocol. | `assets/cursor-mcp-demo.png` (Cursor IDE integration) |
-| **Tweet 6** | Desktop GUI & SQLite FTS5 | React 18 + shadcn Desktop GUI, radial telemetry, pure-Python PDF. | `assets/capture_studio.png` (Capture Studio UI) |
-| **Tweet 7** | CTA & Community Question | Free, MIT, `pip install gitbook-downloader` or `.exe`, GitHub link. | `assets/social-preview.png` (Brand card) |
+| **Tweet 1** | The Hook & Solution | Your AI agent burns 89% of its context on HTML noise. Meet DocHarvest. | `assets/demo-capture.gif` (15s terminal recording) |
+| **Tweet 2** | The Token Economy Pain | Why `curl` & raw scrapers fail (40KB HTML soup vs 2KB clean AST markdown). | `assets/comparison-html-vs-markdown.png` (Side-by-side) |
+| **Tweet 3** | Supported Agent Ecosystem | 1-Click FastMCP v2 for Cursor, Claude Code, OpenCode, Pi, Windsurf & Codex. | `assets/cursor-mcp-demo.png` (Agent integration grid) |
+| **Tweet 4** | 8 Dedicated AST Frameworks | GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe & JS SPAs. | Framework detection logs |
+| **Tweet 5** | The Four-Part Output Contract | Deterministic outputs: `pages/`, `book.md`, `llms.txt`, and vector `dataset.jsonl`. | ASCII tree diagram |
+| **Tweet 6** | Local-First vs Cloud Scraper APIs | Why pay Firecrawl/Jina per page when you can run 100% free locally with SQLite BM25? | Comparison chart |
+| **Tweet 7** | Desktop GUI & Printable PDFs | React 18 + shadcn Desktop GUI, pure-Python PDF handbook (zero C-deps). | `assets/capture_studio.png` |
+| **Tweet 8** | CTA & GitHub Star Callout | Free, MIT, `pip install gitbook-downloader` or Windows `.exe`, GitHub link. | `assets/social-preview.png` |
 
 ---
 
 ## Complete Thread Copy
 
-### 🧵 Tweet 1: The Hook & Announcement
+### 🧵 Tweet 1: The Hook & Problem Framing
 
 ```tweet
-I spent 3 hours copy-pasting API docs into Cursor.
+Your AI coding agent is burning 89% of its context window on navigation HTML, cookie banners, and React hydration scripts.
 
-Page 40 of 673, I gave up and built a tool instead.
+When you ask Cursor, Claude Code, or OpenCode to read documentation with curl, it receives 40KB of noise instead of code.
 
-Meet DocHarvest (formerly gitbook-downloader): Turn ANY documentation site into LLM-ready Markdown, vector RAG datasets & offline PDF books in 1 command.
+Meet DocHarvest (package: gitbook-downloader): The local-first doc compiler & FastMCP v2 server.
 
-100% local. Free. Open source. 🚀👇
+Turn any documentation portal into pure LLM context, vector RAG datasets & offline books in seconds.
 
-[VISUAL: Attach assets/demo-capture.gif — 15-second high-speed recording of terminal running `gitbook-dl capture https://docs.openalgo.in/` showing 673 pages captured in 18s and generating book.md, llms.txt, and exports/]
+100% local. Free. MIT. 🚀👇
 ```
 
 ---
 
-### 🧵 Tweet 2: The Core Problem with Web Scraping Docs
+### 🧵 Tweet 2: The Context Token Waste Comparison
 
 ```tweet
-Why feeding web docs to LLMs is broken today:
+Why scraping docs with basic web scrapers ruins agent accuracy:
 
-❌ wget/curl dumps raw HTML (80% wasted tokens on navbars, headers & cookie popups)
-❌ Fragile scrapers break code indentation & drop tables
-❌ Dynamic SPAs fool basic crawlers into link loops
-❌ Cloud scraping APIs charge $/page and keep your data
+❌ curl/wget dumps 40KB+ HTML boilerplate (exhausts 128k context windows)
+❌ Broken indentation in multi-language code snippets
+❌ Client-rendered JavaScript SPAs return blank white shells
+❌ Paid cloud scraper APIs charge $0.05/page and send private docs to third parties
 
-[VISUAL: Attach assets/comparison-html-vs-markdown.png — High-contrast graphic showing 45KB of messy HTML boilerplate with red highlights vs 2.1KB of pristine DocHarvest Markdown with green highlights]
+DocHarvest uses 8 dedicated AST extractors to isolate article content and probe author-original .md endpoints directly.
 ```
 
 ---
 
-### 🧵 Tweet 3: Invisible Intelligence & Platform Auto-Detection
+### 🧵 Tweet 3: Plug-and-Play FastMCP v2 for 15+ Coding Agents
 
 ```tweet
-DocHarvest requires ZERO custom scraping scripts:
+DocHarvest runs a native FastMCP v2 server over stdio. 
 
-⚡ Auto-detects GitBook, Mintlify, Docusaurus, ReadTheDocs, Nextra & generic docs
-⚡ Direct .md probing retrieves pristine author markdown straight from the source
-⚡ Bounded BFS crawler locks strictly onto the doc root (no link bleeding)
+One config snippet gives your favorite agent 10 native tools to crawl, index, and query documentation on demand:
 
-[VISUAL: Code snippet box showing auto-detection logs:]
-❯ gitbook-dl capture https://docs.anthropic.com/
-[14:02:01] ⚡ Probing documentation framework...
-[14:02:02] ✓ Provider detected: Mintlify (MDX direct probe active)
-[14:02:03] 🔒 BFS crawler locked to subpath: /en/docs/
+⚡ @cursor_run
+⚡ @ClaudeAI Code & Desktop
+⚡ OpenCode
+⚡ Pi Coding Agent & Oh My Pi (omp.sh)
+⚡ @codeiumdev Windsurf
+⚡ VS Code (Cline / Roo Code / Copilot)
+⚡ OpenAI Codex CLI & CommandCode
+⚡ Kilo Code & Grok Build
+
+Your agent searches indexed docs via BM25 in <15ms without copy-pasting.
 ```
 
 ---
 
-### 🧵 Tweet 4: The Four-Part Output Contract
+### 🧵 Tweet 4: Invisible AST Intelligence Across Frameworks
 
 ```tweet
-Every capture produces a deterministic Four-Part Output Contract:
+DocHarvest auto-detects documentation platforms with zero manual regex scripts:
 
-📁 pages/**/*.md: Clean modular markdown with SHA-256 YAML frontmatter
-📖 book.md: Single consolidated handbook with auto-generated TOC
-📄 llms.txt: Standardized AI agent discovery manifest
-📊 exports/*.jsonl: Pre-chunked RAG datasets ready for ChromaDB/Pinecone
-
-[VISUAL: ASCII Output Tree Diagram showing deterministic artifact structure]
+⚡ GitBook — Traverses multi-version dropdowns (/v/v2.0/) & probes raw .md endpoints
+⚡ Mintlify — Filters MDX components (<Accordion>, <ParamField>) to clean markdown
+⚡ Docusaurus — Isolates <article> DOM, expands React tabs & callouts
+⚡ Nextra & VitePress — Extracts navigation trees and code group tabs
+⚡ MkDocs & ReadTheDocs — Unfolds search indices and Sphinx directives
+⚡ Dynamic SPAs — Opt-in Playwright headless engine (--render)
 ```
 
 ---
 
-### 🧵 Tweet 5: Native FastMCP Server for Cursor & Claude Code
+### 🧵 Tweet 5: The Four-Part Output Contract
 
 ```tweet
-DocHarvest includes a native Model Context Protocol (FastMCP) server.
+Every crawl outputs a predictable four-part matrix:
 
-You can connect it directly to @cursor_run or @ClaudeAI Code:
-Your AI agent can autonomously discover, search, and read external documentation on the fly without leaving your editor.
+1️⃣ pages/**/*.md — Modular markdown with SHA-256 YAML frontmatter
+2️⃣ book.md — Consolidated single handbook with auto-generated TOC
+3️⃣ llms.txt — Standardized AI agent context discovery manifest
+4️⃣ dataset.jsonl & handbook.pdf — Vector RAG chunks + pure-Python printable PDF
 
-Just run:
-`gitbook-dl mcp`
-
-```json
-{
-  "mcpServers": {
-    "docharvest": {
-      "command": "gitbook-dl",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-[VISUAL: Attach assets/cursor-mcp-demo.png — Screenshot of Cursor IDE invoking the `search_docs` tool and reading a local doc page]
+Direct drop-in for LangChain, LlamaIndex, ChromaDB, and Claude Project Knowledge.
 ```
 
 ---
 
-### 🧵 Tweet 6: Standalone Desktop GUI & Offline Knowledge Base
+### 🧵 Tweet 6: The Local-First Firecrawl Powerhouse
 
 ```tweet
-Don't want to use the CLI? 
+Stop paying cloud reader APIs per-page scraping subscriptions.
 
-DocHarvest comes with a standalone Desktop GUI (React 18 + shadcn/ui):
-✨ Live radial progress ring & crawl logs
-🔍 Embedded SQLite FTS5 full-text search (BM25 ranking)
-📄 Pure-Python printable PDF compiler (fpdf2, zero C-deps)
-📊 Version snapshot diffing (`gitbook-dl diff`)
-
-[VISUAL: Attach assets/capture_studio.png & assets/document_library.png — Crisp screenshot of the dark-mode Desktop GUI with radial progress gauge]
+DocHarvest runs entirely on your machine:
+🔒 100% Local & Private (Zero cloud telemetry)
+⚡ 20 pages/sec parallel throughput
+🔍 Embedded SQLite FTS5 BM25 search database
+📄 Pure-Python PDF handbook generator (zero WeasyPrint/wkhtmltopdf C-deps)
+🔄 Semver snapshot diffing across crawls (gitbook-dl diff)
 ```
 
 ---
 
-### 🧵 Tweet 7: CTA, Links & Community Question
+### 🧵 Tweet 7: Desktop GUI & Standalone Binaries
 
 ```tweet
-DocHarvest is 100% free, MIT-licensed, and runs completely offline.
+Prefer a visual desktop interface?
+
+DocHarvest includes a standalone Desktop GUI:
+✨ Live radial crawl progress gauge & real-time telemetry
+📊 Visual document library with sub-15ms search
+⚙️ 1-click FastMCP config installer for Cursor and Claude
+💻 Portable Windows .exe, macOS & Linux standalone binaries
+```
+
+---
+
+### 🧵 Tweet 8: CTA, Links & Community Callout
+
+```tweet
+DocHarvest is 100% free and open source under the MIT license.
 
 📦 Install via pip:
 pip install gitbook-downloader
 
-💻 Or download standalone Windows .exe / Linux binaries:
-⭐ GitHub: https://github.com/RohannShetty/gitbook-downloader
-🌐 Showcase: https://rohannshetty.github.io/gitbook-downloader/
+⚡ Run via uvx:
+uvx gitbook-downloader --gui
 
-What documentation platform should we add native extractors for next? Let me know below! 👇
+⭐ Star on GitHub: https://github.com/RohannShetty/gitbook-downloader
+🌐 Interactive Showcase: https://rohannshetty.github.io/gitbook-downloader/
+
+What documentation site should we test next? Drop your favorite library in the replies! 👇
 ```
 
 ---
@@ -150,16 +157,9 @@ What documentation platform should we add native extractors for next? Let me kno
 ## Launch Day Engagement & Reply Playbook
 
 ### 1. Immediate Follow-up Quote Tweet (Post at T+30 mins)
-> *"P.S. If you're building local RAG with LangChain, LlamaIndex, or Ollama, the exported JSONL chunks include section anchors and cryptographic content hashes so your embeddings are always cited back to exact source URLs. Star the repo on GitHub to support open-source AI tooling!"*
+> *"P.S. If you're building local RAG with LangChain, LlamaIndex, or Ollama, the exported JSONL chunks include token counts (cl100k_base compatible) and cryptographic content hashes so your embeddings are always cited back to exact source URLs. Star the repo on GitHub to support open-source tooling!"*
 
 ### 2. Community Tagging Strategy (Post in Reply Thread)
 - Tag relevant ecosystems: `@cursor_run`, `@LangChainAI`, `@llama_index`, `@AnthropicAI`, `@OpenAI`, `@MistralAI`.
-- Include relevant hashtags: `#RAG #LocalLLM #OpenSource #Python #DevTools #CursorAI #ClaudeCode #FastMCP`
+- Include relevant hashtags: `#RAG #LocalLLM #OpenSource #Python #DevTools #CursorAI #ClaudeCode #FastMCP #OpenCode`
 
-### 3. Rapid Reply Templates for Common Inquiries
-- **"Does it support JS-rendered SPAs?"**  
-  *Yes! DocHarvest probes raw `.md` endpoints first, reads `/sitemap.xml` and `/llms.txt`, and uses fallback DOM selector chains to extract structured article content without spinning up heavy browser engines.*
-- **"How does PDF generation work?"**  
-  *It uses a custom pure-Python engine built on `fpdf2`. It formats code blocks with syntax styling, headers, and page numbering with zero external C-dependencies (no WeasyPrint or wkhtmltopdf).*
-- **"Can I run this in CI/CD?"**  
-  *Yes, DocHarvest is a lightweight CLI with process-aware atomic domain locks. You can easily script nightly scrapes to track documentation drift via `gitbook-dl diff`.*

@@ -26,9 +26,19 @@ const TERMINAL_LOGS = [
   { text: "✨ FastMCP server listening on stdio. Ready for Cursor & Claude Code!", color: "text-cyan-300 font-bold" }
 ];
 
+const HERO_AGENTS = [
+  { id: 'cursor', name: 'Cursor' },
+  { id: 'claude', name: 'Claude Code' },
+  { id: 'opencode', name: 'OpenCode' },
+  { id: 'pi', name: 'Pi / Omp.sh' },
+  { id: 'windsurf', name: 'Windsurf' },
+  { id: 'codex', name: 'Codex CLI' }
+];
+
 export function Hero({ onOpenInstallModal }: HeroProps) {
+  const [selectedAgentId, setSelectedAgentId] = useState('cursor');
   const [copiedPip, setCopiedPip] = useState(false);
-  const [activeTab, setActiveTab] = useState<'terminal' | 'ast' | 'vector'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'ast' | 'vector' | 'mcp-stdio'>('terminal');
 
   const copyPipCommand = () => {
     navigator.clipboard.writeText('pip install gitbook-downloader');
@@ -56,8 +66,8 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.4 }}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-xs font-mono text-cyan-300"
             >
-              <Sparkles className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
-              <span>DocHarvest v11.0.0 — AST Compiler &amp; FastMCP v2</span>
+              <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+              <span>DocHarvest v11.0.0 — Local-First AI AST Compiler</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -67,7 +77,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-foreground"
             >
-              Turn any documentation into <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">LLM-ready context</span> &amp; offline books.
+              Turn any documentation into <span className="text-primary font-bold">pure context</span> for Cursor, Claude Code &amp; OpenCode.
             </motion.h1>
 
             {/* Subtitle */}
@@ -77,15 +87,42 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground font-mono leading-relaxed"
             >
-              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; ReadTheDocs with AST precision. Compile clean Markdown, vector RAG JSONL, <code className="text-cyan-300">llms.txt</code>, and printable PDFs with zero HTML noise.
+              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan-300">FastMCP v2</code> or offline PDFs.
             </motion.p>
+
+            {/* Quick Agent Selector Pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="w-full space-y-2 pt-1"
+            >
+              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block">
+                1-Click Connect to Your Favorite Coding Harness:
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {HERO_AGENTS.map((agent) => (
+                  <button
+                    key={agent.id}
+                    onClick={() => setSelectedAgentId(agent.id)}
+                    className={`px-2.5 py-1 rounded-md border font-mono text-[0.70rem] font-semibold transition-all cursor-pointer ${
+                      selectedAgentId === agent.id
+                        ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300'
+                        : 'border-border/80 bg-card text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {agent.name}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
 
             {/* Primary Action Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap items-center gap-3 pt-2 w-full"
+              className="flex flex-wrap items-center gap-3 pt-1 w-full"
             >
               <a
                 href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe"
@@ -99,42 +136,46 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                 onClick={onOpenInstallModal}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 text-xs font-mono font-bold text-foreground hover:border-primary/50 hover:bg-secondary transition-all duration-200 cursor-pointer"
               >
-                <Download className="h-3.5 w-3.5 text-cyan-400" />
-                <span>All Platforms (CLI / GUI)</span>
+                <PythonIcon className="h-4 w-4" />
+                <span>Install via PyPI / uvx</span>
               </button>
             </motion.div>
 
-            {/* Quick Copy Terminal Snippet */}
+            {/* Install Pip Copy Bar */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex items-center gap-2 w-full max-w-md p-2.5 rounded-lg border border-border bg-card/60 font-mono text-xs text-muted-foreground"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-md border border-border/80 bg-card/80 font-mono text-xs text-muted-foreground w-full"
             >
-              <span className="text-primary font-bold pl-1">$</span>
-              <span className="flex-1 text-foreground">pip install gitbook-downloader</span>
+              <span className="text-cyan-400">&gt;</span>
+              <code className="flex-1 text-foreground font-semibold">pip install gitbook-downloader</code>
               <button
                 onClick={copyPipCommand}
-                className="p-1.5 rounded-md hover:bg-secondary hover:text-foreground text-muted-foreground transition-colors cursor-pointer"
-                title="Copy Command"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer text-[11px]"
               >
                 {copiedPip ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{copiedPip ? 'Copied' : 'Copy'}</span>
               </button>
             </motion.div>
 
-            {/* Fast Heuristic Metrics */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border w-full font-mono text-xs">
-              <div className="space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase">Speed</span>
-                <p className="font-bold text-emerald-400">20.0 pgs/sec</p>
+            {/* Proof Metrics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 w-full font-mono text-xs border-t border-border/80">
+              <div className="space-y-0.5">
+                <span className="text-muted-foreground text-[10px] block">THROUGHPUT</span>
+                <span className="font-bold text-cyan-400">20 pgs/sec</span>
               </div>
-              <div className="space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase">Noise Redux</span>
-                <p className="font-bold text-cyan-400">89% Token Cut</p>
+              <div className="space-y-0.5">
+                <span className="text-muted-foreground text-[10px] block">TOKEN SAVINGS</span>
+                <span className="font-bold text-emerald-400">89% Reduction</span>
               </div>
-              <div className="space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase">Local AI</span>
-                <p className="font-bold text-indigo-400">FastMCP v2 Ready</p>
+              <div className="space-y-0.5">
+                <span className="text-muted-foreground text-[10px] block">PRIVACY</span>
+                <span className="font-bold text-foreground">100% Local</span>
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-muted-foreground text-[10px] block">AGENT MODELS</span>
+                <span className="font-bold text-cyan-400">15+ Harnesses</span>
               </div>
             </div>
 
@@ -167,7 +208,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                       activeTab === 'terminal' ? 'bg-primary/20 text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    Live Logs
+                    Crawl Logs
                   </button>
                   <button
                     onClick={() => setActiveTab('ast')}
@@ -184,6 +225,14 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                     }`}
                   >
                     Vector JSONL
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('mcp-stdio')}
+                    className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+                      activeTab === 'mcp-stdio' ? 'bg-primary/20 text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    MCP stdio
                   </button>
                 </div>
               </div>
@@ -214,7 +263,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
     return markdownify(str(article), heading_style="ATX")`}
                     </pre>
                     <div className="text-emerald-400 text-[11px]">
-                      ✓ Extracted 364 articles with zero wrapper bloat.
+                      ✓ Extracted 364 articles with zero wrapper bloat (89% token reduction).
                     </div>
                   </div>
                 )}
@@ -237,12 +286,28 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                     </div>
                   </div>
                 )}
+
+                {activeTab === 'mcp-stdio' && (
+                  <div className="space-y-2 text-zinc-300 animate-fadeIn">
+                    <div className="text-cyan-400 font-bold">// FastMCP v2 stdio Tool Call:</div>
+                    <pre className="text-[11px] text-zinc-400 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
+{`$ docharvest mcp
+> Call: search_docs(query="OAuth token refresh", domain="openalgo")
+> Result (189 tokens):
+  OAuth 2.0 Token Refresh: POST to /oauth/token with client_credentials.
+  Tokens valid for 3600s.`}
+                    </pre>
+                    <div className="text-emerald-400 text-[11px]">
+                      ✓ 10 FastMCP tools connected to Cursor / Claude Code.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Terminal Footer Status Bar */}
               <div className="flex items-center justify-between px-4 py-2 border-t border-border/60 bg-zinc-950 font-mono text-[10px] text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
                   <span>STATUS: 364/364 HARVESTED</span>
                 </div>
                 <span>TIME: 18.2s (20.0 pgs/sec)</span>

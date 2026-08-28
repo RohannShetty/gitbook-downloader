@@ -16,7 +16,7 @@ export function DocTypeSelector() {
         <div className="space-y-3 mb-12">
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
-              // 01 / FRAMEWORK INTELLIGENCE
+              Framework Intelligence
             </span>
             <div className="h-px flex-1 bg-border/60" />
           </div>

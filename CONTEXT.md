@@ -1,6 +1,6 @@
 # CONTEXT.md — Domain Glossary
 
-Shared vocabulary for DocHarvest (`gitbook-downloader`) v10.1.0. Nothing here describes implementation — only what words mean.
+Shared vocabulary for DocHarvest (`gitbook-downloader`) v11.0.0. Nothing here describes implementation — only what words mean.
 
 ## Core nouns
 
@@ -33,5 +33,5 @@ Shared vocabulary for DocHarvest (`gitbook-downloader`) v10.1.0. Nothing here de
 
 - **Desktop GUI** — React + Tailwind CSS + shadcn/ui application: Capture Studio, Document Library, live logs, in-app doc viewer, and export tools.
 - **CLI** — scriptable command surface (`docharvest` / `gitbook-dl`).
-- **MCP server** — FastMCP machine interface exposing 8 tools to AI assistants and IDE harnesses over `stdio`.
+- **MCP server** — FastMCP v2 machine interface exposing 10 tools, resources (`docs://`), and prompts to AI assistants and IDE harnesses over `stdio`.
 - **TUI** — the terminal UI (`docharvest tui`): interactive wizard, library browser, search, snapshot diff, diagnostics.

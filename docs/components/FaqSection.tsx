@@ -20,7 +20,7 @@ export function FaqSection() {
         <div className="space-y-3 mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-secondary font-mono text-xs text-muted-foreground">
             <HelpCircle className="h-3.5 w-3.5 text-primary" />
-            <span>// FREQUENTLY ASKED QUESTIONS</span>
+            <span>Frequently Asked Questions</span>
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Frequently Answered Questions

@@ -12,6 +12,238 @@ export interface DocFramework {
   cleanMarkdownSnippet: string
 }
 
+export interface AgentHarness {
+  id: string
+  name: string
+  category: 'AI IDE' | 'Terminal Agent' | 'Extension' | 'CLI Harness'
+  badge: string
+  configPath: string
+  configSnippet: string
+  cliCommand: string
+  description: string
+  highlights: string[]
+}
+
+export const AI_AGENTS: AgentHarness[] = [
+  {
+    id: "cursor",
+    name: "Cursor IDE",
+    category: "AI IDE",
+    badge: "1-Click FastMCP",
+    configPath: ".cursor/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uvx gitbook-downloader mcp",
+    description: "Connect DocHarvest to Cursor via FastMCP stdio. Cursor's Composer and Chat can search, query concepts, and download docs without leaving the editor.",
+    highlights: ["Token-efficient BM25 search (~200 tokens)", "Direct symbol & API endpoint graph navigation", "Auto-indexing on demand"]
+  },
+  {
+    id: "claude",
+    name: "Claude Code / Desktop",
+    category: "Terminal Agent",
+    badge: "Native stdio Server",
+    configPath: "claude_desktop_config.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uv",
+      "args": ["run", "docharvest", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uv run docharvest mcp",
+    description: "Equip Claude Code CLI and Claude Desktop with 10 native documentation tools, pre-structured prompt templates, and docs:// resources.",
+    highlights: ["MCP Prompts (search_docset, summarize_library)", "docs://{domain}/book resource URIs", "Zero hallucination on new APIs"]
+  },
+  {
+    id: "opencode",
+    name: "OpenCode",
+    category: "Terminal Agent",
+    badge: "Full Protocol Support",
+    configPath: "~/.config/opencode/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "python",
+      "args": ["-m", "gitbook_downloader.mcp"]
+    }
+  }
+}`,
+    cliCommand: "python -m gitbook_downloader.mcp",
+    description: "OpenCode autonomous agent integration. Gives OpenCode instant local documentation harvest and BM25 search tools.",
+    highlights: ["Autonomous background doc harvesting", "Instant SQLite FTS5 querying", "Local-first private operation"]
+  },
+  {
+    id: "pi",
+    name: "Pi Coding Agent & Oh My Pi (omp.sh)",
+    category: "Terminal Agent",
+    badge: "Playwright SPA Ready",
+    configPath: "~/.pi/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uv run docharvest crawl https://omp.sh/docs --render",
+    description: "First-class integration with Pi agents and Oh My Pi. Crawls dynamic JavaScript SPAs (like omp.sh) using Playwright headless rendering.",
+    highlights: ["Headless SPA rendering (--render)", "Topic-aware session recall", "Zero token overflow on deep doc trees"]
+  },
+  {
+    id: "windsurf",
+    name: "Windsurf (Codeium)",
+    category: "AI IDE",
+    badge: "Cascade Flow Ready",
+    configPath: "~/.codeium/windsurf/mcp_config.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "python",
+      "args": ["-m", "gitbook_downloader.mcp"]
+    }
+  }
+}`,
+    cliCommand: "python -m gitbook_downloader.mcp",
+    description: "Supercharge Windsurf's Cascade flow with real-time documentation retrieval. Keeps agent context locked to exact library versions.",
+    highlights: ["Version-diff tracking across releases", "Direct book.md chapter reading", "Works offline once harvested"]
+  },
+  {
+    id: "vscode-cline",
+    name: "VS Code (Cline / Roo Code / Copilot)",
+    category: "Extension",
+    badge: "Multi-Extension Ready",
+    configPath: ".vscode/mcp.json",
+    configSnippet: `{
+  "servers": {
+    "docharvest": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uvx gitbook-downloader mcp",
+    description: "Universal stdio integration for GitHub Copilot, Cline, Roo Code, and Continue in VS Code with zero remote server requirements.",
+    highlights: ["Compatible with Roo Code & Cline", "Standardized stdio protocol", "Instant local doc queries"]
+  },
+  {
+    id: "codex",
+    name: "CommandCode / Codex CLI",
+    category: "CLI Harness",
+    badge: "Multi-Agent Hub",
+    configPath: ".codex/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uv",
+      "args": ["run", "docharvest", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uv run docharvest mcp",
+    description: "Seamless documentation toolchain for OpenAI Codex CLI, CommandCode, and multi-agent orchestrators running in terminal workflows.",
+    highlights: ["Multi-agent parallel doc queries", "Domain-locked concurrency", "Deterministic content hashes"]
+  },
+  {
+    id: "kilocode",
+    name: "Kilo Code",
+    category: "AI IDE",
+    badge: "High-Speed Agent",
+    configPath: ".kilo/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uvx gitbook-downloader mcp",
+    description: "Enhance Kilo Code with fast offline documentation access and automated concept graph relationship mapping.",
+    highlights: ["Sub-15ms BM25 search queries", "Prerequisite concept traversal", "Zero rate limits"]
+  },
+  {
+    id: "grok",
+    name: "Grok Build",
+    category: "CLI Harness",
+    badge: "Agentic Build Engine",
+    configPath: ".grok/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uv",
+      "args": ["run", "docharvest", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uv run docharvest mcp",
+    description: "Provide Grok Build with direct local documentation querying tools for autonomous repository maintenance and code refactoring.",
+    highlights: ["Verified llms.txt discovery", "Full handbook reading (get_doc)", "Deterministic output contract"]
+  },
+  {
+    id: "gemini",
+    name: "Gemini CLI / Antigravity",
+    category: "CLI Harness",
+    badge: "Native Protocol Ready",
+    configPath: ".gemini/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uv",
+      "args": ["run", "docharvest", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uv run docharvest mcp",
+    description: "Integrated documentation compiler for Gemini CLI and Google Antigravity developer agents with structured tool schemas.",
+    highlights: ["Cryptographically verifiable manifests", "Offline RAG JSONL exports", "Subpath crawl scoping"]
+  },
+  {
+    id: "trae",
+    name: "Trae & Qoder",
+    category: "AI IDE",
+    badge: "Global IDE Integration",
+    configPath: ".trae/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
+    }
+  }
+}`,
+    cliCommand: "uvx gitbook-downloader mcp",
+    description: "Plug-and-play documentation server for ByteDance Trae and Qoder IDE workflows across global developer ecosystems.",
+    highlights: ["Zero external cloud telemetry", "Pure-Python PDF exports", "SQLite BM25 search index"]
+  },
+  {
+    id: "vibe",
+    name: "Mistral Vibe & Rovo Dev",
+    category: "CLI Harness",
+    badge: "Enterprise Standard",
+    configPath: ".vibe/mcp.json",
+    configSnippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "command": "python",
+      "args": ["-m", "gitbook_downloader.mcp"]
+    }
+  }
+}`,
+    cliCommand: "python -m gitbook_downloader.mcp",
+    description: "Full FastMCP v2 compliance for Mistral Vibe and Atlassian Rovo Dev agent environments.",
+    highlights: ["Enterprise air-gapped readiness", "Changelog diff generation", "Deterministic AST scraping"]
+  }
+];
+
 export const DOC_FRAMEWORKS: DocFramework[] = [
   {
     id: "gitbook",
@@ -21,7 +253,7 @@ export const DOC_FRAMEWORKS: DocFramework[] = [
     sampleUrl: "https://docs.openalgo.in/v/v2.0/api-reference",
     heuristicMatch: "space_id detection + /v/ version dropdowns + direct .md endpoint probe",
     detectionPriority: 100,
-    description: "Deep GitBook spaces integration. Traverses multi-version dropdowns, parses space manifest JSON, and probes raw .md endpoints to fetch author-original markdown.",
+    description: "Deep GitBook spaces integration. Traverses multi-version dropdowns, parses space manifest JSON, and probes raw .md endpoints to fetch author-original markdown directly.",
     features: [
       "Direct .md raw endpoint probing bypassing HTML conversion",
       "Multi-version space selector traversal (/v/v2.0/, /v/latest)",
@@ -44,7 +276,7 @@ export const DOC_FRAMEWORKS: DocFramework[] = [
     cleanMarkdownSnippet: `---
 source_url: https://docs.openalgo.in/v/v2.0/api-reference/oauth
 title: "OAuth 2.0 Authentication"
-crawl_date: "2026-08-23T16:42:19Z"
+crawl_date: "2026-08-28T16:42:19Z"
 content_hash: "sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 site_version: "v2.0"
 ---
@@ -94,7 +326,7 @@ response = requests.post(
     cleanMarkdownSnippet: `---
 source_url: https://docs.anthropic.com/en/docs/api-reference/messages
 title: "Create a Message"
-crawl_date: "2026-08-23T16:42:19Z"
+crawl_date: "2026-08-28T16:42:19Z"
 content_hash: "sha256-a1b2c3d4..."
 framework: "mintlify"
 ---
@@ -136,7 +368,7 @@ framework: "mintlify"
     cleanMarkdownSnippet: `---
 source_url: https://reactnative.dev/docs/getting-started
 title: "Environment Setup"
-crawl_date: "2026-08-23T16:42:19Z"
+crawl_date: "2026-08-28T16:42:19Z"
 content_hash: "sha256-f5e4d3c2..."
 framework: "docusaurus"
 ---
@@ -172,7 +404,7 @@ framework: "docusaurus"
     cleanMarkdownSnippet: `---
 source_url: https://swr.vercel.app/docs/getting-started
 title: "Getting Started"
-crawl_date: "2026-08-23T16:42:19Z"
+crawl_date: "2026-08-28T16:42:19Z"
 content_hash: "sha256-b7a6c5d4..."
 framework: "nextra"
 ---
@@ -244,7 +476,7 @@ endpoint: "/v1/users"
     cleanMarkdownSnippet: `---
 source_url: https://vitepress.dev/guide/what-is-vitepress
 title: "What is VitePress?"
-crawl_date: "2026-08-23T16:42:19Z"
+crawl_date: "2026-08-28T16:42:19Z"
 ---
 
 # What is VitePress?
@@ -276,7 +508,7 @@ crawl_date: "2026-08-23T16:42:19Z"
     cleanMarkdownSnippet: `---
 source_url: https://squidfunk.github.io/mkdocs-material/
 title: "Material for MkDocs"
-crawl_date: "2026-08-23T16:42:19Z"
+crawl_date: "2026-08-28T16:42:19Z"
 ---
 
 # Material for MkDocs
@@ -316,7 +548,7 @@ framework: "readthedocs"
 
 > 💡 **Tip:** Built with Sphinx documentation builder.`
   }
-]
+];
 
 export const CONTRACT_FORMATS = [
   {
@@ -330,7 +562,7 @@ export const CONTRACT_FORMATS = [
       "Automated hierarchical Table of Contents",
       "Relative link remapping to internal document anchors",
       "Zero redundant headers, sidebars, or footers",
-      "Perfect for pasting directly into Claude Project Knowledge or ChatGPT Custom GPTs"
+      "Perfect for pasting directly into Claude Project Knowledge, Cursor, or ChatGPT Custom GPTs"
     ]
   },
   {
@@ -358,7 +590,7 @@ export const CONTRACT_FORMATS = [
       "Structured # Heading with brief summary",
       "## Docs Section with clean markdown links",
       "## Optional Section for advanced reference",
-      "Standard compliance for automated Cursor & Claude indexing"
+      "Standard compliance for automated Cursor, Claude & OpenCode indexing"
     ]
   },
   {
@@ -375,27 +607,86 @@ export const CONTRACT_FORMATS = [
       "Page headers, footers, and timestamp watermarks"
     ]
   }
-]
+];
+
+export const MATRIX_ROWS = [
+  {
+    feature: "Native AST Framework Extraction (GitBook, Mintlify, Docusaurus)",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: "Partial",
+    detail: "Automatically isolates article DOMs and probes raw markdown endpoints directly."
+  },
+  {
+    feature: "Zero HTML/JSX Soup in Markdown Output (89% Token Cut)",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: true,
+    detail: "Strips cookie banners, navbars, sidebars, and interactive widget code."
+  },
+  {
+    feature: "Built-in FastMCP v2 Server for 15+ AI Coding Agents (Cursor, Claude, OpenCode, Pi)",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: "API Key Req",
+    detail: "10 native MCP tools, resources & prompts running over stdio directly inside your agent."
+  },
+  {
+    feature: "Standard llms.txt & Vector RAG JSONL Compilation",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: false,
+    detail: "Builds unified RAG chunk files with token counts and SHA-256 content hashes."
+  },
+  {
+    feature: "Embedded SQLite FTS5 BM25 Full-Text Search (<15ms)",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: false,
+    detail: "Instant ranked keyword search queries across thousands of harvested pages."
+  },
+  {
+    feature: "Pure-Python PDF Handbook Generation with TOC (fpdf2)",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: false,
+    detail: "Zero external C-library dependencies (no WeasyPrint or wkhtmltopdf)."
+  },
+  {
+    feature: "Client-Side SPA Playwright Rendering (--render)",
+    docharvest: true,
+    rawScrapers: false,
+    cloudApis: true,
+    detail: "Crawls heavy client-rendered JavaScript portals like omp.sh with headless browser hydration."
+  },
+  {
+    feature: "100% Free, Open Source (MIT) & Zero Cloud Telemetry",
+    docharvest: true,
+    rawScrapers: true,
+    cloudApis: false,
+    detail: "No subscription fees, no per-page charges, and zero data leaves your local machine."
+  }
+];
 
 export const FAQ_ITEMS = [
   {
-    q: "Isn't this just another web scraper? How is it different from curl or BeautifulSoup?",
-    a: "Basic scrapers dump messy HTML soup loaded with 40KB+ of cookie banners, navigation menus, and fragmented code blocks with broken indentation. DocHarvest is an engineered documentation compiler: it automatically detects frameworks (GitBook, Mintlify, Docusaurus), probes native .md raw endpoints directly, locks crawls strictly to doc subpaths, injects cryptographic SHA-256 YAML frontmatter, compiles unified book.md handbooks, exports pure-Python PDFs, and indexes everything into an embedded SQLite FTS5 BM25 search database."
+    q: "Isn't this just another web scraper? How is it different from curl, Scrapy, or BeautifulSoup?",
+    a: "Basic scrapers dump messy HTML soup loaded with 40KB+ of cookie banners, navigation menus, and fragmented code blocks with broken indentation. DocHarvest is an engineered documentation compiler: it automatically detects frameworks (GitBook, Mintlify, Docusaurus, Nextra), probes native .md raw endpoints directly, locks crawls strictly to doc subpaths, injects cryptographic SHA-256 YAML frontmatter, compiles unified book.md handbooks, exports pure-Python PDFs, and indexes everything into an embedded SQLite FTS5 BM25 search database."
   },
   {
     q: "Why choose DocHarvest over Firecrawl, Jina Reader, or cloud scraper APIs?",
-    a: "Cloud scraping APIs charge per-page fees that quickly escalate on 1,000+ page libraries, require active internet connections, send your proprietary internal docs to third-party servers, and do not provide local search libraries, PDF generation, or semver diff engines. DocHarvest is 100% free, open-source (MIT), runs locally on your machine, and has zero network telemetry."
+    a: "Cloud scraping APIs charge per-page fees ($0.01 - $0.05/page) that quickly escalate on 1,000+ page libraries, require active internet connections, send your proprietary internal docs to third-party servers, and do not provide local search libraries, PDF generation, or semver diff engines. DocHarvest is 100% free, open-source (MIT), runs locally on your machine, and has zero network telemetry."
+  },
+  {
+    q: "Which AI coding agents and IDEs support DocHarvest FastMCP?",
+    a: "DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and works out of the box with 15+ modern AI coding agents: Cursor, Claude Code, Claude Desktop, OpenCode, Pi Coding Agent & Oh My Pi (omp.sh), Windsurf (Codeium), VS Code (Copilot, Cline, Roo Code, Continue), CommandCode / Codex CLI, Kilo Code, Grok Build, Gemini CLI, ByteDance Trae, Qoder, Mistral Vibe, and Atlassian Rovo Dev."
   },
   {
     q: "Does it work with client-rendered JavaScript Single-Page Applications (SPAs)?",
     a: "Yes. Modern documentation SPAs (GitBook, Mintlify, Docusaurus, Nextra, VitePress) publish underlying raw .md endpoints and sitemaps that DocHarvest probes first. For purely client-rendered SPAs (like omp.sh), DocHarvest includes an opt-in Playwright headless rendering engine (--render) to execute client-side JavaScript before compilation."
   },
   {
-    q: "How does the FastMCP server integrate with Cursor and Claude Desktop?",
-    a: "DocHarvest includes a built-in Model Context Protocol (FastMCP v2) server over stdio. By adding a simple snippet to your IDE's MCP config, your AI coding assistant gains 10 native tools, MCP Resources, and MCP Prompts to search, read, list, graph-navigate, and harvest external documentation on demand without you ever needing to copy-paste URLs."
-  },
-  {
     q: "What dependencies are needed for PDF export? Do I need WeasyPrint or wkhtmltopdf?",
     a: "Zero external C-dependencies! DocHarvest uses a custom layout engine built on pure-Python fpdf2. It generates styled, syntax-highlighted printable PDF handbooks with page numbers and table of contents out of the box on Windows, macOS, and Linux."
   }
-]
+];

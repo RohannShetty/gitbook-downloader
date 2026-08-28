@@ -9,10 +9,63 @@
 
 | Subreddit | Community Size | Target Persona | Subreddit Culture / Angle | Post Title | Flair | Timing (PST) |
 |---|---|---|---|---|---|---|
+| `r/cursor` | 80k+ | Cursor IDE / AI Coders | FastMCP v2 integration, zero context pollution, instant offline doc search for Agent Mode. | *I built a free tool to give Cursor instant BM25 doc search via FastMCP without wasting tokens on HTML* | `Showcase` | 07:45 AM PST |
 | `r/LocalLLaMA` | 350k+ | Local AI / RAG Builders | Token economy, zero cloud fees, chunking quality, local vector search with Ollama / ChromaDB. | *I built a free tool to download entire doc sites and convert them to clean RAG JSONL & Markdown books (no cloud APIs, 100% local)* | `Project / Resource` | 08:30 AM PST |
 | `r/Python` | 1.2M+ | Python Devs & Engineers | Python architecture deep-dive: `requests`, `fpdf2`, `ThreadPoolExecutor`, SQLite FTS5, cross-platform PID locks. | *DocHarvest: A Python CLI + GUI tool to turn documentation websites into clean Markdown, RAG JSONL, and PDF handbooks* | `Showcase` / `Project` | 09:15 AM PST |
 | `r/selfhosted` | 400k+ | Homelab / SysAdmins | Data sovereignty, vanishing docs, air-gapped homelabs, semver snapshot diffing (`gitbook-dl diff`). | *DocHarvest: Self-hosted documentation archiver with full-text search, offline PDF books, and snapshot diffing* | `Self-Hosted Software` | 10:00 AM PST |
-| `r/OpenAI` | 1.8M+ | ChatGPT / Claude Users | Overcoming context limits, clean Project knowledge, replacing manual copy-paste, FastMCP integration. | *Stop copy-pasting docs into ChatGPT & Claude: I built a 1-click tool to turn whole doc portals into clean Markdown knowledge bases & vector files* | `Tutorial / Guide` / `Prompt Engineering` | 10:45 AM PST |
+| `r/ClaudeAI` | 150k+ | Claude Code & Desktop | Claude Code FastMCP stdio server, book.md for Project Knowledge, 89% token reduction. | *Stop copy-pasting docs into Claude Projects: 1-click tool to compile entire doc sites into clean book.md + FastMCP* | `Prompt Engineering` / `Tutorial` | 10:45 AM PST |
+
+---
+
+## Reddit Post 0: `r/cursor`
+
+### Metadata
+- **Subreddit:** `r/cursor`
+- **Flair:** `Showcase`
+- **Link:** `https://github.com/RohannShetty/gitbook-downloader`
+
+### Post Title
+```text
+I built a free tool to give Cursor instant BM25 doc search via FastMCP without wasting tokens on HTML
+```
+
+### Post Body
+```markdown
+Hey Cursor community,
+
+If you use Cursor's Composer or Agent mode to build against newer libraries (or internal private tools), you've probably noticed that typing `@Docs` or asking it to scrape a documentation site often wastes **5,000+ context tokens** on navbar links, footer scripts, and cookie banners. Worse, it often hallucinates old API syntax.
+
+I built **DocHarvest** (Python package: `gitbook-downloader`) — a 100% free, local-first documentation compiler with a native FastMCP v2 server built specifically for coding assistants like Cursor.
+
+### What it does:
+1. **Harvests Any Documentation Site:** Point it at GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, or ReadMe, and it pulls every page down into clean Markdown in seconds (20 pgs/sec parallel crawl).
+2. **Strips 89% of HTML Noise:** AST extractors isolate pure code blocks and prose, discarding headers, navbars, and banners before tokens reach your LLM.
+3. **1-Click FastMCP stdio Server:** Exposes 10 native tools (`search_docs`, `query_doc_graph`, `download_docs`, `get_doc`) directly to Cursor via `~/.cursor/mcp.json`.
+
+### FastMCP Setup for Cursor (`~/.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "docharvest": {
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"]
+    }
+  }
+}
+```
+
+Now in Cursor Composer / Chat, you can simply ask:
+> *"Search our indexed OpenAlgo docs for OAuth token signature validation."*
+
+Cursor automatically calls `search_docs` and receives a ranked, token-efficient BM25 snippet (~180 tokens) instead of reading a 40KB HTML file.
+
+### Links:
+- **GitHub (MIT):** https://github.com/RohannShetty/gitbook-downloader
+- **Showcase Site:** https://rohannshetty.github.io/gitbook-downloader/
+- **PyPI:** `pip install gitbook-downloader`
+
+Would love to hear what other MCP tools or doc frameworks you'd like to see added!
+```
 
 ---
 

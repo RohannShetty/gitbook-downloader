@@ -1,17 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="74 116 365 280" role="img" aria-labelledby="gbdl-icon-title">
-  <title id="gbdl-icon-title">gitbook-downloader icon</title>
-  <desc>Document page flowing into an amber terminal prompt. Transparent background.</desc>
-  <!--
-    gitbook-downloader bare glyph — same geometry as assets/logo.svg minus the tile.
-    Transparent background: for inline UI and containers that already provide a surface.
-    On light backgrounds use assets/logo.svg (tile version) instead.
-    Minimum size 20px; below 32px prefer the tile version.
-  -->
-  <g>
-    <rect x="100" y="142" width="170" height="228" rx="30" fill="none" stroke="#d4d4d8" stroke-width="26"/>
-    <line x1="148" y1="214" x2="222" y2="214" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
-    <line x1="148" y1="270" x2="222" y2="270" stroke="#52525b" stroke-width="20" stroke-linecap="round"/>
-    <path d="M288 206 L344 256 L288 306" fill="none" stroke="#f59e0b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="374" y1="306" x2="412" y2="306" stroke="#f59e0b" stroke-width="28" stroke-linecap="round"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="90 120 360 260" role="img" aria-labelledby="docharvest-icon-title">
+  <title id="docharvest-icon-title">DocHarvest Icon</title>
+  <desc>Stylized layered documentation pages flowing into an electric amber harvest terminal glyph.</desc>
+  <defs>
+    <linearGradient id="cyan-indigo-icon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="amber-glow-icon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="emerald-glow-icon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left Document Spine (Offset) -->
+  <rect x="96" y="156" width="168" height="216" rx="24" fill="none" stroke="#334155" stroke-width="12" opacity="0.6"/>
+
+  <!-- Primary Foreground Document Sheet -->
+  <rect x="124" y="132" width="176" height="236" rx="26" fill="#090d16" stroke="url(#cyan-indigo-icon)" stroke-width="20"/>
+
+  <!-- Document Line Snippets -->
+  <line x1="168" y1="198" x2="236" y2="198" stroke="#38bdf8" stroke-width="16" stroke-linecap="round"/>
+  <line x1="168" y1="244" x2="256" y2="244" stroke="#64748b" stroke-width="14" stroke-linecap="round"/>
+  <line x1="168" y1="290" x2="220" y2="290" stroke="#64748b" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- Graph Connector Node -->
+  <circle cx="256" cy="290" r="8" fill="url(#emerald-glow-icon)"/>
+
+  <!-- Harvest / Terminal Chevron & Spark Prompt -->
+  <path d="M312 196 L376 250 L312 304" fill="none" stroke="url(#amber-glow-icon)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="400" y1="304" x2="436" y2="304" stroke="url(#amber-glow-icon)" stroke-width="26" stroke-linecap="round"/>
 </svg>

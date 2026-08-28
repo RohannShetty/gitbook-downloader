@@ -40,10 +40,12 @@ graphify-out/
 
 # pytest & coverage
 .pytest_cache/
+.tmp_pytest/
 .coverage
 .coverage.*
 coverage.xml
 htmlcov/
+plan_ui.md
 
 # Local agent-tooling state (77 per-tool symlink dirs created by `npx skills add`)
 .serena/
@@ -118,5 +120,6 @@ docs/dist/
 .agents/sentinel/
 .agents/teamwork_preview_*/
 .agents/ORIGINAL_REQUEST.md
+.impeccable/live/
 
 

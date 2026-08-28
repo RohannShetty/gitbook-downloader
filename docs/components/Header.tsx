@@ -39,24 +39,27 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
         </Link>
 
         {/* Navigation Anchors */}
-        <nav className="hidden lg:flex items-center gap-6 font-mono text-xs font-medium text-muted-foreground">
+        <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-muted-foreground">
+          <a href="#agents" className="hover:text-foreground transition-colors text-cyan-400">
+            Agents &amp; IDEs
+          </a>
           <a href="#platforms" className="hover:text-foreground transition-colors">
-            // platforms
+            Platforms
           </a>
           <a href="#contract" className="hover:text-foreground transition-colors">
-            // output
+            Output Contract
           </a>
           <a href="#studio" className="hover:text-foreground transition-colors">
-            // studio
+            Export Studio
           </a>
           <a href="#matrix" className="hover:text-foreground transition-colors">
-            // matrix
+            Comparison
           </a>
           <a href="#mcp" className="hover:text-foreground transition-colors">
-            // mcp
+            FastMCP Server
           </a>
           <a href="#releases" className="hover:text-foreground transition-colors">
-            // releases
+            Releases
           </a>
         </nav>
 

@@ -2,58 +2,7 @@
 
 import React from 'react';
 import { Check, X, Sparkles } from 'lucide-react';
-
-const MATRIX_ROWS = [
-  {
-    feature: "Native AST Heuristic Framework Detection (GitBook, Mintlify, Docusaurus)",
-    docharvest: true,
-    rawScrapers: false,
-    cloudApis: "Partial",
-    detail: "Automatically isolates article DOMs and probes raw markdown endpoints directly."
-  },
-  {
-    feature: "Zero HTML/JSX Soup in Markdown Output",
-    docharvest: true,
-    rawScrapers: false,
-    cloudApis: true,
-    detail: "Strips cookie banners, navbars, sidebars, and interactive widget code."
-  },
-  {
-    feature: "Standard llms.txt & Vector RAG JSONL Compilation",
-    docharvest: true,
-    rawScrapers: false,
-    cloudApis: false,
-    detail: "Builds unified RAG chunk files with token counts and SHA-256 content hashes."
-  },
-  {
-    feature: "Pure-Python PDF Handbook Generation with TOC (fpdf2)",
-    docharvest: true,
-    rawScrapers: false,
-    cloudApis: false,
-    detail: "Zero external C-library dependencies (no WeasyPrint or wkhtmltopdf)."
-  },
-  {
-    feature: "Built-in FastMCP v2 Server for Cursor, Claude Code & 14 AI IDEs",
-    docharvest: true,
-    rawScrapers: false,
-    cloudApis: "API Key Req",
-    detail: "10 native MCP tools, resources & prompts running over stdio directly inside your agent."
-  },
-  {
-    feature: "Embedded SQLite FTS5 BM25 Full-Text Search Database",
-    docharvest: true,
-    rawScrapers: false,
-    cloudApis: false,
-    detail: "Instant sub-15ms keyword search queries across thousands of harvested pages."
-  },
-  {
-    feature: "100% Free, Open Source (MIT) & Local Privacy",
-    docharvest: true,
-    rawScrapers: true,
-    cloudApis: false,
-    detail: "No subscription fees, no credit limits, and zero data leaves your local machine."
-  }
-];
+import { MATRIX_ROWS } from '@/data/showcaseData';
 
 export function FeatureMatrix() {
   return (
@@ -64,7 +13,7 @@ export function FeatureMatrix() {
         <div className="space-y-3 mb-12">
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
-              // 04 / CAPABILITY COMPARISON
+              Capability Comparison
             </span>
             <div className="h-px flex-1 bg-border/60" />
           </div>

@@ -57,8 +57,8 @@ We implemented cross-platform process-aware domain locks (`DomainLock`). By insp
 • Embedded SQLite FTS5 Full-Text Search:
 All captured documentation is automatically indexed into an embedded SQLite database using FTS5 virtual tables with `porter unicode61` stemming, giving you sub-10ms BM25 ranking across your entire offline documentation library.
 
-• Model Context Protocol (FastMCP) & Desktop GUI:
-DocHarvest includes a built-in FastMCP server (`gitbook-dl mcp`) exposing 8 tools over stdio for coding assistants like Cursor and Claude Code. For non-terminal workflows, we also bundle a standalone desktop application built with PyWebView, React 18, and shadcn/ui.
+• Model Context Protocol (FastMCP v2) & Coding Agent Support:
+DocHarvest includes a built-in FastMCP v2 server (`docharvest mcp`) exposing 10 native tools over stdio for coding assistants like Cursor, Claude Code, OpenCode, Pi Coding Agent, and Windsurf. For non-terminal workflows, we also bundle a standalone desktop application built with PyWebView, React 18, and shadcn/ui.
 
 ---
 

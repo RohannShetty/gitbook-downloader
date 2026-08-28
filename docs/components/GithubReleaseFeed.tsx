@@ -23,7 +23,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-cyan-400" />
-                // 07 / RELEASES &amp; TELEMETRY
+                <span>Releases &amp; Telemetry</span>
               </span>
               <div className="h-px w-24 bg-border/60" />
             </div>
@@ -142,7 +142,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
           <div className="lg:col-span-6 space-y-4">
             <div className="flex items-center justify-between border-b border-border/80 pb-2 font-mono text-xs">
               <span className="font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                <GitCommit className="h-4 w-4 text-cyan-400 animate-pulse" />
+                <GitCommit className="h-4 w-4 text-cyan-400" />
                 <span>Recent Commit Stream (master)</span>
               </span>
               <span className="text-muted-foreground text-[10px]">LIVE PIPELINE</span>

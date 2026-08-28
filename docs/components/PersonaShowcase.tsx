@@ -9,7 +9,7 @@ const PERSONAS = [
     id: "ai",
     title: "AI & RAG Engineers",
     icon: Bot,
-    color: "from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/30",
+    iconBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
     badge: "Vector & Agent Ready",
     pain: "LLMs hallucinate on outdated training data. Scraping docs with curl dumps 40KB+ HTML noise that exhausts context windows.",
     solution: "DocHarvest compiles clean vector JSONL datasets with token counts, SHA-256 hashes, and standard llms.txt manifests for instant agent indexing.",
@@ -23,7 +23,7 @@ const PERSONAS = [
     id: "offline",
     title: "Offline Developers & Researchers",
     icon: BookOpen,
-    color: "from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30",
+    iconBg: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     badge: "Air-Gapped Portability",
     pain: "Reading documentation on flights, during outages, or in secure air-gapped enterprise environments is painful with fragmented web pages.",
     solution: "Merges 500+ documentation pages into a single consolidated book.md and publication-grade PDF handbook with automated table of contents.",
@@ -37,7 +37,7 @@ const PERSONAS = [
     id: "devops",
     title: "DevOps & Archival Teams",
     icon: Server,
-    color: "from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30",
+    iconBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
     badge: "Automated Synchronization",
     pain: "Docs change across releases without changelog notices. Mirroring docs locally often hits rate limits or gets blocked by Cloudflare.",
     solution: "Heuristic crawlers with cross-platform lock recovery, retry adapters, exponential backoffs, and automated Git diff tracking.",
@@ -81,7 +81,7 @@ export function PersonaShowcase() {
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className={`p-2.5 rounded-lg border bg-gradient-to-br ${persona.color}`}>
+                    <div className={`p-2.5 rounded-lg border ${persona.iconBg}`}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-background border border-border text-foreground font-bold">
@@ -93,15 +93,15 @@ export function PersonaShowcase() {
                     {persona.title}
                   </h3>
 
-                  <div className="space-y-3 text-xs font-mono leading-relaxed">
-                    <div className="p-3 rounded-lg border border-rose-950/40 bg-rose-950/10 text-zinc-300">
-                      <span className="text-rose-400 font-bold block mb-1">Pain Point:</span>
-                      {persona.pain}
+                  <div className="space-y-3 text-xs font-mono leading-relaxed pt-1">
+                    <div className="space-y-1">
+                      <span className="text-rose-400 font-bold text-[11px] block">Problem:</span>
+                      <p className="text-zinc-300 text-[11px] leading-relaxed">{persona.pain}</p>
                     </div>
 
-                    <div className="p-3 rounded-lg border border-emerald-950/40 bg-emerald-950/10 text-zinc-300">
-                      <span className="text-emerald-400 font-bold block mb-1">DocHarvest Solution:</span>
-                      {persona.solution}
+                    <div className="space-y-1 pt-1 border-t border-border/40">
+                      <span className="text-emerald-400 font-bold text-[11px] block">DocHarvest Solution:</span>
+                      <p className="text-zinc-300 text-[11px] leading-relaxed">{persona.solution}</p>
                     </div>
                   </div>
                 </div>

@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T12:09:47.488Z",
+  "title": "Design System: DocHarvest",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Indigo Accent",
+        "canonical": "oklch(58.5% 0.233 277)",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#4f46e5",
+          "#6366F1",
+          "#818cf8",
+          "#a5b4fc"
+        ]
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Warm Amber",
+        "canonical": "oklch(75.5% 0.177 75)",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#F59E0B",
+          "#fbbf24",
+          "#fde68a"
+        ]
+      },
+      "cyan": {
+        "role": "tertiary",
+        "displayName": "Telemetry Cyan",
+        "canonical": "oklch(71.5% 0.143 215)",
+        "tonalRamp": [
+          "#083344",
+          "#164e63",
+          "#155e75",
+          "#0e7490",
+          "#0891b2",
+          "#06B6D4",
+          "#22d3ee",
+          "#67e8f9"
+        ]
+      },
+      "emerald": {
+        "role": "tertiary",
+        "displayName": "Success Emerald",
+        "canonical": "oklch(69.6% 0.17 162)",
+        "tonalRamp": [
+          "#022c22",
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10B981",
+          "#34d399",
+          "#6ee7b7"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Obsidian Canvas",
+        "canonical": "oklch(14% 0.005 285)",
+        "tonalRamp": [
+          "#050507",
+          "#0A0A0C",
+          "#121215",
+          "#16161A",
+          "#1A1A22",
+          "#27272A",
+          "#3F3F46",
+          "#52525B"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Obsidian Card Surface",
+        "canonical": "oklch(18% 0.008 285)",
+        "tonalRamp": [
+          "#0A0A0C",
+          "#121215",
+          "#16161A",
+          "#1A1A22",
+          "#27272A",
+          "#3F3F46",
+          "#71717A",
+          "#A1A1AA"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Subtle Slate Border",
+        "canonical": "oklch(22% 0.01 285)",
+        "tonalRamp": [
+          "#121215",
+          "#16161A",
+          "#1C1C22",
+          "#27272A",
+          "#3F3F46",
+          "#52525B",
+          "#71717A",
+          "#A1A1AA"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero titles and landmark headings"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Feature and section headings"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headers, modals, and tables"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs, descriptions, and docs"
+      },
+      "label": {
+        "displayName": "Label/Mono",
+        "purpose": "Terminal commands, metrics, and tags"
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-glow",
+        "value": "0 0 20px rgba(99, 102, 241, 0.25)",
+        "purpose": "Hover glow on primary elements"
+      },
+      {
+        "name": "card-lift",
+        "value": "0 8px 30px rgba(0, 0, 0, 0.4)",
+        "purpose": "Elevation for floating cards"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default transition easing"
+      },
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Hover and state toggles"
+      },
+      {
+        "name": "duration-normal",
+        "value": "250ms",
+        "purpose": "Modal and accordion transitions"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary call-to-action button with indigo fill and hover glow.",
+      "html": "<button class=\"ds-btn-primary\">INSTALL FASTMCP</button>",
+      "css": ".ds-btn-primary { background: #6366F1; color: #FFFFFF; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease; } .ds-btn-primary:hover { background: #4f46e5; transform: scale(1.02); box-shadow: 0 0 20px rgba(99, 102, 241, 0.35); } .ds-btn-primary:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The High-Throughput Research Lab",
+    "overview": "DocHarvest provides a high-density, precise engineering atmosphere designed for developers, AI engineers, and archival specialists.",
+    "keyCharacteristics": [
+      "Obsidian & Deep Slate Foundation avoiding pure harsh blacks",
+      "Glassmorphism Depth Architecture (.glass-1, .glass-2, .glass-3)",
+      "Precision Typography with tabular monospace accents",
+      "Restrained Vibrant Accents using indigo and warm amber"
+    ],
+    "rules": [
+      {
+        "name": "The Signal-First Rule",
+        "body": "Color is used strictly to communicate status, interaction, or hierarchy. Maximum 10% accent coverage on any screen.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tinted Surface Rule",
+        "body": "Surfaces are never neutral gray; dark backgrounds carry deep blue/charcoal undertones.",
+        "section": "colors"
+      },
+      {
+        "name": "The Exact Ratio Rule",
+        "body": "Typographic hierarchy maintains at least a 1.25x scaling ratio between sequential heading tiers.",
+        "section": "typography"
+      },
+      {
+        "name": "The Monospace Distinction Rule",
+        "body": "All commands, hashes, JSON snippets, and file paths are rendered strictly in monospace.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Containers rest on subtle border separation and tonal shifts; glow and elevation appear strictly on interactive hover or active state.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do maintain a minimum contrast ratio of 4.5:1 for all text against backgrounds.",
+      "Do use solid, readable text colors rather than distracting multi-color gradient text.",
+      "Do respect prefers-reduced-motion: reduce by disabling heavy motion transitions.",
+      "Do provide full keyboard navigation with visible :focus-visible ring outlines.",
+      "Do use distinct monospace styling for CLI commands, paths, and technical parameters."
+    ],
+    "donts": [
+      "Don't nest cards inside cards; separate sections using spacing, hierarchy, and dividers.",
+      "Don't use generic purple-to-violet SaaS gradients or unstyled default layouts.",
+      "Don't use low-contrast gray text on colored badge backgrounds.",
+      "Don't use decorative pulsing status animations on non-live static elements."
+    ]
+  }
+}

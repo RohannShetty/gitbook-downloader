@@ -53,26 +53,29 @@ export function Footer() {
           {/* Col 2: Navigation Links */}
           <div className="md:col-span-3 space-y-3">
             <span className="font-bold text-foreground block uppercase text-[11px] tracking-wider">
-              // Navigation
+              Navigation
             </span>
-            <ul className="space-y-2 text-muted-foreground">
+            <ul className="space-y-2 text-muted-foreground font-sans text-xs">
               <li>
-                <a href="#platforms" className="hover:text-foreground transition-colors">// platforms</a>
+                <a href="#agents" className="hover:text-foreground transition-colors text-cyan-400">Agents &amp; IDEs</a>
               </li>
               <li>
-                <a href="#contract" className="hover:text-foreground transition-colors">// output-contract</a>
+                <a href="#platforms" className="hover:text-foreground transition-colors">Platforms</a>
               </li>
               <li>
-                <a href="#studio" className="hover:text-foreground transition-colors">// export-studio</a>
+                <a href="#contract" className="hover:text-foreground transition-colors">Output Contract</a>
               </li>
               <li>
-                <a href="#matrix" className="hover:text-foreground transition-colors">// capability-matrix</a>
+                <a href="#studio" className="hover:text-foreground transition-colors">Export Studio</a>
               </li>
               <li>
-                <a href="#mcp" className="hover:text-foreground transition-colors">// fastmcp-server</a>
+                <a href="#matrix" className="hover:text-foreground transition-colors">Capability Matrix</a>
               </li>
               <li>
-                <a href="#releases" className="hover:text-foreground transition-colors">// live-releases</a>
+                <a href="#mcp" className="hover:text-foreground transition-colors">FastMCP Server</a>
+              </li>
+              <li>
+                <a href="#releases" className="hover:text-foreground transition-colors">Live Releases</a>
               </li>
             </ul>
           </div>
@@ -80,7 +83,7 @@ export function Footer() {
           {/* Col 3: Community & Social Links */}
           <div className="md:col-span-4 space-y-3">
             <span className="font-bold text-foreground block uppercase text-[11px] tracking-wider">
-              // Community &amp; Connect
+              Community &amp; Connect
             </span>
             
             <div className="flex gap-2">
