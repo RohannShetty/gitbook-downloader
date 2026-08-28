@@ -10,13 +10,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 Major Architectural Rehaul: Impeccable shadcn/ui Desktop, MCP v2 Protocol, Semantic DocGraph & 8 Verified Providers
 
 Version 11.0.0 represents a ground-up upgrade of DocHarvest:
-- **Impeccable shadcn/ui Desktop GUI**: React 18 + Vite 6 + Tailwind CSS desktop app featuring interactive Onboarding Tour, In-App Documentation Portal, advanced Markdown Viewer with syntax highlighting and Mermaid diagram rendering, dynamic Table of Contents sidebar, and in-app project renaming.
-- **Model Context Protocol (MCP v2) Compliance**: Upgraded `gitbook_downloader.mcp.server` with 10 native tools, **MCP Resources** (`docs://{domain}/book`, `docs://{domain}/manifest`), and **MCP Prompts** (`prompt://search-docset`, `prompt://summarize-library`).
-- **Semantic DocGraph Intelligence**: Non-linear conceptual navigation (`query_doc_graph`, `get_related_concepts`) extracting page hierarchy, API endpoints, code symbols, and cross-links with minimal token consumption.
-- **8 Dedicated Platform Providers**: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io, and ReadTheDocs (plus Generic HTML / SPA).
-- **Loud SPA Diagnostics & Headless Rendering**: Opt-in Playwright rendering (`--render`) for JavaScript-rendered SPAs with explicit challenge detection.
-- **Single-Binary Packaging Pipeline**: Standardized on unified `docharvest` binaries across Windows, Linux, and macOS, removing legacy dual-binary duplication.
-- **14-Client IDE Integration**: Verified JSON configs for Claude Code, Cursor, Windsurf, VS Code (`servers` key), Zed, JetBrains, Cline, Continue.dev, Kiro, OpenCode, Pi / Oh My Pi, Antigravity, and Codex CLI.
+- **Impeccable shadcn/ui Desktop GUI**:
+  - React 18 + Vite 6 + Tailwind CSS desktop app with PyWebView 6 bridge.
+  - Interactive **Onboarding Tour** (`OnboardingTour.tsx`) stored in persistent localStorage.
+  - Full **In-App Documentation Portal** (`InAppDocsView.tsx`) covering architecture, CLI flags, and MCP setup.
+  - Advanced **Markdown Viewer** (`MarkdownViewer.tsx`) featuring syntax-highlighted code blocks, Mermaid diagram rendering, dynamic Table of Contents sidebar with scrollspy, and reading time estimation.
+  - Native **Headless SPA (`ON`/`OFF`)** toggle and smart detection banner with 1-click SPA mode.
+- **Model Context Protocol (MCP v2) Compliance**:
+  - Upgraded `gitbook_downloader.mcp.server` with 10 native tools.
+  - Added **MCP Resources** (`docs://{domain}/book`, `docs://{domain}/manifest`).
+  - Added **MCP Prompts** (`prompt://search-docset`, `prompt://summarize-library`).
+  - Dynamic runtime compatibility for both `mcp<2` (`FastMCP`) and `mcp>=2.1` (`MCPServer`).
+- **Semantic DocGraph Intelligence**:
+  - Built `DocGraph` engine (`src/gitbook_downloader/search/graph.py`) for non-linear conceptual navigation (`query_doc_graph`, `get_related_concepts`).
+  - Extracts page hierarchy, API endpoints, code symbols, and cross-links with minimal token consumption.
+- **8 Dedicated Platform Providers**:
+  - Full provider hierarchy: `GitBook` (100) → `Mintlify` (90) → `Docusaurus` (80) → `Nextra` (75) → `VitePress` (72) → `MkDocs` (70) → `ReadMe` (65) → `ReadTheDocs` (60) → `Generic` (0).
+- **Loud SPA Diagnostics & Headless Rendering**:
+  - Opt-in Playwright rendering (`--render`) for JavaScript-rendered SPAs (e.g. `omp.sh/docs`).
+  - Upgraded wait strategy to monitor `networkidle` state and DOM text population inside `<main>` / `<article>` / `#root`.
+  - Loud failure diagnostics detecting empty shells and anti-bot challenge interstitials (Cloudflare/DataDome).
+- **Single-Binary Packaging Pipeline**:
+  - Standardized on unified `docharvest` binaries across Windows, Linux, and macOS in `build_exe.py` and GitHub Actions.
+- **14-Client IDE Integration**:
+  - Verified JSON configs for Claude Code, Cursor, Windsurf, VS Code (`servers` key), Zed, JetBrains, Cline, Continue.dev, Kiro, OpenCode, Pi / Oh My Pi, Antigravity, and Codex CLI.
 
 ---
 
