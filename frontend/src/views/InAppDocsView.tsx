@@ -332,13 +332,13 @@ docharvest --gui`}</pre>
               Model Context Protocol (MCP v2) Integration
             </h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              DocHarvest exposes 8 native tools, MCP Resources, and MCP Prompts over standard input/output (<code className="font-mono text-cyan-400">stdio</code>). Compatible with Cursor, Claude Desktop, Claude Code, Windsurf, Zed, and 10+ other harnesses.
+              DocHarvest exposes 10 native tools, MCP Resources, and MCP Prompts over standard input/output (<code className="font-mono text-cyan-400">stdio</code>). Directly compatible with Cursor, Claude Desktop, Claude Code, Oh My Pi (<code className="font-mono text-cyan-400">omp.sh</code>), Windsurf, Zed, OpenCode, Kiro, and 10+ other harnesses.
             </p>
           </div>
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold font-mono text-foreground">
-              All 8 Native MCP Tools
+              All 10 Native MCP Tools
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
               <div className="p-3 rounded-lg border border-border bg-card/60">
@@ -348,6 +348,14 @@ docharvest --gui`}</pre>
               <div className="p-3 rounded-lg border border-border bg-card/60">
                 <span className="text-cyan-400 font-semibold">search_docs(query, domain, limit)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">BM25 SQLite FTS5 search across local indexed documentation.</p>
+              </div>
+              <div className="p-3 rounded-lg border border-border bg-card/60">
+                <span className="text-cyan-400 font-semibold">query_doc_graph(domain, query, limit)</span>
+                <p className="text-[11px] font-sans text-muted-foreground mt-1">Traverse semantic entity & concept graph for non-linear lookups.</p>
+              </div>
+              <div className="p-3 rounded-lg border border-border bg-card/60">
+                <span className="text-cyan-400 font-semibold">get_related_concepts(domain, concept)</span>
+                <p className="text-[11px] font-sans text-muted-foreground mt-1">Retrieve connected concepts, symbols & API endpoints.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
                 <span className="text-cyan-400 font-semibold">get_doc(domain, version)</span>
@@ -376,25 +384,82 @@ docharvest --gui`}</pre>
             </div>
           </div>
 
-          <div className="space-y-3">
+          {/* MCP Resources & Prompts */}
+          <div className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 space-y-2 text-xs">
+            <h4 className="font-semibold text-cyan-400 font-mono">⚡ MCP v2 Resources & Prompts Available</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-muted-foreground font-mono text-[11px]">
+              <div><strong className="text-foreground">Resource:</strong> <code className="text-cyan-300">docs://&#123;domain&#125;/book</code></div>
+              <div><strong className="text-foreground">Resource:</strong> <code className="text-cyan-300">docs://&#123;domain&#125;/manifest</code></div>
+              <div><strong className="text-foreground">Prompt:</strong> <code className="text-amber-300">search_docset</code></div>
+              <div><strong className="text-foreground">Prompt:</strong> <code className="text-amber-300">summarize_library</code></div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
             <h3 className="text-sm font-semibold font-mono text-foreground">
-              Example Claude Desktop Config (<code className="text-cyan-400">claude_desktop_config.json</code>)
+              1-Click IDE & Harness Configuration Snippets
             </h3>
-            <div className="relative rounded-xl border border-border bg-[#090d16] p-4 text-xs font-mono text-slate-300">
-              <button
-                onClick={() => handleCopyCode("mcp_claude", JSON.stringify({
-                  mcpServers: {
-                    docharvest: {
-                      command: "docharvest",
-                      args: ["mcp"]
+
+            {/* Oh My Pi / Pi */}
+            <div className="space-y-2">
+              <span className="font-mono text-xs font-semibold text-amber-400">Oh My Pi (`omp.sh`) / Pi (`~/.omp/config.json`)</span>
+              <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
+                <button
+                  onClick={() => handleCopyCode("mcp_omp", JSON.stringify({
+                    mcp_servers: {
+                      docharvest: {
+                        command: "docharvest",
+                        args: ["mcp"]
+                      }
                     }
-                  }
-                }, null, 2))}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
-              >
-                {copiedKey === "mcp_claude" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-              </button>
-              <pre>{`{
+                  }, null, 2))}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                >
+                  {copiedKey === "mcp_omp" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
+                <pre>{`{
+  "mcp_servers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["mcp"]
+    }
+  }
+}`}</pre>
+              </div>
+            </div>
+
+            {/* Claude Code */}
+            <div className="space-y-2">
+              <span className="font-mono text-xs font-semibold text-cyan-400">Claude Code CLI</span>
+              <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
+                <button
+                  onClick={() => handleCopyCode("mcp_claude_cli", "claude mcp add docharvest docharvest mcp")}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                >
+                  {copiedKey === "mcp_claude_cli" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
+                <pre>{`claude mcp add docharvest docharvest mcp`}</pre>
+              </div>
+            </div>
+
+            {/* Cursor */}
+            <div className="space-y-2">
+              <span className="font-mono text-xs font-semibold text-cyan-400">Cursor (`.cursor/mcp.json`)</span>
+              <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
+                <button
+                  onClick={() => handleCopyCode("mcp_cursor", JSON.stringify({
+                    mcpServers: {
+                      docharvest: {
+                        command: "docharvest",
+                        args: ["mcp"]
+                      }
+                    }
+                  }, null, 2))}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                >
+                  {copiedKey === "mcp_cursor" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
+                <pre>{`{
   "mcpServers": {
     "docharvest": {
       "command": "docharvest",
@@ -402,6 +467,35 @@ docharvest --gui`}</pre>
     }
   }
 }`}</pre>
+              </div>
+            </div>
+
+            {/* OpenCode */}
+            <div className="space-y-2">
+              <span className="font-mono text-xs font-semibold text-cyan-400">OpenCode (`opencode.json`)</span>
+              <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
+                <button
+                  onClick={() => handleCopyCode("mcp_opencode", JSON.stringify({
+                    mcp: {
+                      docharvest: {
+                        command: "docharvest",
+                        args: ["mcp"]
+                      }
+                    }
+                  }, null, 2))}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                >
+                  {copiedKey === "mcp_opencode" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
+                <pre>{`{
+  "mcp": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["mcp"]
+    }
+  }
+}`}</pre>
+              </div>
             </div>
           </div>
         </div>

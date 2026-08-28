@@ -81,7 +81,7 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     title: "🔌 Native FastMCP v2 Server",
-    subtitle: "Expose 8 Tools, Prompts & Resources to AI IDEs",
+    subtitle: "Expose 10 Tools, Prompts & Resources to AI IDEs",
     description: "Seamlessly connect Cursor, Claude Code, Windsurf, VS Code, Zed, and JetBrains. DocHarvest exposes tools like download_docs, search_docs, get_doc, and query_doc_graph over stdio with zero configuration.",
     icon: Cpu,
     badge: "MCP v2 Protocol",
