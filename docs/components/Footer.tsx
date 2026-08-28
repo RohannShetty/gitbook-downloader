@@ -11,7 +11,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="border-t border-border bg-[#07070a] py-16 text-zinc-400 font-mono text-xs">
+    <footer className="border-t border-border bg-card/50 py-16 text-muted-foreground font-mono text-xs transition-colors duration-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 border-b border-border/80">
@@ -35,7 +35,7 @@ export function Footer() {
             </p>
 
             {/* Creator Attribution Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card/80 text-foreground font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground font-semibold shadow-xs">
               <span>Made with</span>
               <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
               <span>by</span>
@@ -43,7 +43,7 @@ export function Footer() {
                 href="https://github.com/RohannShetty"
                 target="_blank"
                 rel="noreferrer"
-                className="text-primary hover:underline"
+                className="text-primary hover:underline font-bold"
               >
                 Rohan Shetty
               </a>
@@ -57,7 +57,7 @@ export function Footer() {
             </span>
             <ul className="space-y-2 text-muted-foreground font-sans text-xs">
               <li>
-                <a href="#agents" className="hover:text-foreground transition-colors text-cyan-400">Agents &amp; IDEs</a>
+                <a href="#agents" className="hover:text-primary transition-colors text-cyan-700 dark:text-cyan-400 font-semibold">Agents &amp; IDEs</a>
               </li>
               <li>
                 <a href="#platforms" className="hover:text-foreground transition-colors">Platforms</a>

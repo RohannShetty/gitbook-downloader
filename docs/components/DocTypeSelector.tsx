@@ -65,7 +65,7 @@ export function DocTypeSelector() {
             <div className="lg:col-span-5 space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 font-bold uppercase">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 font-bold uppercase">
                     {selectedFramework.badge}
                   </span>
                   <span className="font-mono text-[10px] text-muted-foreground">
@@ -82,7 +82,7 @@ export function DocTypeSelector() {
 
               {/* Sample Target URL */}
               <div className="p-3 rounded-lg border border-border bg-background font-mono text-xs space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground uppercase flex items-center gap-1 font-semibold">
                   <Globe className="h-3 w-3 text-primary" /> Target Sample:
                 </span>
                 <div className="text-foreground text-[11px] truncate font-semibold">
@@ -92,14 +92,14 @@ export function DocTypeSelector() {
 
               {/* Feature Checklist */}
               <div className="space-y-2">
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block">
+                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">
                   Parsing Capabilities:
                 </span>
                 <ul className="space-y-2 text-xs font-mono text-muted-foreground">
                   {selectedFramework.features.map((feat, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>{feat}</span>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <span className="text-foreground/90">{feat}</span>
                     </li>
                   ))}
                 </ul>
@@ -112,22 +112,22 @@ export function DocTypeSelector() {
                 
                 {/* Raw HTML Soup */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between font-mono text-[10px] text-rose-400">
+                  <div className="flex items-center justify-between font-mono text-[10px] text-rose-600 dark:text-rose-400 font-bold">
                     <span>❌ Raw Scraper / Curl (HTML Noise)</span>
                     <span>~42.8 KB</span>
                   </div>
-                  <pre className="h-[260px] overflow-y-auto text-[10px] text-zinc-400 bg-[#09090c] p-3 rounded-lg border border-rose-950/40">
+                  <pre className="h-[260px] overflow-y-auto text-[10px] text-zinc-400 bg-zinc-950 p-3 rounded-lg border border-rose-500/30 dark:border-rose-950/40">
                     <code>{selectedFramework.rawHtmlSnippet}</code>
                   </pre>
                 </div>
 
                 {/* Clean Markdown Output */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between font-mono text-[10px] text-emerald-400">
+                  <div className="flex items-center justify-between font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
                     <span>✓ DocHarvest Output (LLM Context)</span>
                     <span>~3.2 KB Clean</span>
                   </div>
-                  <pre className="h-[260px] overflow-y-auto text-[10px] text-cyan-300 bg-[#09090c] p-3 rounded-lg border border-cyan-950/40">
+                  <pre className="h-[260px] overflow-y-auto text-[10px] text-emerald-300 bg-zinc-950 p-3 rounded-lg border border-emerald-500/30 dark:border-emerald-950/40">
                     <code>{selectedFramework.cleanMarkdownSnippet}</code>
                   </pre>
                 </div>

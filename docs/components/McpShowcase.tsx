@@ -113,7 +113,7 @@ export function McpShowcase() {
                   onClick={() => setSelectedClient(key as any)}
                   className={`px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                     selectedClient === key
-                      ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
+                      ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 font-bold'
                       : 'border-border bg-card text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -123,20 +123,20 @@ export function McpShowcase() {
             </div>
 
             {/* Config Snippet Card */}
-            <div className="border border-border rounded-xl bg-[#09090d] shadow-xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-zinc-950/80 font-mono text-[11px] text-muted-foreground">
+            <div className="border border-slate-800 rounded-xl bg-zinc-950 shadow-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800 bg-zinc-900/80 font-mono text-[11px] text-zinc-400">
                 <span className="text-cyan-400 font-bold">{current.filename}</span>
                 <button
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer text-xs"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-800 hover:bg-primary/20 hover:text-white transition-colors cursor-pointer text-xs text-zinc-200 border border-zinc-700"
                 >
                   {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                   <span>{copied ? 'Copied' : 'Copy JSON'}</span>
                 </button>
               </div>
 
-              <div className="p-4 bg-[#07070a] font-mono text-xs leading-relaxed overflow-x-auto">
-                <pre className="text-zinc-300">
+              <div className="p-4 bg-zinc-950 font-mono text-xs leading-relaxed overflow-x-auto">
+                <pre className="!bg-transparent !p-0 !border-0 text-zinc-100">
                   <code>{current.snippet}</code>
                 </pre>
               </div>
@@ -157,7 +157,7 @@ export function McpShowcase() {
             <div className="space-y-2.5">
               {MCP_TOOLS.map((tool) => (
                 <div key={tool.name} className="p-3.5 rounded-lg border border-border bg-card font-mono text-xs space-y-1 hover:border-cyan-500/30 transition-colors">
-                  <div className="text-cyan-400 font-bold">
+                  <div className="text-cyan-700 dark:text-cyan-400 font-bold">
                     @{tool.name}()
                   </div>
                   <div className="text-muted-foreground text-[11px]">

@@ -95,22 +95,22 @@ export function ExportStudioPreview() {
             Inspect the Generated Compilation Artifacts
           </h2>
           <p className="text-sm text-muted-foreground font-mono max-w-2xl">
-            Switch between raw generated artifacts to see how DocHarvest formats Markdown, vector JSONL, <code className="text-cyan-300">llms.txt</code>, and SQLite FTS5 indices.
+            Switch between raw generated artifacts to see how DocHarvest formats Markdown, vector JSONL, <code className="text-cyan-700 dark:text-cyan-400 font-bold">llms.txt</code>, and SQLite FTS5 indices.
           </p>
         </div>
 
         {/* Studio Window Card */}
-        <div className="border border-border rounded-xl bg-[#09090d] shadow-2xl overflow-hidden">
+        <div className="border border-slate-800 rounded-xl bg-zinc-950 shadow-2xl overflow-hidden">
           
           {/* Studio Navigation Bar */}
-          <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-border bg-zinc-950/80 gap-3">
+          <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 gap-3">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab('markdown')}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer transition-all ${
                   activeTab === 'markdown'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 <FileText className="h-3.5 w-3.5" />
@@ -122,7 +122,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer transition-all ${
                   activeTab === 'rag'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 <Database className="h-3.5 w-3.5" />
@@ -134,7 +134,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer transition-all ${
                   activeTab === 'llmstxt'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 <FileCode className="h-3.5 w-3.5" />
@@ -146,7 +146,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer transition-all ${
                   activeTab === 'fts5'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 <Search className="h-3.5 w-3.5" />
@@ -156,12 +156,12 @@ export function ExportStudioPreview() {
 
             {/* Copy Artifact CTA */}
             <div className="flex items-center gap-3">
-              <span className="hidden sm:inline-block font-mono text-[10px] text-muted-foreground">
+              <span className="hidden sm:inline-block font-mono text-[10px] text-zinc-400">
                 {current.filename}
               </span>
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-card text-xs font-mono text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-700 bg-zinc-800 text-xs font-mono text-zinc-200 hover:text-white hover:border-primary/60 transition-colors cursor-pointer"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy Sample'}</span>
@@ -170,14 +170,14 @@ export function ExportStudioPreview() {
           </div>
 
           {/* Code Viewer Panel */}
-          <div className="p-5 overflow-x-auto font-mono text-xs leading-relaxed bg-[#07070a]">
-            <pre className="text-zinc-300">
+          <div className="p-5 overflow-x-auto font-mono text-xs leading-relaxed bg-zinc-950">
+            <pre className="!bg-transparent !p-0 !border-0 text-zinc-100">
               <code>{current.code}</code>
             </pre>
           </div>
 
           {/* Studio Footer */}
-          <div className="flex items-center justify-between px-4 py-2 border-t border-border/80 bg-zinc-950 font-mono text-[10px] text-muted-foreground">
+          <div className="flex items-center justify-between px-4 py-2.5 border-t border-zinc-800 bg-zinc-900/60 font-mono text-[10px] text-zinc-400">
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
               <span>SYNTAX: {current.language.toUpperCase()}</span>

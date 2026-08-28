@@ -28,7 +28,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
               <span className="font-mono text-base font-extrabold tracking-tight text-foreground">
                 DocHarvest
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-mono text-cyan-400">
+              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-700 dark:text-cyan-400">
                 v11.0.1
               </span>
             </div>
@@ -40,7 +40,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
 
         {/* Navigation Anchors */}
         <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-muted-foreground">
-          <a href="#agents" className="hover:text-foreground transition-colors text-cyan-400">
+          <a href="#agents" className="hover:text-primary transition-colors text-cyan-700 dark:text-cyan-400">
             Agents &amp; IDEs
           </a>
           <a href="#platforms" className="hover:text-foreground transition-colors">

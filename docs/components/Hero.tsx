@@ -64,9 +64,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-xs font-mono text-cyan-300"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-xs font-mono font-bold text-cyan-700 dark:text-cyan-400"
             >
-              <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+              <Sparkles className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
               <span>DocHarvest v11.0.1 — Local-First AI AST Compiler</span>
             </motion.div>
 
@@ -87,7 +87,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground font-mono leading-relaxed"
             >
-              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan-300">FastMCP v2</code> or offline PDFs.
+              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan-700 dark:text-cyan-400 font-bold">FastMCP v2</code> or offline PDFs.
             </motion.p>
 
             {/* Quick Agent Selector Pills */}
@@ -107,7 +107,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                     onClick={() => setSelectedAgentId(agent.id)}
                     className={`px-2.5 py-1 rounded-md border font-mono text-[0.70rem] font-semibold transition-all cursor-pointer ${
                       selectedAgentId === agent.id
-                        ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300'
+                        ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 font-bold shadow-xs'
                         : 'border-border/80 bg-card text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -148,13 +148,13 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex items-center gap-2 px-3.5 py-2 rounded-md border border-border/80 bg-card/80 font-mono text-xs text-muted-foreground w-full"
             >
-              <span className="text-cyan-400">&gt;</span>
+              <span className="text-cyan-600 dark:text-cyan-400">&gt;</span>
               <code className="flex-1 text-foreground font-semibold">pip install gitbook-downloader</code>
               <button
                 onClick={copyPipCommand}
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer text-[11px]"
               >
-                {copiedPip ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedPip ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copiedPip ? 'Copied' : 'Copy'}</span>
               </button>
             </motion.div>
@@ -163,11 +163,11 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 w-full font-mono text-xs border-t border-border/80">
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">THROUGHPUT</span>
-                <span className="font-bold text-cyan-400">20 pgs/sec</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">20 pgs/sec</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">TOKEN SAVINGS</span>
-                <span className="font-bold text-emerald-400">89% Reduction</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">89% Reduction</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">PRIVACY</span>
@@ -175,7 +175,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">AGENT MODELS</span>
-                <span className="font-bold text-cyan-400">15+ Harnesses</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">15+ Harnesses</span>
               </div>
             </div>
 

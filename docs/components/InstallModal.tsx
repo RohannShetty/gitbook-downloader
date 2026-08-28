@@ -69,7 +69,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div
-        className="relative w-full max-w-2xl border border-border rounded-xl bg-[#0e0e13] shadow-2xl p-6 sm:p-8 space-y-6"
+        className="relative w-full max-w-2xl border border-border rounded-xl bg-card text-foreground shadow-2xl p-6 sm:p-8 space-y-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -124,15 +124,15 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             <span>Terminal Command:</span>
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-1 text-cyan-400 hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1 text-cyan-700 dark:text-cyan-400 font-bold hover:underline cursor-pointer"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied to Clipboard!' : 'Copy'}</span>
             </button>
           </div>
 
-          <div className="p-4 rounded-lg bg-[#060609] border border-border font-mono text-xs text-zinc-300 leading-relaxed overflow-x-auto">
-            <pre>
+          <div className="p-4 rounded-lg bg-zinc-950 border border-slate-800 font-mono text-xs text-zinc-100 leading-relaxed overflow-x-auto shadow-inner">
+            <pre className="!bg-transparent !p-0 !border-0 text-zinc-100">
               <code>{activeTab.command}</code>
             </pre>
           </div>

@@ -9,7 +9,7 @@ const PERSONAS = [
     id: "ai",
     title: "AI & RAG Engineers",
     icon: Bot,
-    iconBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+    iconBg: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/30",
     badge: "Vector & Agent Ready",
     pain: "LLMs hallucinate on outdated training data. Scraping docs with curl dumps 40KB+ HTML noise that exhausts context windows.",
     solution: "DocHarvest compiles clean vector JSONL datasets with token counts, SHA-256 hashes, and standard llms.txt manifests for instant agent indexing.",
@@ -23,7 +23,7 @@ const PERSONAS = [
     id: "offline",
     title: "Offline Developers & Researchers",
     icon: BookOpen,
-    iconBg: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    iconBg: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30",
     badge: "Air-Gapped Portability",
     pain: "Reading documentation on flights, during outages, or in secure air-gapped enterprise environments is painful with fragmented web pages.",
     solution: "Merges 500+ documentation pages into a single consolidated book.md and publication-grade PDF handbook with automated table of contents.",
@@ -37,7 +37,7 @@ const PERSONAS = [
     id: "devops",
     title: "DevOps & Archival Teams",
     icon: Server,
-    iconBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    iconBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
     badge: "Automated Synchronization",
     pain: "Docs change across releases without changelog notices. Mirroring docs locally often hits rate limits or gets blocked by Cloudflare.",
     solution: "Heuristic crawlers with cross-platform lock recovery, retry adapters, exponential backoffs, and automated Git diff tracking.",
@@ -95,26 +95,26 @@ export function PersonaShowcase() {
 
                   <div className="space-y-3 text-xs font-mono leading-relaxed pt-1">
                     <div className="space-y-1">
-                      <span className="text-rose-400 font-bold text-[11px] block">Problem:</span>
-                      <p className="text-zinc-300 text-[11px] leading-relaxed">{persona.pain}</p>
+                      <span className="text-rose-600 dark:text-rose-400 font-bold text-[11px] block">Problem:</span>
+                      <p className="text-muted-foreground text-[11px] leading-relaxed">{persona.pain}</p>
                     </div>
 
                     <div className="space-y-1 pt-1 border-t border-border/40">
-                      <span className="text-emerald-400 font-bold text-[11px] block">DocHarvest Solution:</span>
-                      <p className="text-zinc-300 text-[11px] leading-relaxed">{persona.solution}</p>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[11px] block">DocHarvest Solution:</span>
+                      <p className="text-muted-foreground text-[11px] leading-relaxed">{persona.solution}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-border/80 pt-4 space-y-2">
-                  <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block">
+                  <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">
                     Core Advantages:
                   </span>
                   <ul className="space-y-1.5 text-xs font-mono text-muted-foreground">
                     {persona.highlights.map((h, i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
-                        <span>{h}</span>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                        <span className="text-foreground/90">{h}</span>
                       </li>
                     ))}
                   </ul>
