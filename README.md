@@ -8,12 +8,12 @@
 
 **Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
 
-[![Version: 10.1.0](https://img.shields.io/badge/version-10.1.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 11.0.0](https://img.shields.io/badge/version-11.0.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
-[![MCP: 8 Tools](https://img.shields.io/badge/MCP-8%20Tools%20Ready-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-server)
-[![Tests: 530 Passing](https://img.shields.io/badge/tests-530%20passing-10b981?style=flat-square&labelColor=090d16)](#-test-suite--quality-benchmarks)
+[![MCP: 10 Tools & Resources](https://img.shields.io/badge/MCP-10%20Tools%20%26%20Resources-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-server)
+[![Tests: 531 Passing](https://img.shields.io/badge/tests-531%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-64748b?style=flat-square&labelColor=090d16)](#)
 [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)
 [![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/gitbook-downloader/)
@@ -176,28 +176,36 @@ docharvest --gui
 
 ---
 
-## 🔌 AI Agent Integration: Native FastMCP Server
+## 🔌 AI Agent Integration: Native FastMCP v2 Server
 
-DocHarvest includes a native **FastMCP (Model Context Protocol)** server that exposes 8 high-level tools over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
+DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that exposes 10 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
 
-### All 8 Native MCP Tools
+### All 10 Native MCP Tools
 
 1. `download_docs(url, max_pages=None, workers=8, path_scope=[], exclude_paths=[], site_versions=None, output_mode="both")`
-   Captures any documentation URL into Markdown, book.md, and llms.txt.
+   Captures any documentation URL into Markdown, `book.md`, and `llms.txt`.
 2. `search_docs(query, domain=None, limit=10)`
    Full-text search across downloaded documentation via SQLite FTS5 BM25.
-3. `list_domains()`
+3. `query_doc_graph(domain, query, limit=10)`
+   Queries the semantic entity & concept graph to discover connected API endpoints and sections without reading full files.
+4. `get_related_concepts(domain, concept)`
+   Returns 1-hop and 2-hop connected concepts and prerequisite sections.
+5. `list_domains()`
    Returns metadata for all harvested documentation portals in local storage.
-4. `get_doc(domain, version=None)`
+6. `get_doc(domain, version=None)`
    Retrieves the compiled documentation content or preview for a domain.
-5. `diff_versions(domain, v1, v2)`
+7. `diff_versions(domain, v1, v2)`
    Computes unified diffs and line change statistics between two snapshots.
-6. `list_versions(domain)`
+8. `list_versions(domain)`
    Lists available captured snapshots and timestamps for a domain.
-7. `export_docs(domain, format="markdown")`
+9. `export_docs(domain, format="markdown")`
    Exports documentation into `"markdown"`, `"jsonl"`, or `"rag"` metadata formats.
-8. `get_changelog(domain)`
-   Auto-generates version changelogs across captured snapshot iterations.
+10. `get_changelog(domain)`
+    Auto-generates version changelogs across captured snapshot iterations.
+
+### MCP v2 Resources & Prompts
+- **Resources**: `docs://{domain}/book` (full handbook), `docs://{domain}/manifest` (`llms.txt` index).
+- **Prompts**: `prompt://search-docset` (guided docset synthesis), `prompt://summarize-library` (library overview).
 
 ---
 
@@ -205,7 +213,7 @@ DocHarvest includes a native **FastMCP (Model Context Protocol)** server that ex
 
 #### 1. Claude Code
 ```bash
-claude mcp add docharvest docharvest --mcp
+claude mcp add docharvest docharvest mcp
 ```
 Or in `~/.claude.json`:
 ```json
@@ -213,7 +221,7 @@ Or in `~/.claude.json`:
   "mcpServers": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
@@ -225,7 +233,7 @@ Or in `~/.claude.json`:
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "--mcp"]
+      "args": ["gitbook-downloader", "mcp"]
     }
   }
 }
@@ -249,7 +257,7 @@ Or in `~/.claude.json`:
   "mcpServers": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
@@ -262,7 +270,7 @@ Or in `~/.claude.json`:
     "docharvest": {
       "type": "stdio",
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
@@ -272,7 +280,7 @@ Or in `~/.claude.json`:
 Configure via **Settings → Tools → Model Context Protocol (MCP)**:
 - **Server Name**: `docharvest`
 - **Command**: `docharvest`
-- **Arguments**: `--mcp`
+- **Arguments**: `mcp`
 
 #### 7. Zed (`settings.json`)
 ```json
@@ -280,7 +288,7 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
   "context_servers": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
@@ -292,9 +300,9 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
   "mcpServers": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"],
+      "args": ["mcp"],
       "disabled": false,
-      "autoApprove": ["search_docs", "get_doc", "list_domains"]
+      "autoApprove": ["search_docs", "get_doc", "list_domains", "query_doc_graph"]
     }
   }
 }
@@ -309,7 +317,7 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
         "transport": {
           "type": "stdio",
           "command": "docharvest",
-          "args": ["--mcp"]
+          "args": ["mcp"]
         }
       }
     ]
@@ -317,14 +325,14 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
 }
 ```
 
-#### 10. Kiro (`kiro-config.json`)
+#### 10. Kiro (`.kiro/settings/mcp.json`)
 ```json
 {
   "mcp": {
     "servers": {
       "docharvest": {
         "command": "docharvest",
-        "args": ["--mcp"]
+        "args": ["mcp"]
       }
     }
   }
@@ -334,22 +342,22 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
 #### 11. OpenCode (`opencode.json`)
 ```json
 {
-  "mcpServers": {
+  "mcp": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-#### 12. Pi / Oh My Pi (`omp.sh`) (`~/.omp/config.json`)
+#### 12. Pi (`pi.dev`) / Oh My Pi (`omp.sh`) (`~/.omp/config.json`)
 ```json
 {
   "mcp_servers": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
@@ -360,7 +368,7 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
 {
   "name": "docharvest",
   "command": "docharvest",
-  "args": ["--mcp"]
+  "args": ["mcp"]
 }
 ```
 
@@ -370,7 +378,7 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
   "mcp_servers": {
     "docharvest": {
       "command": "docharvest",
-      "args": ["--mcp"]
+      "args": ["mcp"]
     }
   }
 }
@@ -404,8 +412,8 @@ print(f"Manifest:  {result.manifest_file}")
 
 DocHarvest is continuously tested across Windows, Linux, and macOS:
 
-- **530 Automated Tests**: 100% test pass rate across engine discovery, BFS crawling, provider extraction, storage safety, and MCP tools.
-- **71%+ Statement Coverage**: Rigorous test suites covering error recovery, invalid signatures, domain locks, and AST link normalization.
+- **531 Automated Tests**: 100% test pass rate across engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, and MCP v2 tools.
+- **73%+ Statement Coverage**: Rigorous test suites covering error recovery, invalid signatures, domain locks, and AST link normalization.
 - **Windows CRLF Safe**: All link and boilerplate stripping routines are cross-platform normalized against Windows CRLF and Unix LF linebreaks.
 
 To run the test suite locally:

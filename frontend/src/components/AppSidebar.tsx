@@ -13,12 +13,14 @@ import {
   Moon,
   Command,
   Heart,
-  Info
+  Info,
+  BookOpen,
+  HelpCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-export type TabId = "capture" | "library" | "search" | "diff" | "export" | "diagnostics"
+export type TabId = "capture" | "library" | "search" | "diff" | "export" | "docs" | "diagnostics"
 
 interface AppSidebarProps {
   activeTab: TabId
@@ -29,6 +31,7 @@ interface AppSidebarProps {
   onToggleTheme: () => void
   libraryCount?: number
   onOpenAbout?: () => void
+  onOpenTour?: () => void
 }
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({
@@ -38,7 +41,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   onToggleCollapse,
   theme,
   onToggleTheme,
-  onOpenAbout
+  onOpenAbout,
+  onOpenTour
 }) => {
   const navItems = [
     { id: "capture" as TabId, label: "Capture Studio", icon: Download, badge: null },
@@ -46,6 +50,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     { id: "search" as TabId, label: "Search Studio", icon: Search, badge: null },
     { id: "diff" as TabId, label: "Snapshot Diff", icon: GitCompare, badge: null },
     { id: "export" as TabId, label: "Export Studio", icon: FileUp, badge: "RAG" },
+    { id: "docs" as TabId, label: "Documentation", icon: BookOpen, badge: null },
     { id: "diagnostics" as TabId, label: "Diagnostics", icon: Activity, badge: null },
   ]
 
@@ -66,7 +71,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               <div className="flex items-center gap-1.5">
                 <span className="font-bold tracking-tight text-foreground text-sm font-mono">DocHarvest</span>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-cyan-500/30 text-cyan-400 bg-cyan-500/10 font-mono">
-                  v10.0.1
+                  v11.0.0
                 </Badge>
               </div>
               <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Harvester</span>
@@ -132,6 +137,18 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
+
+            {onOpenTour && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onOpenTour}
+                className="h-8 w-8 text-muted-foreground hover:text-cyan-400"
+                title="Start Interactive Tour"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            )}
 
             {onOpenAbout && (
               <Button

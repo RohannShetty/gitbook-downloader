@@ -39,8 +39,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({
 }) => {
   if (!open) return null
 
-  const appVersion = systemInfo?.version || "10.0.1"
-  const engineVersion = systemInfo?.engine || `DocHarvest Engine v${appVersion} (AST + FastMCP + fpdf2)`
+  const appVersion = systemInfo?.version || "11.0.0"
+  const engineVersion = systemInfo?.engine || `DocHarvest Engine v${appVersion} (AST + FastMCP v2 + fpdf2)`
   const authorName = systemInfo?.author || "Rohan Shetty"
 
   return (

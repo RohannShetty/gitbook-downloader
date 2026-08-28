@@ -9,6 +9,8 @@ import { SearchView } from "@/views/SearchView"
 import { DiffView } from "@/views/DiffView"
 import { ExportView } from "@/views/ExportView"
 import { DiagnosticsView } from "@/views/DiagnosticsView"
+import { InAppDocsView } from "@/views/InAppDocsView"
+import { OnboardingTour } from "@/components/OnboardingTour"
 import { Toaster } from "@/components/ui/sonner"
 import { pyApi } from "@/lib/bridge"
 
@@ -18,6 +20,7 @@ export function App() {
   const [theme, setTheme] = useState<"dark" | "light">("dark")
   const [cmdMenuOpen, setCmdMenuOpen] = useState<boolean>(false)
   const [aboutOpen, setAboutOpen] = useState<boolean>(false)
+  const [tourOpen, setTourOpen] = useState<boolean>(false)
   const [systemInfo, setSystemInfo] = useState<any>(null)
   
   // Library State
@@ -44,6 +47,12 @@ export function App() {
   useEffect(() => {
     pyApi.getSystemInfo().then(setSystemInfo).catch(console.error)
     loadLibrary()
+    
+    // Check if first-time user tour should be shown
+    const tourCompleted = localStorage.getItem("docharvest_tour_completed")
+    if (!tourCompleted) {
+      setTourOpen(true)
+    }
   }, [])
 
   // Reload library whenever the active tab changes to keep UI synchronized
@@ -55,7 +64,6 @@ export function App() {
   useEffect(() => {
     document.documentElement.classList.add("dark")
   }, [])
-
 
   // Global Ctrl+K / Cmd+K listener
   useEffect(() => {
@@ -99,6 +107,7 @@ export function App() {
         onToggleTheme={handleToggleTheme}
         libraryCount={library.length}
         onOpenAbout={() => setAboutOpen(true)}
+        onOpenTour={() => setTourOpen(true)}
       />
 
       {/* Main Workspace Area */}
@@ -130,6 +139,9 @@ export function App() {
         {activeTab === "export" && (
           <ExportView library={library} selectedDomain={exportDomain} />
         )}
+        {activeTab === "docs" && (
+          <InAppDocsView />
+        )}
         {activeTab === "diagnostics" && (
           <DiagnosticsView />
         )}
@@ -156,6 +168,12 @@ export function App() {
         open={aboutOpen}
         onOpenChange={setAboutOpen}
         systemInfo={systemInfo}
+      />
+
+      {/* First-Time User Onboarding Tour */}
+      <OnboardingTour
+        open={tourOpen}
+        onClose={() => setTourOpen(false)}
       />
 
       {/* Toast Notification Container */}

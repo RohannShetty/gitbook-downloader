@@ -5,35 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [10.1.0] - 2026-08-28
+## [11.0.0] - 2026-08-28
 
-### 🚀 Real Provider Expansion (8 Platforms), SPA Diagnostics, Headless Rendering & 14-Client MCP Ecosystem
+### 🚀 Major Architectural Rehaul: Impeccable shadcn/ui Desktop, MCP v2 Protocol, Semantic DocGraph & 8 Verified Providers
 
-Version 10.1.0 implements 4 missing documentation providers (**MkDocs**, **VitePress**, **Nextra**, and **ReadMe.io**), adds loud diagnostics and optional Playwright headless rendering (`--render`) for JavaScript SPAs, hardens anti-bot/challenge detection, unifies the 8-tool FastMCP server with dual `mcp<2`/`mcp>=2` support, and establishes verified integration configs across 14 AI IDEs and agent harnesses.
-
-### Added & Improved in v10.1.0
-- 🧩 **4 New Dedicated Documentation Providers (8 Platforms Total)**:
-  - `MkDocsProvider` (priority 70): Auto-detects Material for MkDocs & standard MkDocs via generator meta tags and search index (`search/search_index.json`), extracting clean markdown from `article.md-content__inner` while stripping permalink symbols.
-  - `VitePressProvider` (priority 72): Detects VitePress theme structures, extracting content from `div.vp-doc`/`div.VPContent` with header-anchor cleanup.
-  - `NextraProvider` (priority 75): Targets Next.js + Nextra documentation portals via `nextra-content` and container signatures.
-  - `ReadMeProvider` (priority 65): Resolves ReadMe.io / ReadMe.com developer hubs, isolating `rm-Article`/`rm-Markdown` DOM blocks.
-  - Full provider hierarchy: `GitBook` (100) → `Mintlify` (90) → `Docusaurus` (80) → `Nextra` (75) → `VitePress` (72) → `MkDocs` (70) → `ReadMe` (65) → `ReadTheDocs` (60) → `Generic` (0).
-- 🚨 **Loud Failure Diagnostics & SPA Detection**:
-  - Automatically identifies empty SPA shells and anti-bot challenge interstitials (Cloudflare/DataDome).
-  - Emits clear, actionable warnings: `⚠ No content was captured for this source. This documentation site appears to be client-rendered JavaScript (SPA) — try --render to execute JavaScript with a headless browser.`
-- 🌐 **Opt-In Headless Browser Rendering (`--render`)**:
-  - Added `gitbook_downloader.utils.renderer.HeadlessRenderer` utilizing Playwright to render dynamic JavaScript SPAs into full DOM before markdown compilation.
-  - Configured as a clean optional extra in `pyproject.toml` (`[project.optional-dependencies] render / js`) to preserve the 100% lightweight, zero-bloat default install.
-- 🔌 **Native 8-Tool FastMCP Server & 14-Client Ecosystem**:
-  - Dynamically imports `FastMCP` (mcp 1.x) or `MCPServer` (mcp 2.x), enabling seamless execution across both legacy and modern MCP runtimes.
-  - Verified configurations for: **Claude Code**, **Claude Desktop**, **Cursor**, **Windsurf**, **VS Code** (standard `servers` key), **JetBrains AI Assistant**, **Zed**, **Cline**, **Continue.dev**, **Kiro**, **OpenCode**, **Pi / Oh My Pi (`omp.sh`)**, **Gemini CLI / Antigravity**, and **Codex CLI**.
-- 💻 **CLI Usability & Flag Additions**:
-  - Added `crawl` alias alongside `capture` and `dl`.
-  - Added `--render`, `--rag`, `--pdf`, and `--fast-ast` flags.
-  - Added sugar top-level flag routing: `docharvest --mcp`, `docharvest --gui`, and `docharvest --tui`.
-- 🧪 **Test Suite & Cross-Platform Reliability**:
-  - Normalized Windows CRLF line endings in string utilities.
-  - 511 tests passing with 0 failures and 71%+ verified statement coverage.
+Version 11.0.0 represents a ground-up upgrade of DocHarvest:
+- **Impeccable shadcn/ui Desktop GUI**: React 18 + Vite 6 + Tailwind CSS desktop app featuring interactive Onboarding Tour, In-App Documentation Portal, advanced Markdown Viewer with syntax highlighting and Mermaid diagram rendering, dynamic Table of Contents sidebar, and in-app project renaming.
+- **Model Context Protocol (MCP v2) Compliance**: Upgraded `gitbook_downloader.mcp.server` with 10 native tools, **MCP Resources** (`docs://{domain}/book`, `docs://{domain}/manifest`), and **MCP Prompts** (`prompt://search-docset`, `prompt://summarize-library`).
+- **Semantic DocGraph Intelligence**: Non-linear conceptual navigation (`query_doc_graph`, `get_related_concepts`) extracting page hierarchy, API endpoints, code symbols, and cross-links with minimal token consumption.
+- **8 Dedicated Platform Providers**: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io, and ReadTheDocs (plus Generic HTML / SPA).
+- **Loud SPA Diagnostics & Headless Rendering**: Opt-in Playwright rendering (`--render`) for JavaScript-rendered SPAs with explicit challenge detection.
+- **Single-Binary Packaging Pipeline**: Standardized on unified `docharvest` binaries across Windows, Linux, and macOS, removing legacy dual-binary duplication.
+- **14-Client IDE Integration**: Verified JSON configs for Claude Code, Cursor, Windsurf, VS Code (`servers` key), Zed, JetBrains, Cline, Continue.dev, Kiro, OpenCode, Pi / Oh My Pi, Antigravity, and Codex CLI.
 
 ---
 

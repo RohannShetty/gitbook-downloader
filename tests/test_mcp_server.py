@@ -214,7 +214,7 @@ def test_search_unavailable_message_points_at_real_fix(monkeypatch):
 # ── tool inventory: the other 7 tools remain registered ─────────────
 
 
-def test_all_eight_tools_registered():
+def test_all_tools_registered():
     registered = {tool.name for tool in server.mcp._tool_manager.list_tools()}
     assert registered == {
         "download_docs",
@@ -225,6 +225,8 @@ def test_all_eight_tools_registered():
         "list_versions",
         "export_docs",
         "get_changelog",
+        "query_doc_graph",
+        "get_related_concepts",
     }
 
 
@@ -320,4 +322,39 @@ def test_get_changelog_success(monkeypatch):
     assert res["domain"] == "example.com"
     assert len(res["entries"]) == 1
     assert res["total_versions"] == 2
+
+
+def test_query_doc_graph_and_related_concepts(tmp_path, monkeypatch):
+    # Setup a mock domain with pages
+    domain_dir = tmp_path / "graph_domain.com"
+    pages_dir = domain_dir / "pages"
+    pages_dir.mkdir(parents=True)
+
+    page1 = pages_dir / "001_auth.md"
+    page1.write_text(
+        "# Authentication Guide\n\n## Overview\nUse JWT tokens.\n\nPOST /api/v1/login\n\nSee [Config](002_config.md)",
+        encoding="utf-8"
+    )
+
+    page2 = pages_dir / "002_config.md"
+    page2.write_text(
+        "# Configuration\n\n## Settings\nSet JWT_SECRET environment variable.",
+        encoding="utf-8"
+    )
+
+    mock_storage = MagicMock()
+    mock_storage._domain_dir.return_value = domain_dir
+    monkeypatch.setattr(server, "_storage", mock_storage)
+
+    # Test query_doc_graph
+    res = call_tool(server.query_doc_graph, domain="graph_domain.com", query="authentication")
+    assert res["domain"] == "graph_domain.com"
+    assert res["matches_count"] >= 1
+    assert any("Authentication" in r["label"] for r in res["results"])
+
+    # Test get_related_concepts
+    res_concepts = call_tool(server.get_related_concepts, domain="graph_domain.com", concept="auth")
+    assert res_concepts["domain"] == "graph_domain.com"
+    assert "primary_matches" in res_concepts
+
 

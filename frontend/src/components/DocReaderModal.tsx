@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
+import { MarkdownViewer } from "@/components/MarkdownViewer"
 
 interface DocReaderModalProps {
   domain: string | null
@@ -202,25 +203,24 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
 
           {/* Markdown Content Viewer */}
           <div className="flex-1 flex flex-col bg-background overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border px-5 py-2.5 bg-muted/10 text-xs text-muted-foreground font-mono">
-              <div className="flex items-center gap-2">
-                <Layers className="h-3.5 w-3.5 text-primary" />
-                <span className="text-foreground">{selectedFile}</span>
+            {loading ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Loading documentation...
               </div>
-              <span>{fileContent.length.toLocaleString()} characters</span>
-            </div>
-
-            <ScrollArea className="flex-1 p-6">
-              {loading ? (
-                <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-                  Loading documentation...
-                </div>
-              ) : (
-                <div className="prose dark:prose-invert max-w-none text-foreground text-sm leading-relaxed font-sans whitespace-pre-wrap selection:bg-primary/20">
-                  {fileContent}
-                </div>
-              )}
-            </ScrollArea>
+            ) : (
+              <MarkdownViewer
+                content={fileContent}
+                title={selectedFile}
+                domain={domain || undefined}
+                onExportPdf={() => {
+                  if (docData?.domain) {
+                    pyApi.exportDoc(docData.domain, "pdf").then((res) => {
+                      if (res.success) toast.success(`PDF exported to: ${res.file}`)
+                    }).catch((err) => toast.error(`PDF export failed: ${err.message}`))
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
       </DialogContent>

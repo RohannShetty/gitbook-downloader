@@ -137,18 +137,11 @@ def build() -> int:
     if result.returncode == 0 and os.path.isdir(out):
         import shutil
 
-        # Ensure both docharvest and legacy gitbook-dl exist in dist
         ext = ".exe" if sys.platform == "win32" else ""
         primary = f"docharvest{ext}"
-        legacy = f"gitbook-dl{ext}"
         primary_path = os.path.join(out, primary)
-        legacy_path = os.path.join(out, legacy)
 
-        if os.path.exists(primary_path):
-            shutil.copyfile(primary_path, legacy_path)
-            print(f"Created compatibility binary: {legacy_path}")
-
-        produced = {primary, legacy}
+        produced = {primary}
         for name in sorted(os.listdir(out)):
             path = os.path.join(out, name)
             if name not in produced:

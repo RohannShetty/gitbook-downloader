@@ -430,6 +430,105 @@ async def get_changelog(domain: str) -> dict:
         return {"error": str(exc)}
 
 
+@mcp.tool()
+async def query_doc_graph(
+    domain: str,
+    query: str,
+    limit: int = 10,
+) -> dict:
+    """Query semantic entity & concept graph for a documentation domain.
+
+    Navigates non-linear relationships between pages, sections, API endpoints,
+    and code symbols to find connected concepts with minimal token overhead.
+
+    Args:
+        domain: Domain name (e.g. "docs.example.com").
+        query: Concept, keyword, or endpoint to search in graph.
+        limit: Maximum results to return (default 10).
+
+    Returns:
+        Dict with domain, matches count, and node results with 1-hop connected neighbors.
+    """
+    try:
+        from gitbook_downloader.search.graph import build_graph_from_pages
+
+        domain_dir = _storage._domain_dir(domain)
+        pages_dir = domain_dir / "pages"
+        graph = build_graph_from_pages(domain, pages_dir)
+        return graph.query(query, limit=limit)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def get_related_concepts(
+    domain: str,
+    concept: str,
+) -> dict:
+    """Retrieve semantic associations and connected entities for a concept.
+
+    Args:
+        domain: Domain name.
+        concept: Concept keyword or symbol name.
+
+    Returns:
+        Dict with primary matches and related graph nodes.
+    """
+    try:
+        from gitbook_downloader.search.graph import build_graph_from_pages
+
+        domain_dir = _storage._domain_dir(domain)
+        pages_dir = domain_dir / "pages"
+        graph = build_graph_from_pages(domain, pages_dir)
+        return graph.get_related_concepts(concept)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── MCP v2 Resources ─────────────────────────────────────────────────
+
+if hasattr(mcp, "resource"):
+    @mcp.resource("docs://{domain}/book")
+    async def get_book_resource(domain: str) -> str:
+        """Read the full unified markdown handbook for a documentation domain."""
+        content = _storage.load_doc(domain)
+        if content is None:
+            return f"No documentation found for domain: {domain}"
+        return content
+
+    @mcp.resource("docs://{domain}/manifest")
+    async def get_manifest_resource(domain: str) -> str:
+        """Read the llms.txt discovery manifest for a documentation domain."""
+        manifest_path = _storage._domain_dir(domain) / "llms.txt"
+        if manifest_path.exists():
+            try:
+                return manifest_path.read_text(encoding="utf-8")
+            except Exception as exc:
+                return f"Error reading manifest: {exc}"
+        return f"No llms.txt manifest found for domain: {domain}"
+
+
+# ── MCP v2 Prompts ───────────────────────────────────────────────────
+
+if hasattr(mcp, "prompt"):
+    @mcp.prompt()
+    def search_docset(domain: str, query: str) -> str:
+        """Prompt to guide an agent in searching and synthesizing documentation."""
+        return (
+            f"Search the local documentation for '{domain}' with query '{query}'. "
+            f"Use `search_docs` or `query_doc_graph` to find relevant sections, "
+            f"quote key code examples, and summarize the steps concisely."
+        )
+
+    @mcp.prompt()
+    def summarize_library() -> str:
+        """Prompt to inspect all harvested documentation in local library."""
+        return (
+            "Inspect the local documentation library using `list_domains`. "
+            "Provide an overview of indexed docsets, page counts, and last captured dates."
+        )
+
+
 # ── Entry point ──────────────────────────────────────────────────────
 
 
