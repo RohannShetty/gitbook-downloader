@@ -25,7 +25,16 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except (ImportError, ModuleNotFoundError):
+    try:
+        from mcp.server.mcpserver import MCPServer as FastMCP
+    except (ImportError, ModuleNotFoundError):
+        try:
+            from mcp.server.fastmcp.server import FastMCP
+        except (ImportError, ModuleNotFoundError):
+            FastMCP = None  # type: ignore[assignment,misc]
 
 # ── Capture facade (the ONLY entry into the engine) ──────────────────
 #

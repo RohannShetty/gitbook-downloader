@@ -15,14 +15,27 @@ Usage::
     print(list_providers())  # ['gitbook', 'mintlify', 'docusaurus', 'readthedocs', 'generic']
 """
 
-from .base import Provider, ProviderRegistry, normalize_url, is_md_url, same_domain
+from .base import (
+    Provider,
+    ProviderRegistry,
+    is_md_url,
+    looks_like_challenge_or_blocked,
+    looks_like_html,
+    looks_like_spa_shell,
+    normalize_url,
+    same_domain,
+)
 
 # Import all providers — the ``@ProviderRegistry.register`` decorator
 # in each module adds them to the registry at import time.
 from .gitbook import GitBookProvider
-from .docusaurus import DocusaurusProvider
-from .readthedocs import ReadTheDocsProvider
 from .mintlify import MintlifyProvider
+from .docusaurus import DocusaurusProvider
+from .nextra import NextraProvider
+from .vitepress import VitePressProvider
+from .mkdocs import MkDocsProvider
+from .readme import ReadMeProvider
+from .readthedocs import ReadTheDocsProvider
 from .generic import GenericProvider
 
 
@@ -58,11 +71,18 @@ __all__ = [
     "normalize_url",
     "is_md_url",
     "same_domain",
+    "looks_like_html",
+    "looks_like_spa_shell",
+    "looks_like_challenge_or_blocked",
     # Providers
     "GitBookProvider",
-    "DocusaurusProvider",
-    "ReadTheDocsProvider",
     "MintlifyProvider",
+    "DocusaurusProvider",
+    "NextraProvider",
+    "VitePressProvider",
+    "MkDocsProvider",
+    "ReadMeProvider",
+    "ReadTheDocsProvider",
     "GenericProvider",
     # Convenience
     "detect_provider",

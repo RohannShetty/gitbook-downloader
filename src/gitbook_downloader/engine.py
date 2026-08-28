@@ -16,6 +16,8 @@ import requests
 from gitbook_downloader.providers import Provider, detect_provider, ProviderRegistry
 from gitbook_downloader.providers.base import (
     decode_response,
+    looks_like_challenge_or_blocked,
+    looks_like_spa_shell,
     normalize_url,
     same_domain,
 )
@@ -271,6 +273,7 @@ def stream_download(
     exclude_paths: str | tuple[str, ...] | list[str] | None = None,
     timeout: float = 20.0,
     cancel_check: Optional[callable] = None,
+    render: bool = False,
 ) -> str:
     """Download an entire documentation site.
 
@@ -455,11 +458,38 @@ def stream_download(
         if cancel_check and cancel_check():
             return None, url_to_fetch, "Cancelled"
         try:
-            content = provider.extract_content(url_to_fetch, session)
+            content = ""
+            if render:
+                try:
+                    from .utils.renderer import HeadlessRenderer
+                    renderer = HeadlessRenderer()
+                    html = renderer.render_url(url_to_fetch)
+                    if hasattr(provider, "_extract_md_from_html"):
+                        content = provider._extract_md_from_html(html)
+                    else:
+                        from markdownify import markdownify as md
+                        content = md(html, heading_style="ATX").strip()
+                except Exception as exc:
+                    logger.debug("Render failed for %s: %s; falling back to provider extract", url_to_fetch, exc)
+                    content = provider.extract_content(url_to_fetch, session)
+            else:
+                content = provider.extract_content(url_to_fetch, session)
+
             if cancel_check and cancel_check():
                 return None, url_to_fetch, "Cancelled"
             if not content or len(content.strip()) < 60:
-                return None, url_to_fetch, "Content too short"
+                # Diagnostic check for thin content
+                err_detail = "Content too short"
+                try:
+                    r = session.get(url_to_fetch, timeout=10)
+                    h = decode_response(r)
+                    if looks_like_challenge_or_blocked(h, r.status_code):
+                        err_detail = "Anti-bot challenge / blocked"
+                    elif looks_like_spa_shell(h):
+                        err_detail = "Client-rendered SPA shell (try --render)"
+                except Exception:
+                    pass
+                return None, url_to_fetch, err_detail
 
             with lock:
                 pages_downloaded += 1
@@ -521,6 +551,18 @@ def stream_download(
     combined = "\n\n---\n\n".join(combined_parts)
 
     if not combined.strip():
+        # Diagnostic detection for empty crawl
+        err_msg = "No content downloaded"
+        try:
+            root_resp = session.get(url, timeout=10)
+            root_html = decode_response(root_resp)
+            if looks_like_challenge_or_blocked(root_html, root_resp.status_code):
+                err_msg = "Anti-bot challenge detected (Cloudflare/DataDome blocked static requests)"
+            elif looks_like_spa_shell(root_html):
+                err_msg = "Client-rendered SPA detected (no readable content in static HTML — try --render)"
+        except Exception:
+            pass
+
         if progress_callback:
             progress_callback({
                 "phase": "done",
@@ -528,8 +570,9 @@ def stream_download(
                 "errors": pages_errored,
                 "total_size_kb": 0,
                 "provider": provider.name,
-                "error": "No content downloaded",
+                "error": err_msg,
             })
+        logger.warning("Download produced 0 pages for %s: %s", url, err_msg)
         return ""
 
     # ── Save to storage ──────────────────────────────────────────

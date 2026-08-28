@@ -7,7 +7,7 @@ from pathlib import Path
 
 def test_package_import():
     import gitbook_downloader
-    assert gitbook_downloader.__version__ == "10.0.1"
+    assert gitbook_downloader.__version__ == "10.1.0"
     assert gitbook_downloader.StorageManager is not None
 
 
@@ -23,17 +23,35 @@ def test_providers_imports():
     from gitbook_downloader.providers import (
         Provider, ProviderRegistry, detect_provider,
         GitBookProvider, DocusaurusProvider, ReadTheDocsProvider,
-        MintlifyProvider, GenericProvider,
+        MintlifyProvider, NextraProvider, VitePressProvider,
+        MkDocsProvider, ReadMeProvider, GenericProvider,
     )
     names = ProviderRegistry.list_names()
     assert "gitbook" in names
+    assert "mintlify" in names
+    assert "docusaurus" in names
+    assert "nextra" in names
+    assert "vitepress" in names
+    assert "mkdocs" in names
+    assert "readme" in names
+    assert "readthedocs" in names
     assert "generic" in names
 
 
 def test_provider_registry_order():
     from gitbook_downloader.providers import list_providers
     names = list_providers()
-    assert names == ["gitbook", "mintlify", "docusaurus", "readthedocs", "generic"]
+    assert names == [
+        "gitbook",
+        "mintlify",
+        "docusaurus",
+        "nextra",
+        "vitepress",
+        "mkdocs",
+        "readme",
+        "readthedocs",
+        "generic",
+    ]
 
 
 def test_storage_imports():

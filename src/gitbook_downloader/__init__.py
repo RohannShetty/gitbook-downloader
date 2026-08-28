@@ -1,6 +1,6 @@
-"""DocHarvest (gitbook-downloader) v10.0.1 — Modern shadcn/ui Desktop & CLI documentation harvesting platform."""
+"""DocHarvest (gitbook-downloader) v10.1.0 — Modern shadcn/ui Desktop & CLI documentation harvesting platform."""
 
-__version__ = "10.0.1"
+__version__ = "10.1.0"
 __author__ = "Rohan Shetty"
 
 from .utils import (
@@ -12,7 +12,8 @@ from .storage import StorageManager, VersionManager
 from .providers import (
     Provider, ProviderRegistry, detect_provider, get_provider, list_providers,
     GitBookProvider, DocusaurusProvider, ReadTheDocsProvider,
-    MintlifyProvider, GenericProvider,
+    MintlifyProvider, NextraProvider, VitePressProvider, MkDocsProvider,
+    ReadMeProvider, GenericProvider,
 )
 
 __all__ = [
@@ -20,4 +21,7 @@ __all__ = [
     "StorageManager", "VersionManager",
     "detect_provider", "get_provider", "list_providers",
     "create_session", "load_config",
+    "GitBookProvider", "DocusaurusProvider", "ReadTheDocsProvider",
+    "MintlifyProvider", "NextraProvider", "VitePressProvider",
+    "MkDocsProvider", "ReadMeProvider", "GenericProvider",
 ]

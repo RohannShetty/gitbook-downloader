@@ -11,6 +11,7 @@ import asyncio
 import dataclasses
 from pathlib import Path
 from typing import Any, Optional
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -225,3 +226,98 @@ def test_all_eight_tools_registered():
         "export_docs",
         "get_changelog",
     }
+
+
+def test_search_docs_success(monkeypatch):
+    mock_search = MagicMock()
+    mock_search.search.return_value = [{"title": "Doc", "url": "https://example.com", "snippet": "Text"}]
+    monkeypatch.setattr(server, "_search", mock_search)
+
+    res = call_tool(server.search_docs, query="test", domain="example.com", limit=5)
+    assert len(res) == 1
+    assert res[0]["title"] == "Doc"
+
+
+def test_list_domains_success(monkeypatch):
+    mock_storage = MagicMock()
+    mock_storage.list_domains.return_value = [{"name": "example.com", "pages": 10}]
+    monkeypatch.setattr(server, "_storage", mock_storage)
+
+    res = call_tool(server.list_domains)
+    assert len(res) == 1
+    assert res[0]["name"] == "example.com"
+
+
+def test_get_doc_success(monkeypatch):
+    mock_storage = MagicMock()
+    mock_storage.load_doc.return_value = "# Example Docs Content"
+    mock_storage.get_metadata.return_value = {"latest_version": "v1.0"}
+    monkeypatch.setattr(server, "_storage", mock_storage)
+
+    res = call_tool(server.get_doc, domain="example.com")
+    assert res["domain"] == "example.com"
+    assert res["version"] == "v1.0"
+    assert "Example Docs" in res["preview"]
+
+
+def test_get_doc_not_found(monkeypatch):
+    mock_storage = MagicMock()
+    mock_storage.load_doc.return_value = None
+    mock_storage.get_metadata.return_value = None
+    monkeypatch.setattr(server, "_storage", mock_storage)
+
+    res = call_tool(server.get_doc, domain="missing.com")
+    assert "error" in res
+
+
+def test_diff_versions_success(monkeypatch):
+    mock_versioning = MagicMock()
+    mock_versioning.diff.return_value = "--- v1\n+++ v2\n+New line\n-Old line"
+    monkeypatch.setattr(server, "_versioning", mock_versioning)
+
+    res = call_tool(server.diff_versions, domain="example.com", v1="v1", v2="v2")
+    assert res["domain"] == "example.com"
+    assert res["added_lines"] == 1
+    assert res["removed_lines"] == 1
+
+
+def test_list_versions_success(monkeypatch):
+    mock_versioning = MagicMock()
+    mock_versioning.get_versions.return_value = [{"version": "v1.0"}, {"version": "v2.0"}]
+    monkeypatch.setattr(server, "_versioning", mock_versioning)
+
+    res = call_tool(server.list_versions, domain="example.com")
+    assert len(res) == 2
+
+
+def test_export_docs_markdown(monkeypatch):
+    mock_storage = MagicMock()
+    mock_storage.load_doc.return_value = "# Markdown content"
+    mock_storage.latest_path.return_value = Path("/tmp/example.md")
+    monkeypatch.setattr(server, "_storage", mock_storage)
+
+    res = call_tool(server.export_docs, domain="example.com", format="markdown")
+    assert res["format"] == "markdown"
+    assert "Markdown content" in res["preview"]
+
+
+def test_export_docs_rag(monkeypatch):
+    mock_storage = MagicMock()
+    mock_storage.load_doc.return_value = "# RAG doc content"
+    monkeypatch.setattr(server, "_storage", mock_storage)
+
+    res = call_tool(server.export_docs, domain="example.com", format="rag")
+    assert res["format"] == "rag"
+    assert "domain: example.com" in res["content"]
+
+
+def test_get_changelog_success(monkeypatch):
+    mock_versioning = MagicMock()
+    mock_versioning.changelog.return_value = [{"version": "v2.0", "added_lines": 5, "removed_lines": 2}]
+    monkeypatch.setattr(server, "_versioning", mock_versioning)
+
+    res = call_tool(server.get_changelog, domain="example.com")
+    assert res["domain"] == "example.com"
+    assert len(res["entries"]) == 1
+    assert res["total_versions"] == 2
+

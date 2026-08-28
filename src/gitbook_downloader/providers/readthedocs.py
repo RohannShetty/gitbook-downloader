@@ -24,7 +24,7 @@ class ReadTheDocsProvider(Provider):
     """Provider for ReadTheDocs / Sphinx-powered documentation."""
 
     name = "readthedocs"
-    priority = 70
+    priority = 60
 
     # ── Detection ───────────────────────────────────────────
 

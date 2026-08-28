@@ -32,7 +32,17 @@ class TestProviderRegistry:
 
     def test_list_providers_order(self):
         names = list_providers()
-        assert names == ["gitbook", "mintlify", "docusaurus", "readthedocs", "generic"]
+        assert names == [
+            "gitbook",
+            "mintlify",
+            "docusaurus",
+            "nextra",
+            "vitepress",
+            "mkdocs",
+            "readme",
+            "readthedocs",
+            "generic",
+        ]
 
     def test_get_provider_by_name(self):
         assert get_provider("gitbook") is GitBookProvider
@@ -46,8 +56,8 @@ class TestProviderRegistry:
         with pytest.raises(ValueError, match="Unknown provider"):
             get_provider("nonexistent")
 
-    def test_registry_has_five_providers(self):
-        assert len(ProviderRegistry._providers) == 5
+    def test_registry_has_nine_providers(self):
+        assert len(ProviderRegistry._providers) == 9
 
     def test_registry_sorted_by_priority(self):
         priorities = [p.priority for p in ProviderRegistry._providers]
@@ -339,7 +349,7 @@ class TestReadTheDocsProvider:
         assert provider.name == "readthedocs"
 
     def test_priority(self):
-        assert ReadTheDocsProvider.priority == 70
+        assert ReadTheDocsProvider.priority == 60
 
     def test_detect_readthedocs_in_body(self):
         html = '<html><body class="rst-body"><div class="document">Content</div></body></html>'

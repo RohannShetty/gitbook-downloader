@@ -1,10 +1,12 @@
-"""Mintlify provider — detection, link extraction, and content extraction
-for Mintlify-powered documentation sites.
+"""
+VitePress provider — detection, link extraction, and content extraction
+for VitePress-powered documentation sites.
 
-Mintlify specifics:
-- /llms.txt available for URL discovery (like GitBook).
-- .md export available (like GitBook).
-- Detected via "mintlify" in window.__MINTLIFY or meta generator tag.
+VitePress specifics:
+  - <meta name="generator" content="VitePress..."> in <head>.
+  - window.__VP_HASH_MAP__ or window.__VP_SITE_DATA__ in <script>.
+  - Default theme classes: VPContent, VPDoc, vp-doc, VPSidebar.
+  - Generates /sitemap.xml and /llms.txt when configured.
 """
 
 import re
@@ -13,70 +15,62 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
-from .base import Provider, ProviderRegistry, normalize_url, same_domain, decode_response, looks_like_html, content_probe_url
+from .base import (
+    Provider,
+    ProviderRegistry,
+    content_probe_url,
+    decode_response,
+    is_md_url,
+    looks_like_html,
+    normalize_url,
+    same_domain,
+)
 
 
 @ProviderRegistry.register
-class MintlifyProvider(Provider):
-    """Provider for Mintlify-powered documentation."""
+class VitePressProvider(Provider):
+    """Provider for VitePress-powered documentation."""
 
-    name = "mintlify"
-    priority = 90
+    name = "vitepress"
+    priority = 72
 
     # ── Detection ───────────────────────────────────────────
 
     @classmethod
     def detect(cls, url: str, html: str, session) -> bool:
-        """Detect a Mintlify site.
+        """Detect a VitePress site.
 
         Signals:
-          1. ``window.__MINTLIFY`` / ``__mintlify`` in JavaScript/HTML.
-          2. ``<meta name="generator" content="...Mintlify...">`` tag.
-          3. Mintlify CDN / asset references in ``<script src="...">``, ``<link href="...">``,
-             such as ``cdn.mintlify.com``, ``mintlify.app``, or ``mintlify-assets``.
-          4. ``id="__mintlify"``, ``id="mintlify-content"``, or ``data-mintlify`` attributes.
-          5. Script tags loading ``mint.json`` configuration.
-
-        A prose mention in body paragraph text is deliberately NOT a signal.
+          1. ``<meta name="generator" content="VitePress...">`` in <head>.
+          2. ``window.__VP_HASH_MAP__`` or ``window.__VP_SITE_DATA__`` in JavaScript.
+          3. Standard VitePress classes: ``VPContent``, ``VPDoc``, ``vp-doc``.
+          4. VitePress script chunks: ``/assets/chunks/theme.`` or ``vitepress`` in bundle scripts.
         """
         lower_html = html.lower()
-        if "window.__mintlify" in lower_html or "__mintlify_config" in lower_html:
-            return True
-        if "data-mintlify" in lower_html or 'id="__mintlify"' in lower_html or 'id="mintlify-content"' in lower_html:
-            return True
-        if "cdn.mintlify.com" in lower_html or "mintlify.app" in lower_html or "mintlify-assets" in lower_html:
-            return True
-        if re.search(r"<(?:script|link)[^>]+mintlify", lower_html):
+        if '<meta name="generator" content="vitepress' in lower_html:
             return True
         soup = BeautifulSoup(html[:5_000], "html.parser")
         gen = soup.find("meta", attrs={"name": "generator"})
-        if gen and "mintlify" in gen.get("content", "").lower():
+        if gen and "vitepress" in gen.get("content", "").lower():
+            return True
+        if "__vp_hash_map__" in lower_html or "__vp_site_data__" in lower_html:
+            return True
+        if 'class="vpcontent' in lower_html or 'class="vpdoc' in lower_html or 'class="vp-doc' in lower_html:
+            return True
+        if "vitepress" in lower_html and ("vpsidebar" in lower_html or "vpnav" in lower_html):
             return True
         return False
 
     # ── URL discovery ───────────────────────────────────────
 
     def discover_urls(self, base_url: str, session) -> set[str]:
-        """Discover pages from /llms.txt (preferred) or /sitemap.xml."""
+        """Discover pages from /sitemap.xml or /llms.txt."""
         base = base_url.rstrip("/")
         urls: set[str] = set()
 
         from ..utils.discovery import _decode_xml, parse_sitemap_urls, same_site
 
-        # Try /llms.txt first (Mintlify supports it like GitBook)
-        try:
-            resp = session.get(f"{base}/llms.txt", timeout=30)
-            if resp.status_code == 200:
-                for match in re.finditer(r"\]\((https?://[^)]+)\)", decode_response(resp)):
-                    u = match.group(1)
-                    if same_site(u, base_url):
-                        urls.add(normalize_url(u))
-                if urls:
-                    return urls
-        except Exception:
-            pass
-
-        # Fallback to sitemap — pages only, same-site only.
+        # 1. Try /sitemap.xml
         try:
             resp = session.get(f"{base}/sitemap.xml", timeout=30)
             if resp.status_code == 200:
@@ -84,6 +78,19 @@ class MintlifyProvider(Provider):
                 for u in pages:
                     if same_site(u, base_url):
                         urls.add(normalize_url(u.strip()))
+                if urls:
+                    return urls
+        except Exception:
+            pass
+
+        # 2. Try /llms.txt
+        try:
+            resp = session.get(f"{base}/llms.txt", timeout=20)
+            if resp.status_code == 200:
+                for match in re.finditer(r"\]\((https?://[^)]+)\)", decode_response(resp)):
+                    u = match.group(1)
+                    if same_site(u, base_url):
+                        urls.add(normalize_url(u))
         except Exception:
             pass
 
@@ -98,7 +105,7 @@ class MintlifyProvider(Provider):
         path_scope: str | None = None,
         exclude_paths: list[str] | None = None,
     ) -> set[str]:
-        """Extract same-domain links from Mintlify HTML."""
+        """Extract same-domain links from VitePress navigation and body."""
         soup = BeautifulSoup(html, "html.parser")
         base_domain = urlparse(url).netloc
         links: set[str] = set()
@@ -113,6 +120,8 @@ class MintlifyProvider(Provider):
                 continue
             if parsed.fragment and not parsed.path and not parsed.query:
                 continue
+            if is_md_url(full):
+                continue
             if path_scope and not parsed.path.startswith(path_scope):
                 continue
             if exclude_paths and any(ex in parsed.path for ex in exclude_paths):
@@ -124,11 +133,7 @@ class MintlifyProvider(Provider):
     # ── Content extraction ──────────────────────────────────
 
     def extract_content(self, url: str, session) -> str:
-        """Fetch page content, preferring .md export over HTML→markdown.
-
-        1. Try ``<url>.md``.
-        2. Fallback to HTML fetch + ``<article>`` / ``<main>`` extraction.
-        """
+        """Fetch VitePress page content, trying .md export then HTML."""
         md_url = content_probe_url(url) + ".md"
         try:
             resp = session.get(md_url, timeout=20)
@@ -140,7 +145,7 @@ class MintlifyProvider(Provider):
         except Exception:
             pass
 
-        # HTML → markdown
+        # Fallback: HTML -> markdown
         try:
             resp = session.get(url, timeout=20)
             if resp.status_code != 200:
@@ -155,23 +160,31 @@ class MintlifyProvider(Provider):
 
     @staticmethod
     def _extract_md_from_html(html: str) -> str:
-        """Convert Mintlify HTML to markdown."""
+        """Convert VitePress HTML to clean markdown."""
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(["nav", "footer", "aside", "script", "style"]):
             tag.decompose()
 
+        # Remove VitePress navbar/sidebar/aside containers
+        for el in soup.find_all(class_=lambda c: c and any(x in c for x in ["VPNav", "VPSidebar", "VPLocalNav", "VPDocAside", "header-anchor"])):
+            el.decompose()
+
         main = (
-            soup.find("article")
+            soup.find("div", class_=lambda c: c and "vp-doc" in c)
+            or soup.find("main", class_=lambda c: c and "vp-doc" in c)
+            or soup.find("div", class_=lambda c: c and "VPDoc" in c)
+            or soup.find("div", class_=lambda c: c and "VPContent" in c)
+            or soup.find("article")
             or soup.find("main")
-            or soup.find("div", class_=lambda c: c and "content" in c)
             or soup.body
         )
         body = str(main) if main else html
         markdown = md(body, heading_style="ATX")
-        return MintlifyProvider._clean_markdown(markdown)
+        return VitePressProvider._clean_markdown(markdown)
 
     @staticmethod
     def _clean_markdown(text: str) -> str:
-        """Normalise whitespace and strip excessive blank lines."""
+        """Strip VitePress header anchors and normalise whitespace."""
+        text = re.sub(r"\s*\[(?:#|¶)\]\([^)]*\)", "", text)
         text = re.sub(r"\n{3,}", "\n\n", text)
         return text.strip()

@@ -1,6 +1,6 @@
 {
   "name": "docharvest-showcase",
-  "version": "10.0.1",
+  "version": "10.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

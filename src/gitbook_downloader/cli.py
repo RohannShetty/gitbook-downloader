@@ -156,6 +156,7 @@ def cmd_capture(args) -> int:
         "output_mode": args.output,
         "local_dir": str(args.output_dir) if args.output_dir else None,
         "snapshot": False if args.no_snapshot else None,
+        "render": getattr(args, "render", False),
     }
 
     try:
@@ -186,6 +187,8 @@ def cmd_capture(args) -> int:
     print(f"  Output mode: {options.output_mode}   Workers: {options.workers}")
     if options.max_pages:
         print(f"  Max pages:   {options.max_pages}")
+    if getattr(options, "render", False):
+        print("  JS Rendering: enabled (headless browser)")
     print("=" * 50)
     print()
 
@@ -199,6 +202,36 @@ def cmd_capture(args) -> int:
         return 130
 
     _print_capture_result(result)
+
+    # Post-capture exports if requested via flags
+    if getattr(args, "rag", False) and result.pages_captured > 0:
+        try:
+            from urllib.parse import urlparse
+            from .storage import StorageManager
+            from .utils.export import export_to_jsonl
+            st = StorageManager()
+            parsed_u = urlparse(target)
+            domain = parsed_u.netloc.replace("www.", "")
+            base_out = result.local_path or (result.library_path.parent if result.library_path else Path.cwd() / f"{domain}-docs")
+            rag_dest = base_out / "exports" / f"{domain}_rag.jsonl" if (base_out / "exports").exists() or result.local_path else base_out / f"{domain}_rag.jsonl"
+            export_to_jsonl(domain, st, rag_dest)
+            print(f"  📄 RAG JSONL:   {rag_dest}")
+        except Exception as exc:
+            print(f"  ⚠ RAG export failed: {exc}", file=sys.stderr)
+
+    if getattr(args, "pdf", False) and result.pages_captured > 0 and result.book_file:
+        try:
+            from urllib.parse import urlparse
+            from .utils.export import export_to_pdf
+            parsed_u = urlparse(target)
+            domain = parsed_u.netloc.replace("www.", "")
+            base_out = result.local_path or (result.library_path.parent if result.library_path else Path.cwd() / f"{domain}-docs")
+            pdf_dest = base_out / "exports" / f"{domain}_handbook.pdf" if (base_out / "exports").exists() or result.local_path else base_out / f"{domain}_handbook.pdf"
+            pdf_path = export_to_pdf(result.book_file, pdf_dest)
+            print(f"  📑 PDF Book:    {pdf_path}")
+        except Exception as exc:
+            print(f"  ⚠ PDF export failed: {exc}", file=sys.stderr)
+
     if result.pages_captured == 0:
         return 1
     return 0
@@ -441,7 +474,7 @@ def cmd_tui(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="gitbook-dl",
+        prog="docharvest",
         description=(
             "Capture documentation sites as Markdown — page tree, book file, "
             "and llms.txt manifest — into your project and a searchable library."
@@ -453,9 +486,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = parser.add_subparsers(dest="command", help="Available commands")
 
-    # capture (alias: dl)
+    # capture (aliases: dl, crawl)
     cap = sub.add_parser(
-        "capture", aliases=["dl"],
+        "capture", aliases=["dl", "crawl"],
         help="Capture a documentation site (URL or --preset name)",
     )
     cap.add_argument("url", nargs="?", default=None,
@@ -482,6 +515,14 @@ def build_parser() -> argparse.ArgumentParser:
                      help="Don't snapshot the previous capture before overwriting")
     cap.add_argument("--preset", default=None, metavar="NAME",
                      help="Use a named [presets.<name>] entry from config")
+    cap.add_argument("--render", action="store_true", default=False,
+                     help="Render JavaScript with headless browser (requires 'gitbook-downloader[render]')")
+    cap.add_argument("--rag", action="store_true", default=False,
+                     help="Export vector RAG JSONL dataset after capture")
+    cap.add_argument("--pdf", action="store_true", default=False,
+                     help="Export styled PDF handbook after capture")
+    cap.add_argument("--fast-ast", action="store_true", default=False,
+                     help="Use AST-based cleaning (standard)")
     cap.set_defaults(func=cmd_capture)
 
     # search
@@ -552,6 +593,15 @@ def main(argv: list[str] | None = None) -> int:
     # Bare invocation → Desktop GUI (or TUI fallback)
     if not argv:
         return _launch_gui()
+
+    # Route top-level flags directly to corresponding commands
+    first = argv[0].lower()
+    if first in ("--gui", "-gui"):
+        return _launch_gui()
+    if first in ("--mcp", "-mcp"):
+        return cmd_mcp(None)
+    if first in ("--tui", "-tui"):
+        return _launch_tui()
 
     # Bare-URL sugar: `gitbook-dl https://…` == `gitbook-dl capture https://…`
     if _looks_like_url(argv[0]):

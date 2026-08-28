@@ -36,6 +36,7 @@ _LLM_REF_LINE = re.compile(
 
 def strip_agent_boilerplate(text: str) -> str:
     """Remove GitBook Agent Instructions boilerplate from .md content."""
+    text = text.replace("\r\n", "\n")
     text = _AGENT_BOILERPLATE.sub("", text)
     text = _AGENT_BOILERPLATE_SIMPLE.sub("", text)
     text = _LLM_REF_LINE.sub("", text)

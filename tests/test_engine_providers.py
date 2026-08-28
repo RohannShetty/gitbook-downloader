@@ -21,7 +21,7 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
 def _expected(name: str) -> str:
-    return (FIXTURES_DIR / name).read_text(encoding="utf-8").strip()
+    return (FIXTURES_DIR / name).read_text(encoding="utf-8").replace("\r\n", "\n").strip()
 
 
 @pytest.fixture()

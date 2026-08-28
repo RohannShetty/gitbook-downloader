@@ -19,13 +19,13 @@ Optimizing repository discoverability ensures maximum visibility across search e
 ### 2.1 Repository Description (Character Count: 201 / 350 max)
 
 ```text
-Turn any documentation portal (GitBook, Mintlify, Docusaurus, ReadTheDocs) into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, desktop GUI & FastMCP server.
+Turn any documentation portal (GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, ReadTheDocs) into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, desktop GUI & FastMCP server.
 ```
 
 #### Keyword Analysis & Intent Mapping
 | Keyword Segment | Target Search Intent | Persona Targeted |
 |---|---|---|
-| `GitBook, Mintlify, Docusaurus, ReadTheDocs` | Platform-specific documentation scraping queries | All Developers & Archival Teams |
+| `GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, ReadTheDocs` | Platform-specific documentation scraping queries | All Developers & Archival Teams |
 | `LLM-ready Markdown` | AI context prep & cleaning without HTML boilerplate | AI & RAG Engineers |
 | `vector RAG JSONL` | Vector ingestion for LangChain, LlamaIndex, ChromaDB | AI / Vector DB Developers |
 | `llms.txt` | Standardized agent manifest compliance | AI Agents & Autonomous Workflows |
@@ -37,9 +37,9 @@ Turn any documentation portal (GitBook, Mintlify, Docusaurus, ReadTheDocs) into 
   ```text
   Turn any documentation site into clean LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Features a zero-config CLI, React desktop GUI, and FastMCP server.
   ```
-- **Extended Technical (274 chars):**
+- **Extended Technical (290 chars):**
   ```text
-  Universal documentation harvesting and AI context platform. Automatically captures GitBook, Mintlify, Docusaurus, and ReadTheDocs sites into clean Markdown trees, RAG JSONL, llms.txt, and pure-Python PDFs. Includes CLI, React 18 desktop GUI, and FastMCP server. 100% local & free.
+  Universal documentation harvesting and AI context platform. Automatically captures GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, and ReadTheDocs sites into clean Markdown trees, RAG JSONL, llms.txt, and pure-Python PDFs. Includes CLI, desktop GUI, and FastMCP server. 100% local.
   ```
 
 ---

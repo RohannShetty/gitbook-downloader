@@ -1,10 +1,12 @@
-"""Mintlify provider — detection, link extraction, and content extraction
-for Mintlify-powered documentation sites.
+"""
+ReadMe provider — detection, link extraction, and content extraction
+for ReadMe.io / ReadMe.com documentation portals.
 
-Mintlify specifics:
-- /llms.txt available for URL discovery (like GitBook).
-- .md export available (like GitBook).
-- Detected via "mintlify" in window.__MINTLIFY or meta generator tag.
+ReadMe specifics:
+  - Assets on cdn.readme.io or hub.readme.com.
+  - Distinct hub layout: id="hub-container", class="hub-header", class="hub-reference".
+  - Dedicated API reference and guide views.
+  - Sitemaps at /sitemap.xml and /llms.txt.
 """
 
 import re
@@ -13,70 +15,69 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
-from .base import Provider, ProviderRegistry, normalize_url, same_domain, decode_response, looks_like_html, content_probe_url
+from .base import (
+    Provider,
+    ProviderRegistry,
+    content_probe_url,
+    decode_response,
+    is_md_url,
+    looks_like_html,
+    normalize_url,
+    same_domain,
+)
 
 
 @ProviderRegistry.register
-class MintlifyProvider(Provider):
-    """Provider for Mintlify-powered documentation."""
+class ReadMeProvider(Provider):
+    """Provider for ReadMe.io / ReadMe.com documentation hubs."""
 
-    name = "mintlify"
-    priority = 90
+    name = "readme"
+    priority = 65
 
     # ── Detection ───────────────────────────────────────────
 
     @classmethod
     def detect(cls, url: str, html: str, session) -> bool:
-        """Detect a Mintlify site.
+        """Detect a ReadMe.io / ReadMe.com site.
 
         Signals:
-          1. ``window.__MINTLIFY`` / ``__mintlify`` in JavaScript/HTML.
-          2. ``<meta name="generator" content="...Mintlify...">`` tag.
-          3. Mintlify CDN / asset references in ``<script src="...">``, ``<link href="...">``,
-             such as ``cdn.mintlify.com``, ``mintlify.app``, or ``mintlify-assets``.
-          4. ``id="__mintlify"``, ``id="mintlify-content"``, or ``data-mintlify`` attributes.
-          5. Script tags loading ``mint.json`` configuration.
-
-        A prose mention in body paragraph text is deliberately NOT a signal.
+          1. ``<meta name="generator" content="ReadMe...">`` in <head>.
+          2. References to ``readme.io`` or ``readme.com`` in <script> or <link> assets.
+          3. ReadMe DOM elements: ``id="hub-container"``, ``class="hub-header"``,
+             ``class="hub-reference"``, ``window.__README_METRICS__``.
         """
         lower_html = html.lower()
-        if "window.__mintlify" in lower_html or "__mintlify_config" in lower_html:
+        if '<meta name="generator" content="readme' in lower_html:
             return True
-        if "data-mintlify" in lower_html or 'id="__mintlify"' in lower_html or 'id="mintlify-content"' in lower_html:
-            return True
-        if "cdn.mintlify.com" in lower_html or "mintlify.app" in lower_html or "mintlify-assets" in lower_html:
-            return True
-        if re.search(r"<(?:script|link)[^>]+mintlify", lower_html):
-            return True
-        soup = BeautifulSoup(html[:5_000], "html.parser")
+        soup = BeautifulSoup(html[:10_000], "html.parser")
         gen = soup.find("meta", attrs={"name": "generator"})
-        if gen and "mintlify" in gen.get("content", "").lower():
+        if gen and "readme" in gen.get("content", "").lower():
+            return True
+        if "hub.readme.com" in lower_html or "cdn.readme.io" in lower_html or "assets.readme.io" in lower_html:
+            return True
+        if (
+            "hub-container" in lower_html
+            or "hub-header" in lower_html
+            or "hub-reference" in lower_html
+            or "theme-readme" in lower_html
+            or "rm-article" in lower_html
+            or "rm-markdown" in lower_html
+        ):
+            return True
+        if "__readme_metrics__" in lower_html or "readme-content" in lower_html:
             return True
         return False
 
     # ── URL discovery ───────────────────────────────────────
 
     def discover_urls(self, base_url: str, session) -> set[str]:
-        """Discover pages from /llms.txt (preferred) or /sitemap.xml."""
+        """Discover pages from /sitemap.xml or /llms.txt."""
         base = base_url.rstrip("/")
         urls: set[str] = set()
 
         from ..utils.discovery import _decode_xml, parse_sitemap_urls, same_site
 
-        # Try /llms.txt first (Mintlify supports it like GitBook)
-        try:
-            resp = session.get(f"{base}/llms.txt", timeout=30)
-            if resp.status_code == 200:
-                for match in re.finditer(r"\]\((https?://[^)]+)\)", decode_response(resp)):
-                    u = match.group(1)
-                    if same_site(u, base_url):
-                        urls.add(normalize_url(u))
-                if urls:
-                    return urls
-        except Exception:
-            pass
-
-        # Fallback to sitemap — pages only, same-site only.
+        # 1. Try /sitemap.xml
         try:
             resp = session.get(f"{base}/sitemap.xml", timeout=30)
             if resp.status_code == 200:
@@ -84,6 +85,19 @@ class MintlifyProvider(Provider):
                 for u in pages:
                     if same_site(u, base_url):
                         urls.add(normalize_url(u.strip()))
+                if urls:
+                    return urls
+        except Exception:
+            pass
+
+        # 2. Try /llms.txt
+        try:
+            resp = session.get(f"{base}/llms.txt", timeout=20)
+            if resp.status_code == 200:
+                for match in re.finditer(r"\]\((https?://[^)]+)\)", decode_response(resp)):
+                    u = match.group(1)
+                    if same_site(u, base_url):
+                        urls.add(normalize_url(u))
         except Exception:
             pass
 
@@ -98,7 +112,7 @@ class MintlifyProvider(Provider):
         path_scope: str | None = None,
         exclude_paths: list[str] | None = None,
     ) -> set[str]:
-        """Extract same-domain links from Mintlify HTML."""
+        """Extract same-domain links from ReadMe navigation and body."""
         soup = BeautifulSoup(html, "html.parser")
         base_domain = urlparse(url).netloc
         links: set[str] = set()
@@ -113,6 +127,8 @@ class MintlifyProvider(Provider):
                 continue
             if parsed.fragment and not parsed.path and not parsed.query:
                 continue
+            if is_md_url(full):
+                continue
             if path_scope and not parsed.path.startswith(path_scope):
                 continue
             if exclude_paths and any(ex in parsed.path for ex in exclude_paths):
@@ -124,11 +140,7 @@ class MintlifyProvider(Provider):
     # ── Content extraction ──────────────────────────────────
 
     def extract_content(self, url: str, session) -> str:
-        """Fetch page content, preferring .md export over HTML→markdown.
-
-        1. Try ``<url>.md``.
-        2. Fallback to HTML fetch + ``<article>`` / ``<main>`` extraction.
-        """
+        """Fetch ReadMe page content and convert to clean markdown."""
         md_url = content_probe_url(url) + ".md"
         try:
             resp = session.get(md_url, timeout=20)
@@ -140,7 +152,7 @@ class MintlifyProvider(Provider):
         except Exception:
             pass
 
-        # HTML → markdown
+        # Fallback: HTML -> markdown
         try:
             resp = session.get(url, timeout=20)
             if resp.status_code != 200:
@@ -155,23 +167,31 @@ class MintlifyProvider(Provider):
 
     @staticmethod
     def _extract_md_from_html(html: str) -> str:
-        """Convert Mintlify HTML to markdown."""
+        """Convert ReadMe HTML to clean markdown."""
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(["nav", "footer", "aside", "script", "style"]):
             tag.decompose()
 
+        # Remove ReadMe header bar, search bar, sidebar
+        for el in soup.find_all(class_=lambda c: c and any(x in c for x in ["hub-header", "hub-sidebar", "hub-search", "suggest-edits", "page-next-previous"])):
+            el.decompose()
+
         main = (
-            soup.find("article")
+            soup.find("article", class_=lambda c: c and "hub-content" in c)
+            or soup.find("div", class_=lambda c: c and "hub-content" in c)
+            or soup.find("div", class_=lambda c: c and "markdown-body" in c)
+            or soup.find("div", id="content-container")
+            or soup.find("article")
             or soup.find("main")
-            or soup.find("div", class_=lambda c: c and "content" in c)
             or soup.body
         )
         body = str(main) if main else html
         markdown = md(body, heading_style="ATX")
-        return MintlifyProvider._clean_markdown(markdown)
+        return ReadMeProvider._clean_markdown(markdown)
 
     @staticmethod
     def _clean_markdown(text: str) -> str:
-        """Normalise whitespace and strip excessive blank lines."""
+        """Normalise whitespace and strip anchors."""
+        text = re.sub(r"\s*\[(?:#|¶)\]\([^)]*\)", "", text)
         text = re.sub(r"\n{3,}", "\n\n", text)
         return text.strip()

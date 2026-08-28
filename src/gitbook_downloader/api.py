@@ -74,6 +74,7 @@ class CaptureOptions:
     snapshot: bool = True                 # snapshot previous before overwrite
     timeout: float = 20.0
     cancel_check: Callable[[], bool] | None = None
+    render: bool = False                  # render client-side JS with headless browser
 
 
 @dataclass(frozen=True)
@@ -429,9 +430,21 @@ def capture(
                     workers=options.workers,
                     progress_callback=on_engine_event,
                     cancel_check=options.cancel_check,
+                    render=options.render,
                 )
             except TypeError as exc:
-                if options.cancel_check is not None and "cancel_check" in str(exc):
+                if "render" in str(exc):
+                    raw = stream_download(
+                        url,
+                        path_scope=list(options.path_scope),
+                        exclude_paths=list(options.exclude_paths),
+                        timeout=options.timeout,
+                        max_pages=options.max_pages,
+                        workers=options.workers,
+                        progress_callback=on_engine_event,
+                        cancel_check=options.cancel_check,
+                    )
+                elif options.cancel_check is not None and "cancel_check" in str(exc):
                     raw = stream_download(
                         url,
                         path_scope=list(options.path_scope),
@@ -448,7 +461,7 @@ def capture(
                 f"Engine rejected the v7 stream_download signature: {exc}. "
                 f"Update gitbook_downloader.engine.stream_download to accept "
                 f"(url, *, path_scope, exclude_paths, timeout, max_pages, "
-                f"workers, progress_callback)."
+                f"workers, progress_callback, render)."
             ) from exc
 
         pages, provider_name, discovered_hint, failed_hint = \
@@ -471,7 +484,35 @@ def capture(
         skipped = max(0, before_filter - len(pages))
 
         if not pages:
-            warnings.append("No content was captured for this source.")
+            # Detect reason for 0 pages
+            is_spa = False
+            is_blocked = False
+            try:
+                import requests
+                from .providers.base import decode_response, looks_like_challenge_or_blocked, looks_like_spa_shell
+                probe_sess = requests.Session()
+                probe_resp = probe_sess.get(url, timeout=10)
+                probe_html = decode_response(probe_resp)
+                if looks_like_challenge_or_blocked(probe_html, probe_resp.status_code):
+                    is_blocked = True
+                elif looks_like_spa_shell(probe_html):
+                    is_spa = True
+            except Exception:
+                pass
+
+            if is_blocked:
+                warnings.append(
+                    "Anti-bot or challenge interstitial detected (e.g. Cloudflare/DataDome). "
+                    "The target site blocked static HTTP requests."
+                )
+            elif is_spa:
+                warnings.append(
+                    "No content was captured for this source. This documentation site appears to be "
+                    "client-rendered JavaScript (SPA) — try --render to execute JavaScript with a headless browser."
+                )
+            else:
+                warnings.append("No content was captured for this source.")
+
             emit(ProgressEvent(kind="written", count=0,
                                message="nothing written"))
             return CaptureResult(
@@ -486,6 +527,14 @@ def capture(
                 book_file=None,
                 manifest_file=None,
                 version_id=version_id,
+            )
+
+        # Check for suspiciously thin captures
+        avg_len = sum(len(p.content.strip()) for p in pages) / len(pages)
+        if avg_len < 100:
+            warnings.append(
+                f"Captured content is suspiciously thin (average page size: {avg_len:.0f} chars). "
+                "If this documentation site is client-rendered, try --render to execute JavaScript."
             )
 
         # ── Output routing ──────────────────────────────────────────

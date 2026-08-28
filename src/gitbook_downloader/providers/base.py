@@ -76,6 +76,28 @@ def decode_response(resp) -> str:
 # ── Soft-200 sniffing ───────────────────────────────────────
 
 _HTML_SNIFF_MARKERS = ("<html", "<head", "<body", "<div", "<script", "<meta ", "<iframe")
+_SPA_SHELL_MARKERS = (
+    '<div id="__next">',
+    '<div id="root">',
+    '<div id="app">',
+    '<div id="__nuxt">',
+    "<noscript>",
+    "you need to enable javascript",
+    "requires javascript to be enabled",
+    "javascript is disabled",
+    "skip to content",
+)
+_CHALLENGE_MARKERS = (
+    "just a moment...",
+    "attention required! | cloudflare",
+    "cf-browser-verification",
+    "challenge-running",
+    "cf-please-wait",
+    "datadome",
+    "checking your browser",
+    "shieldsquare",
+    "incapsula",
+)
 
 
 def looks_like_html(text: str, content_type: str = "") -> bool:
@@ -94,6 +116,32 @@ def looks_like_html(text: str, content_type: str = "") -> bool:
         return True
     hits = sum(1 for marker in _HTML_SNIFF_MARKERS if marker in head)
     return hits >= 3
+
+
+def looks_like_spa_shell(html: str) -> bool:
+    """Return True if the HTML looks like a client-rendered SPA with empty text."""
+    if not html:
+        return False
+    lower = html.lower()
+    has_marker = any(m in lower for m in _SPA_SHELL_MARKERS)
+    cleaned = re.sub(r"<(script|style|svg|noscript)[^>]*>.*?</\1>", "", lower, flags=re.DOTALL)
+    text_only = re.sub(r"<[^>]+>", " ", cleaned).strip()
+    words = text_only.split()
+    if has_marker and len(words) < 60:
+        return True
+    if len(words) < 25 and ("<script" in lower or "<div id=" in lower):
+        return True
+    return False
+
+
+def looks_like_challenge_or_blocked(html: str, status_code: int = 200) -> bool:
+    """Return True if the response is an anti-bot challenge or Cloudflare/DataDome block."""
+    if status_code in (403, 429, 503):
+        return True
+    if not html:
+        return False
+    lower = html.lower()
+    return any(marker in lower for marker in _CHALLENGE_MARKERS)
 
 
 # ── Abstract Provider ───────────────────────────────────────

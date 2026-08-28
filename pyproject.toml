@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "10.0.1"
+version = "10.1.0"
 description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
     {name = "Rohan Shetty", email = "shettyrohan2@gmail.com"},
 ]
-keywords = ["docharvest", "gitbook", "documentation", "markdown", "downloader", "ai", "rag", "llms-txt", "mcp-server", "vector-db", "docusaurus", "readthedocs", "mintlify", "offline-docs", "pdf-generator"]
+keywords = ["docharvest", "gitbook", "documentation", "markdown", "downloader", "ai", "rag", "llms-txt", "mcp-server", "vector-db", "docusaurus", "readthedocs", "mintlify", "offline-docs", "pdf-generator", "nextra", "vitepress", "mkdocs", "readme-io"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -40,10 +40,13 @@ dependencies = [
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.2.0"]
+render = ["playwright>=1.40.0"]
+js = ["playwright>=1.40.0"]
 dev = [
     "pytest>=8.0",
     "pytest-timeout>=2.3",
     "pytest-asyncio>=0.23",
+    "pytest-cov>=4.0",
 ]
 
 [project.scripts]

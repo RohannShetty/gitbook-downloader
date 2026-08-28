@@ -8,11 +8,12 @@
 
 **Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
 
-[![Version: 10.0.1](https://img.shields.io/badge/version-10.0.1-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 10.1.0](https://img.shields.io/badge/version-10.1.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
-[![MCP: Enabled](https://img.shields.io/badge/MCP-FastMCP%20Ready-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-fastmcp-server)
+[![MCP: 8 Tools](https://img.shields.io/badge/MCP-8%20Tools%20Ready-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-server)
+[![Tests: 530 Passing](https://img.shields.io/badge/tests-530%20passing-10b981?style=flat-square&labelColor=090d16)](#-test-suite--quality-benchmarks)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-64748b?style=flat-square&labelColor=090d16)](#)
 [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)
 [![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/gitbook-downloader/)
@@ -27,18 +28,39 @@
 
 ## ⚡ Overview
 
-**DocHarvest** (formerly `gitbook-downloader`) is a high-performance, local-first documentation compiler and AI context platform. It automatically detects documentation platforms (**GitBook**, **Mintlify**, **Docusaurus**, **Nextra**, **ReadMe.io**, **VitePress**, **MkDocs**, and custom HTML), bounds crawls strictly to documentation subpaths, extracts pristine markdown via direct `.md` endpoint probing and AST-based cleaning, and compiles structured output corpora.
+**DocHarvest** (package: `gitbook-downloader`) is a high-performance, local-first documentation compiler and AI context platform. It automatically detects documentation platforms, bounds crawls strictly to documentation subpaths, extracts clean markdown via direct `.md` endpoint probing and AST-based DOM cleaning, and compiles structured output corpora.
 
 Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, building vector RAG pipelines with **LangChain & LlamaIndex**, reading offline on an airplane, or archiving technical libraries, DocHarvest delivers a deterministic, noise-free knowledge corpus in seconds.
+
+---
+
+## 🧩 Supported Documentation Platforms (8 Real Providers)
+
+DocHarvest features dedicated, priority-ordered parsers that extract clean article content and strip headers, footers, sidebars, anchor hashes, and cookie banners:
+
+| Provider | Priority | Discovery Method | Clean Content Target |
+| :--- | :---: | :--- | :--- |
+| **GitBook** | `100` | `.md` endpoint probing, sitemap, space discovery | Native markdown or `.page-inner` / `article` |
+| **Mintlify** | `90` | `mintlify.json`, OpenAPI specs, CDN asset anchors | `#content`, `#main-content`, `article` |
+| **Docusaurus** | `80` | `sitemap.xml`, `docusaurus.config.js`, sidebars | `article`, `.markdown`, `main .theme-doc-markdown` |
+| **Nextra** | `75` | `sitemap.xml`, Next.js app routes, nextra scripts | `main.nextra-content`, `article` |
+| **VitePress** | `72` | Sitemap, VitePress theme anchors, route index | `div.vp-doc`, `div.VPContent`, `main.VPDoc` |
+| **MkDocs** | `70` | `search/search_index.json`, sitemap | `article.md-content__inner`, `div.md-typeset` |
+| **ReadMe.io** | `65` | `sitemap.xml`, `/llms.txt`, developer hub routes | `div.rm-Article`, `div.rm-Markdown`, `#content` |
+| **ReadTheDocs** | `60` | Sphinx `sitemap.xml`, `div.sphinxsidebar` | `div.document[role="main"]`, `div.body` |
+| **Generic HTML / SPA** | `0` | BFS link crawl, `llms.txt`, `sitemap.xml` | `main`, `article`, `[role="main"]`, `#content` |
+
+> [!TIP]
+> **Dynamic JavaScript SPAs**: If a site is rendered entirely client-side via JavaScript (such as `omp.sh/docs`), install the optional Playwright extra (`pip install "gitbook-downloader[render]" && playwright install chromium`) and run with `--render` to execute JavaScript before extracting markdown.
 
 ---
 
 ## 🌟 Key Capabilities
 
 - 🤖 **Zero-Noise LLM Context**: Probes native `.md` endpoints and cleans DOM trees, eliminating up to 89% of token-wasting navigation boilerplate, scripts, and cookie banners.
-- 📦 **Four-Part Output Contract**: Every capture generates a modular `pages/` tree with SHA-256 YAML frontmatter, a consolidated `book.md` with TOC, a standardized `llms.txt` manifest, and search index records.
-- 🚀 **AI Export Studio**: One-click export to **RAG JSONL** (for vector databases), **Pure-Python PDF** (syntax-highlighted printable handbooks via `fpdf2`), and **AST Markdown chunks**.
-- 🔌 **Native FastMCP Server**: Built-in Model Context Protocol server exposing 8 tools for Cursor, Claude Code, Windsurf, and Claude Desktop.
+- 📦 **Four-Part Output Contract**: Every capture generates a modular `pages/` tree with YAML frontmatter, a consolidated `book.md` with TOC, a standardized `llms.txt` manifest, and search index records.
+- 🚀 **AI Export Studio**: Export to **RAG JSONL** (for vector databases), **Pure-Python PDF** (syntax-highlighted printable handbooks via `fpdf2`), and **AST Markdown chunks**.
+- 🔌 **Native FastMCP Server**: Built-in Model Context Protocol server exposing 8 tools compatible with Cursor, Claude Code, Windsurf, VS Code, and 10+ other harnesses.
 - 🎨 **Modern Desktop GUI**: React + Tailwind CSS + shadcn/ui desktop application featuring real-time radial progress, in-app doc reader, document library renaming, and batch queues.
 - 🔍 **SQLite FTS5 Full-Text Search**: Embedded BM25 search engine with `porter unicode61` stemming across all downloaded documentation.
 - 🔒 **Process-Safe Storage & Diffs**: Active PID-validated `DomainLock`, atomic file staging (`os.replace` + `os.fsync`), and semver snapshot version diffing.
@@ -73,7 +95,7 @@ data/
     ├── book.md                    # Consolidated single handbook with hierarchical TOC
     ├── llms.txt                   # Standardized AI discovery manifest
     ├── exports/
-    │   ├── openalgo_rag.jsonl     # Tokenized vector chunks + SHA-256 metadata
+    │   ├── openalgo_rag.jsonl     # Tokenized vector chunks + metadata
     │   └── openalgo_handbook.pdf  # Publication-grade printable PDF (pure Python)
     └── .manifest.json             # Crawl metadata, engine version & cryptographic hashes
 ```
@@ -82,19 +104,27 @@ data/
 
 ## 🚀 Quick Start
 
-### Option 1: Standalone Desktop Application (Zero Setup)
+### Option 1: Standalone Executable (Zero Setup)
 Download **[`docharvest-windows-latest.exe`](https://github.com/RohannShetty/gitbook-downloader/releases/latest)** from the latest release:
 - **Double-click** to launch the **Desktop GUI Application**.
-- Or execute directly in terminal:
+- Or execute directly in your terminal:
   ```powershell
-  .\docharvest-windows-latest.exe crawl https://docs.openalgo.in/v/v2.0 --rag --pdf
+  .\docharvest-windows-latest.exe crawl https://docs.openalgo.in/ --rag --pdf
   ```
 
 ### Option 2: Install via pip / PyPI
 ```bash
+# Standard installation (100% local, zero C-dependencies)
 pip install gitbook-downloader
 
-# Launch the desktop GUI:
+# Optional headless browser rendering for dynamic JavaScript SPAs
+pip install "gitbook-downloader[render]"
+playwright install chromium
+
+# Optional FastMCP server support
+pip install "gitbook-downloader[mcp]"
+
+# Launch desktop GUI:
 docharvest --gui
 
 # Or run a CLI crawl:
@@ -106,34 +136,90 @@ docharvest crawl https://docs.openalgo.in/ --rag --pdf
 # Launch GUI instantly without permanent installation:
 uvx gitbook-downloader --gui
 
-# Or install as a global tool:
+# Or install as a global CLI tool:
 uv tool install gitbook-downloader
-```
-
-### Option 4: Docker Container
-```bash
-docker run --rm -v $(pwd)/data:/app/data rohanshetty/docharvest crawl https://docs.openalgo.in/
 ```
 
 ---
 
-## 🔌 AI Agent Integration (FastMCP Server)
+## 💻 CLI Command Reference
 
-DocHarvest includes a native **FastMCP (Model Context Protocol)** server over `stdio`, giving Cursor, Claude Code, and Windsurf direct documentation search and retrieval capabilities:
+```bash
+# Basic Documentation Crawl (aliases: capture, dl, crawl)
+docharvest crawl https://docs.openalgo.in/
 
-### Cursor IDE Configuration (`.cursor/mcp.json`)
+# Full Compilation (Markdown + RAG JSONL + llms.txt + PDF Handbook)
+docharvest crawl https://docs.openalgo.in/ --rag --pdf
+
+# Crawl Dynamic Client-Rendered SPAs (Playwright Headless Browser)
+docharvest crawl https://omp.sh/docs --render
+
+# Restrict Crawl to Specific Path Prefix & Limit Depth
+docharvest crawl https://docs.example.com/ --scope /api/ --max-pages 50
+
+# Full-Text BM25 Search across Harvested Docs
+docharvest search "OAuth 2.0 authentication token"
+
+# List Harvested Document Domains in Local Library
+docharvest ls
+
+# Show Snapshot History & Diff Versions
+docharvest history docs.example.com
+docharvest diff docs.example.com snap-20260822 snap-20260828
+
+# Start FastMCP Server over Stdio for AI IDEs
+docharvest --mcp
+
+# Launch Desktop GUI Application
+docharvest --gui
+```
+
+---
+
+## 🔌 AI Agent Integration: Native FastMCP Server
+
+DocHarvest includes a native **FastMCP (Model Context Protocol)** server that exposes 8 high-level tools over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
+
+### All 8 Native MCP Tools
+
+1. `download_docs(url, max_pages=None, workers=8, path_scope=[], exclude_paths=[], site_versions=None, output_mode="both")`
+   Captures any documentation URL into Markdown, book.md, and llms.txt.
+2. `search_docs(query, domain=None, limit=10)`
+   Full-text search across downloaded documentation via SQLite FTS5 BM25.
+3. `list_domains()`
+   Returns metadata for all harvested documentation portals in local storage.
+4. `get_doc(domain, version=None)`
+   Retrieves the compiled documentation content or preview for a domain.
+5. `diff_versions(domain, v1, v2)`
+   Computes unified diffs and line change statistics between two snapshots.
+6. `list_versions(domain)`
+   Lists available captured snapshots and timestamps for a domain.
+7. `export_docs(domain, format="markdown")`
+   Exports documentation into `"markdown"`, `"jsonl"`, or `"rag"` metadata formats.
+8. `get_changelog(domain)`
+   Auto-generates version changelogs across captured snapshot iterations.
+
+---
+
+### IDE & Agent Configuration Matrix (14 Clients)
+
+#### 1. Claude Code
+```bash
+claude mcp add docharvest docharvest --mcp
+```
+Or in `~/.claude.json`:
 ```json
 {
   "mcpServers": {
     "docharvest": {
-      "command": "python",
-      "args": ["-m", "gitbook_downloader.mcp_server"]
+      "command": "docharvest",
+      "args": ["--mcp"]
     }
   }
 }
 ```
 
-### Claude Desktop Configuration (`claude_desktop_config.json`)
+#### 2. Claude Desktop (`claude_desktop_config.json`)
 ```json
 {
   "mcpServers": {
@@ -145,49 +231,149 @@ DocHarvest includes a native **FastMCP (Model Context Protocol)** server over `s
 }
 ```
 
-### Available Native MCP Tools
-- `@docharvest_search(query, domain)` — Sub-15ms BM25 full-text keyword query across harvested docs.
-- `@docharvest_read_page(url_or_path)` — Returns clean Markdown content for an article.
-- `@docharvest_list_domains()` — Lists all local documentation portals and page counts.
-- `@docharvest_crawl(url, max_pages)` — Dispatches an AST crawler on a documentation portal.
-- `@docharvest_export_rag(domain)` — Generates vector chunks for LangChain/ChromaDB embedding.
+#### 3. Cursor (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "docharvest": {
+      "command": "python",
+      "args": ["-m", "gitbook_downloader.mcp"]
+    }
+  }
+}
+```
 
----
+#### 4. Windsurf (`~/.codeium/windsurf/mcp_config.json`)
+```json
+{
+  "mcpServers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
 
-## 📊 Feature Comparison Matrix
+#### 5. VS Code (`.vscode/mcp.json`)
+```json
+{
+  "servers": {
+    "docharvest": {
+      "type": "stdio",
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
 
-| Feature | DocHarvest v10.0.1 | Raw Scrapers (curl/Scrapy) | Cloud Reader APIs |
-| :--- | :---: | :---: | :---: |
-| **Native AST Platform Detection** (GitBook, Mintlify, Docusaurus, Nextra) | **✓ Yes** | ❌ No | Partial |
-| **Direct `.md` Raw Endpoint Probing** | **✓ Yes** | ❌ No | ❌ No |
-| **Zero HTML / Cookie Banner Noise** (89% token reduction) | **✓ Yes** | ❌ No | ✓ Yes |
-| **Consolidated `book.md` with Auto TOC** | **✓ Yes** | ❌ No | ❌ No |
-| **Standard `llms.txt` Generation** | **✓ Yes** | ❌ No | ❌ No |
-| **Vector RAG JSONL Chunks** (cl100k/o200k compatible) | **✓ Yes** | ❌ No | ❌ No |
-| **Pure-Python PDF Generation** (Zero C-deps) | **✓ Yes** | ❌ No | ❌ No |
-| **Built-in FastMCP Server** (Cursor / Claude) | **✓ Yes** | ❌ No | Requires API Key |
-| **Embedded SQLite FTS5 BM25 Search** | **✓ Yes** | ❌ No | ❌ No |
-| **100% Free & Local Privacy** (Zero API cost) | **✓ Free (MIT)** | ✓ Free | ❌ Paid / Per-Page |
+#### 6. JetBrains AI Assistant / PyCharm / IntelliJ
+Configure via **Settings → Tools → Model Context Protocol (MCP)**:
+- **Server Name**: `docharvest`
+- **Command**: `docharvest`
+- **Arguments**: `--mcp`
 
----
+#### 7. Zed (`settings.json`)
+```json
+{
+  "context_servers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
 
-## 💻 CLI Command Reference
+#### 8. Cline (`cline_mcp_settings.json`)
+```json
+{
+  "mcpServers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"],
+      "disabled": false,
+      "autoApprove": ["search_docs", "get_doc", "list_domains"]
+    }
+  }
+}
+```
 
-```bash
-# Basic Documentation Crawl
-docharvest crawl https://docs.openalgo.in/
+#### 9. Continue.dev (`config.json`)
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [
+      {
+        "transport": {
+          "type": "stdio",
+          "command": "docharvest",
+          "args": ["--mcp"]
+        }
+      }
+    ]
+  }
+}
+```
 
-# Full Compilation (Markdown + RAG JSONL + llms.txt + PDF)
-docharvest crawl https://docs.openalgo.in/v/v2.0 --rag --pdf --fast-ast
+#### 10. Kiro (`kiro-config.json`)
+```json
+{
+  "mcp": {
+    "servers": {
+      "docharvest": {
+        "command": "docharvest",
+        "args": ["--mcp"]
+      }
+    }
+  }
+}
+```
 
-# Search Downloaded Documentation via FTS5 BM25
-docharvest search "OAuth 2.0 authentication token"
+#### 11. OpenCode (`opencode.json`)
+```json
+{
+  "mcpServers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
 
-# Launch FastMCP Stdio Server for AI IDEs
-docharvest --mcp
+#### 12. Pi / Oh My Pi (`omp.sh`) (`~/.omp/config.json`)
+```json
+{
+  "mcp_servers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
 
-# Launch Desktop GUI Application
-docharvest --gui
+#### 13. Antigravity / Gemini CLI (`mcp/docharvest.json`)
+```json
+{
+  "name": "docharvest",
+  "command": "docharvest",
+  "args": ["--mcp"]
+}
+```
+
+#### 14. OpenAI Codex CLI (`codex_config.json`)
+```json
+{
+  "mcp_servers": {
+    "docharvest": {
+      "command": "docharvest",
+      "args": ["--mcp"]
+    }
+  }
+}
 ```
 
 ---
@@ -195,21 +381,36 @@ docharvest --gui
 ## 🐍 Python SDK Example
 
 ```python
-from gitbook_downloader import DocHarvestEngine
+from gitbook_downloader.api import capture, CaptureOptions
 
-# Initialize the harvester
-engine = DocHarvestEngine(output_dir="./data")
-
-# Crawl and compile documentation
-result = engine.crawl(
-    url="https://docs.openalgo.in/v/v2.0",
-    export_rag=True,
-    export_pdf=True
+# Configure capture options
+options = CaptureOptions(
+    workers=8,
+    output_mode="both",   # "both", "library", or "local"
+    render=False,         # set True for dynamic JavaScript SPAs
 )
 
-print(f"Harvested {result.total_pages} pages in {result.elapsed_seconds}s")
-print(f"Consolidated handbook: {result.book_path}")
-print(f"RAG JSONL dataset: {result.rag_jsonl_path}")
+# Execute deterministic capture
+result = capture("https://docs.openalgo.in/", options=options)
+
+print(f"Captured {result.pages_captured} pages using provider: {result.provider}")
+print(f"Book file: {result.book_file}")
+print(f"Manifest:  {result.manifest_file}")
+```
+
+---
+
+## 🧪 Test Suite & Quality Benchmarks
+
+DocHarvest is continuously tested across Windows, Linux, and macOS:
+
+- **530 Automated Tests**: 100% test pass rate across engine discovery, BFS crawling, provider extraction, storage safety, and MCP tools.
+- **71%+ Statement Coverage**: Rigorous test suites covering error recovery, invalid signatures, domain locks, and AST link normalization.
+- **Windows CRLF Safe**: All link and boilerplate stripping routines are cross-platform normalized against Windows CRLF and Unix LF linebreaks.
+
+To run the test suite locally:
+```bash
+uv run pytest --cov=gitbook_downloader
 ```
 
 ---

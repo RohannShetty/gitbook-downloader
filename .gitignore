@@ -38,8 +38,12 @@ graphify-out/
 # Docker
 .docker/
 
-# pytest
+# pytest & coverage
 .pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
 # Local agent-tooling state (77 per-tool symlink dirs created by `npx skills add`)
 .serena/

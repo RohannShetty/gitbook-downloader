@@ -48,7 +48,7 @@ def test_bridge_detect_mocked(monkeypatch):
 def test_bridge_system_info():
     bridge = ApiBridge()
     info = bridge.get_system_info()
-    assert info["version"] == "10.0.1"
+    assert info["version"] == "10.1.0"
     assert info["name"] == "DocHarvest"
     assert "DocHarvest Engine" in info["engine"]
     assert info["author"] == "Rohan Shetty"
