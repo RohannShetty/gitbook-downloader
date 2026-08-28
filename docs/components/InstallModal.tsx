@@ -14,8 +14,8 @@ const INSTALL_OPTIONS = [
     id: "windows",
     title: "Windows Standalone",
     icon: WindowsIcon,
-    command: "# Direct executable (zero Python install needed)\ncurl -LO https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-windows-latest.exe\n.\\docharvest-windows-latest.exe --gui",
-    ctaUrl: "https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-windows-latest.exe",
+    command: "# Direct executable (zero Python install needed)\ncurl -LO https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe\n.\\docharvest-windows-latest.exe --gui",
+    ctaUrl: "https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe",
     ctaLabel: "Download docharvest.exe (32.9MB)"
   },
   {
@@ -80,7 +80,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">
-                Install DocHarvest v10.0.1
+                Install DocHarvest v11.0.0
               </h3>
               <p className="text-xs text-muted-foreground font-mono">
                 Select your operating system or preferred package manager.

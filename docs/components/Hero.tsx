@@ -57,7 +57,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-xs font-mono text-cyan-300"
             >
               <Sparkles className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
-              <span>DocHarvest v10.0.1 — AST Compiler &amp; FastMCP</span>
+              <span>DocHarvest v11.0.0 — AST Compiler &amp; FastMCP v2</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -77,7 +77,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground font-mono leading-relaxed"
             >
-              Crawl GitBook, Mintlify, Docusaurus, Nextra, and ReadMe with AST precision. Compile clean Markdown, vector RAG JSONL, <code className="text-cyan-300">llms.txt</code>, and printable PDFs with zero HTML noise.
+              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; ReadTheDocs with AST precision. Compile clean Markdown, vector RAG JSONL, <code className="text-cyan-300">llms.txt</code>, and printable PDFs with zero HTML noise.
             </motion.p>
 
             {/* Primary Action Buttons */}
@@ -88,7 +88,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="flex flex-wrap items-center gap-3 pt-2 w-full"
             >
               <a
-                href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-windows-latest.exe"
+                href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe"
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-xs font-mono font-bold text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all duration-200"
               >
                 <WindowsIcon className="h-4 w-4" />
@@ -134,7 +134,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-1">
                 <span className="text-[10px] text-muted-foreground uppercase">Local AI</span>
-                <p className="font-bold text-indigo-400">FastMCP Ready</p>
+                <p className="font-bold text-indigo-400">FastMCP v2 Ready</p>
               </div>
             </div>
 
@@ -155,7 +155,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   <span className="ml-2 font-mono text-[11px] text-muted-foreground">
-                    docharvest@terminal — v10.0.1
+                    docharvest@terminal — v11.0.0
                   </span>
                 </div>
                 

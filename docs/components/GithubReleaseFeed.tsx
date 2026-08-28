@@ -99,7 +99,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {/* Windows */}
                   <a
-                    href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-windows-latest.exe"
+                    href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe"
                     className="flex flex-col items-center justify-center p-3 rounded-lg border border-border bg-secondary/50 hover:border-primary hover:bg-primary/10 transition-all text-center group cursor-pointer"
                   >
                     <WindowsIcon className="h-5 w-5 text-indigo-400 group-hover:scale-110 transition-transform mb-1.5" />
@@ -109,7 +109,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
 
                   {/* Linux */}
                   <a
-                    href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-linux-x86_64"
+                    href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-linux-x86_64"
                     className="flex flex-col items-center justify-center p-3 rounded-lg border border-border bg-secondary/50 hover:border-primary hover:bg-primary/10 transition-all text-center group cursor-pointer"
                   >
                     <LinuxIcon className="h-5 w-5 text-amber-400 group-hover:scale-110 transition-transform mb-1.5" />
@@ -119,7 +119,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
 
                   {/* macOS */}
                   <a
-                    href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-macos-universal"
+                    href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-macos-universal"
                     className="flex flex-col items-center justify-center p-3 rounded-lg border border-border bg-secondary/50 hover:border-primary hover:bg-primary/10 transition-all text-center group cursor-pointer"
                   >
                     <AppleIcon className="h-5 w-5 text-cyan-400 group-hover:scale-110 transition-transform mb-1.5" />

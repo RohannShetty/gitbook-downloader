@@ -33,27 +33,27 @@ class TestStorageManagerInit:
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
             ddir = sm._domain_dir("example.com")
-            assert ddir == Path(tmp) / "docs" / "example.com"
+            assert ddir == Path(tmp).resolve() / "docs" / "example.com"
 
     def test_metadata_path(self):
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
-            assert sm.metadata_path("test.com") == Path(tmp) / "docs" / "test.com" / "metadata.json"
+            assert sm.metadata_path("test.com") == Path(tmp).resolve() / "docs" / "test.com" / "metadata.json"
 
     def test_latest_path(self):
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
-            assert sm.latest_path("test.com") == Path(tmp) / "docs" / "test.com" / "docs.md"
+            assert sm.latest_path("test.com") == Path(tmp).resolve() / "docs" / "test.com" / "docs.md"
 
     def test_versions_dir(self):
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
-            assert sm.versions_dir("test.com") == Path(tmp) / "docs" / "test.com" / "versions"
+            assert sm.versions_dir("test.com") == Path(tmp).resolve() / "docs" / "test.com" / "versions"
 
     def test_chunks_dir(self):
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
-            assert sm.chunks_dir("test.com") == Path(tmp) / "docs" / "test.com" / "chunks"
+            assert sm.chunks_dir("test.com") == Path(tmp).resolve() / "docs" / "test.com" / "chunks"
 
 
 class TestStorageManagerSaveAndLoad:

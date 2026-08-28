@@ -355,11 +355,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Does it work with client-rendered JavaScript Single-Page Applications (SPAs)?",
-    a: "Yes. Modern documentation SPAs (GitBook, Mintlify, Docusaurus, Nextra) publish underlying raw .md endpoints and sitemap manifests that DocHarvest probes first. For client-rendered pages, its heuristic content selector chain extracts the structured article DOM cleanly without the overhead and memory crashes of heavy headless browsers."
+    a: "Yes. Modern documentation SPAs (GitBook, Mintlify, Docusaurus, Nextra, VitePress) publish underlying raw .md endpoints and sitemaps that DocHarvest probes first. For purely client-rendered SPAs (like omp.sh), DocHarvest includes an opt-in Playwright headless rendering engine (--render) to execute client-side JavaScript before compilation."
   },
   {
     q: "How does the FastMCP server integrate with Cursor and Claude Desktop?",
-    a: "DocHarvest includes a built-in Model Context Protocol (FastMCP) server over stdio. By adding a simple snippet to your IDE's MCP config, your AI coding assistant gains 8 native tools to search, read, list, and harvest external documentation on demand without you ever needing to copy-paste URLs."
+    a: "DocHarvest includes a built-in Model Context Protocol (FastMCP v2) server over stdio. By adding a simple snippet to your IDE's MCP config, your AI coding assistant gains 10 native tools, MCP Resources, and MCP Prompts to search, read, list, graph-navigate, and harvest external documentation on demand without you ever needing to copy-paste URLs."
   },
   {
     q: "What dependencies are needed for PDF export? Do I need WeasyPrint or wkhtmltopdf?",

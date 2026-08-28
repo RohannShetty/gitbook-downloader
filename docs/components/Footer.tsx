@@ -26,7 +26,7 @@ export function Footer() {
                 DocHarvest
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold">
-                v10.0.1
+                v11.0.0
               </span>
             </div>
 

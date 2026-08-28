@@ -33,11 +33,11 @@ const MATRIX_ROWS = [
     detail: "Zero external C-library dependencies (no WeasyPrint or wkhtmltopdf)."
   },
   {
-    feature: "Built-in FastMCP Server for Cursor, Claude Desktop & Windsurf",
+    feature: "Built-in FastMCP v2 Server for Cursor, Claude Code & 14 AI IDEs",
     docharvest: true,
     rawScrapers: false,
     cloudApis: "API Key Req",
-    detail: "8 native MCP tools running over stdio directly inside your IDE agent."
+    detail: "10 native MCP tools, resources & prompts running over stdio directly inside your agent."
   },
   {
     feature: "Embedded SQLite FTS5 BM25 Full-Text Search Database",
@@ -85,7 +85,7 @@ export function FeatureMatrix() {
                   Engine Capability
                 </th>
                 <th className="p-4 sm:p-5 text-cyan-400 font-bold bg-cyan-500/5 text-center">
-                  DocHarvest v10.0.1
+                  DocHarvest v11.0.0
                 </th>
                 <th className="p-4 sm:p-5 text-zinc-400 font-semibold text-center hidden sm:table-cell">
                   Raw Scrapers (curl/Scrapy)

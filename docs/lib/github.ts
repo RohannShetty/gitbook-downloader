@@ -157,31 +157,31 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
 
 function getFallbackRelease(): ReleaseInfo {
   return {
-    tag: 'v10.0.1',
-    name: 'DocHarvest v10.0.1 — Hotfix Release & Standalone Binaries',
-    publishedAt: '2026-08-23',
-    body: 'Hotfix release introducing docharvest.exe binary names, FastMCP integration, AST crawl improvements, and zero-flicker library navigation.',
-    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v10.0.1',
+    tag: 'v11.0.0',
+    name: 'DocHarvest v11.0.0 — Major Architectural Rehaul & FastMCP v2',
+    publishedAt: '2026-08-28',
+    body: 'Major upgrade featuring Impeccable shadcn/ui Desktop, FastMCP v2 protocol with 10 tools & resources, semantic DocGraph intelligence, 8 platform providers, and Playwright headless SPA rendering.',
+    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.0',
     assets: [
       {
         name: 'docharvest-windows-latest.exe',
         size: 32900000,
         downloadCount: 412,
-        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-windows-latest.exe',
+        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-windows-latest.exe',
         os: 'windows',
       },
       {
         name: 'docharvest-linux-x86_64',
         size: 28400000,
         downloadCount: 185,
-        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-linux-x86_64',
+        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-linux-x86_64',
         os: 'linux',
       },
       {
         name: 'docharvest-macos-universal',
         size: 31200000,
         downloadCount: 230,
-        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v10.0.1/docharvest-macos-universal',
+        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.0/docharvest-macos-universal',
         os: 'macos',
       },
     ],

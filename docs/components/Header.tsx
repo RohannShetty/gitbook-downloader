@@ -29,7 +29,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
                 DocHarvest
               </span>
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                v10.0.1
+                v11.0.0
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-mono tracking-wider">
