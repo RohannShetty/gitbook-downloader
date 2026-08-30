@@ -29,7 +29,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
               <span className="font-mono text-base font-extrabold tracking-tight text-foreground">
                 DocHarvest
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border/50 bg/50 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan">
+              <span className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-card/50 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan">
                 v{VERSION}
               </span>
             </div>
@@ -88,9 +88,9 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
             aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text/50" />
+              <Sun className="h-4 w-4 text-cyan/50" />
             ) : (
-              <Moon className="h-4 w-4 text/50" />
+              <Moon className="h-4 w-4 text-cyan/50" />
             )}
           </button>
 

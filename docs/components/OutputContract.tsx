@@ -26,7 +26,7 @@ export function OutputContract() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               The Four-Part Output Contract
             </span>
-            <div className="h-px flex-1 bg-border/60" />
+            <div className="h-px flex-1 bg-border-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             One Crawl. Four Production-Ready Formats.
@@ -85,7 +85,7 @@ export function OutputContract() {
             {/* Left: Spec Details */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono border border/50 bg/50 text-cyan font-bold uppercase">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-border/50 bg-card/50 text-cyan font-bold uppercase">
                   {selectedFormat.badge}
                 </span>
                 <span className="font-mono text-[10px] text-muted-foreground">
@@ -118,14 +118,14 @@ export function OutputContract() {
 
             {/* Right: Architectural Mock Display */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm border border/80 rounded-xl bg/95 p-5 font-mono text-xs space-y-3 shadow-inner">
-                <div className="flex items-center justify-between border-b border/80 pb-2 text-[10px] text-muted-foreground">
+              <div className="w-full max-w-sm border border-border/80 rounded-xl bg-card/95 p-5 font-mono text-xs space-y-3 shadow-inner">
+                <div className="flex items-center justify-between border-b border-border/80 pb-2 text-[10px] text-muted-foreground">
                   <span>TARGET: {selectedFormat.fileExt}</span>
-                  <span className="text/40 font-bold">READY</span>
+                  <span className="text-cyan/40 font-bold">READY</span>
                 </div>
-                <div className="text/10 text-[11px] leading-relaxed space-y-2">
-                  <div className="text/40 font-bold">$ docharvest export --format {selectedFormat.id}</div>
-                  <div className="text/40 text-[10px]">
+                <div className="text-cyan/10 text-[11px] leading-relaxed space-y-2">
+                  <div className="text-cyan/40 font-bold">$ docharvest export --format {selectedFormat.id}</div>
+                  <div className="text-cyan/40 text-[10px]">
                     ✓ Synthesized AST nodes into uniform format.<br/>
                     ✓ Injected SHA-256 cryptographic hashes.<br/>
                     ✓ Output written to disk in 0.4s.

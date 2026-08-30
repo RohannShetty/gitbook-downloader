@@ -16,7 +16,7 @@ export function FeatureMatrix() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               Capability Comparison
             </span>
-            <div className="h-px flex-1 bg-border/60" />
+            <div className="h-px flex-1 bg-border-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Why DocHarvest Outperforms Raw Scrapers &amp; Cloud APIs
@@ -45,7 +45,7 @@ export function FeatureMatrix() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y divide-border-border/60">
               {MATRIX_ROWS.map((row, index) => (
                 <tr key={index} className="hover:bg-secondary/30 transition-colors">
                   <td className="p-4 sm:p-5">
@@ -56,24 +56,24 @@ export function FeatureMatrix() {
                   </td>
                   
                   {/* DocHarvest Column */}
-                  <td className="p-4 sm:p-5 text-center bg/50">
+                  <td className="p-4 sm:p-5 text-center bg-card/50">
                     {row.docharvest ? (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg/50 text-emerald">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-emerald">
                         <Check className="h-4 w-4" />
                       </div>
                     ) : (
-                      <X className="h-4 w-4 text/50 mx-auto" />
+                      <X className="h-4 w-4 text-cyan/50 mx-auto" />
                     )}
                   </td>
 
                   {/* Raw Scrapers Column */}
                   <td className="p-4 sm:p-5 text-center hidden sm:table-cell">
                     {row.rawScrapers === true ? (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg/50 text-emerald">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-emerald">
                         <Check className="h-4 w-4" />
                       </div>
                     ) : (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg/50 text/50">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-cyan/50">
                         <X className="h-4 w-4" />
                       </div>
                     )}
@@ -82,15 +82,15 @@ export function FeatureMatrix() {
                   {/* Cloud APIs Column */}
                   <td className="p-4 sm:p-5 text-center">
                     {row.cloudApis === true ? (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg/50 text-emerald">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-emerald">
                         <Check className="h-4 w-4" />
                       </div>
                     ) : row.cloudApis === false ? (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg/50 text/50">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-cyan/50">
                         <X className="h-4 w-4" />
                       </div>
                     ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg/50 text-accent border border/50 font-bold">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-card/50 text-accent border border-border/50 font-bold">
                         {row.cloudApis}
                       </span>
                     )}

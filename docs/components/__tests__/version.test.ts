@@ -8,19 +8,19 @@ describe('version constants', () => {
 
   it('should export DOWNLOAD_URLS with correct Windows URL', () => {
     expect(DOWNLOAD_URLS.windows).toBe(
-      'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.2/docharvest-windows-latest.exe'
+      `https://github.com/RohannShetty/gitbook-downloader/releases/download/v${VERSION}/docharvest-windows-latest.exe`
     );
   });
 
   it('should export DOWNLOAD_URLS with correct Linux URL', () => {
     expect(DOWNLOAD_URLS.linux).toBe(
-      'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.2/docharvest-ubuntu-latest'
+      `https://github.com/RohannShetty/gitbook-downloader/releases/download/v${VERSION}/docharvest-ubuntu-latest`
     );
   });
 
   it('should export DOWNLOAD_URLS with correct macOS URL', () => {
     expect(DOWNLOAD_URLS.macos).toBe(
-      'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.2/docharvest-macos-latest'
+      `https://github.com/RohannShetty/gitbook-downloader/releases/download/v${VERSION}/docharvest-macos-latest`
     );
   });
 

@@ -162,7 +162,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                 <Sparkles className="h-4 w-4 text-cyan" />
                 <span>Releases &amp; Telemetry</span>
               </span>
-              <div className="h-px w-24 bg-border/80" />
+              <div className="h-px w-24 bg-border-border/80" />
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               Latest Release &amp; Live Build Telemetry
@@ -199,7 +199,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2.5">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg/50 text-cyan border border/50">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-card/50 text-cyan border border-border/50">
                       <Tag className="h-3 w-3" />
                       {release.tag}
                     </span>
@@ -317,7 +317,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                   title="Copy PowerShell verification command"
                   aria-label="Copy SHA-256 verification command"
                 >
-                  {copiedVerify ? <Check className="h-3 w-3 text/50" /> : <Copy className="h-3 w-3" />}
+                  {copiedVerify ? <Check className="h-3 w-3 text-cyan/50" /> : <Copy className="h-3 w-3" />}
                   <span>{copiedVerify ? 'Copied' : 'Copy Hash Check'}</span>
                 </button>
               </div>
@@ -332,12 +332,12 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                 <GitCommit className="h-4 w-4 text-cyan" />
                 <span>Recent Commit Stream (master)</span>
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg/50 text-emerald border border/50">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-card/50 text-emerald border border-border/50">
                 LIVE
               </span>
             </div>
 
-            <div className="border border-border rounded-xl bg-card divide-y divide-border/60 max-h-[500px] overflow-y-auto shadow-md">
+            <div className="border border-border rounded-xl bg-card divide-y divide-border-border/60 max-h-[500px] overflow-y-auto shadow-md">
               {commits.map((commit, index) => (
                 <div
                   key={commit.sha + index}
@@ -350,7 +350,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                     aria-label="Copy commit hash"
                   >
                     <span>[{commit.sha}]</span>
-                    {copiedSha === commit.sha && <Check className="h-3 w-3 text/50" />}
+                    {copiedSha === commit.sha && <Check className="h-3 w-3 text-cyan/50" />}
                   </button>
 
                   <div className="flex-1 space-y-1 overflow-hidden">

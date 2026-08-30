@@ -18,7 +18,7 @@ export function DocTypeSelector() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               Framework Intelligence
             </span>
-            <div className="h-px flex-1 bg-border/60" />
+            <div className="h-px flex-1 bg-border-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Engineered For Every Major Documentation Platform
@@ -66,7 +66,7 @@ export function DocTypeSelector() {
             <div className="lg:col-span-5 space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono border border/50 bg/50 text-cyan font-bold uppercase">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-border/50 bg-card/50 text-cyan font-bold uppercase">
                     {selectedFramework.badge}
                   </span>
                   <span className="font-mono text-[10px] text-muted-foreground">
@@ -117,7 +117,7 @@ export function DocTypeSelector() {
                     <span>❌ Raw Scraper / Curl (HTML Noise)</span>
                     <span>~42.8 KB</span>
                   </div>
-                  <pre className="h-[260px] overflow-y-auto text-[10px] text/40 bg/95 p-3 rounded-lg border border-destructive/30">
+                  <pre className="h-[260px] overflow-y-auto text-[10px] text-cyan/40 bg-card/95 p-3 rounded-lg border border-destructive/30">
                     <code>{selectedFramework.rawHtmlSnippet}</code>
                   </pre>
                 </div>
@@ -128,7 +128,7 @@ export function DocTypeSelector() {
                     <span>✓ DocHarvest Output (LLM Context)</span>
                     <span>~3.2 KB Clean</span>
                   </div>
-                  <pre className="h-[260px] overflow-y-auto text-[10px] text/30 bg/95 p-3 rounded-lg border border-emerald/30">
+                  <pre className="h-[260px] overflow-y-auto text-[10px] text-cyan/30 bg-card/95 p-3 rounded-lg border border-emerald/30">
                     <code>{selectedFramework.cleanMarkdownSnippet}</code>
                   </pre>
                 </div>

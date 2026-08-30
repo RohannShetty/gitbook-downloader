@@ -9,7 +9,7 @@ const PERSONAS = [
     id: "ai",
     title: "AI & RAG Engineers",
     icon: Bot,
-    iconBg: "bg/50 text-cyan border/50",
+    iconBg: "bg-card/50 text-cyan border-border/50",
     badge: "Vector & Agent Ready",
     pain: "LLMs hallucinate on outdated training data. Scraping docs with curl dumps 40KB+ HTML noise that exhausts context windows.",
     solution: "DocHarvest compiles clean vector JSONL datasets with token counts, SHA-256 hashes, and standard llms.txt manifests for instant agent indexing.",
@@ -23,7 +23,7 @@ const PERSONAS = [
     id: "offline",
     title: "Offline Developers & Researchers",
     icon: BookOpen,
-    iconBg: "bg/50 text-accent border/50",
+    iconBg: "bg-card/50 text-accent border-border/50",
     badge: "Air-Gapped Portability",
     pain: "Reading documentation on flights, during outages, or in secure air-gapped enterprise environments is painful with fragmented web pages.",
     solution: "Merges 500+ documentation pages into a single consolidated book.md and publication-grade PDF handbook with automated table of contents.",
@@ -37,7 +37,7 @@ const PERSONAS = [
     id: "devops",
     title: "DevOps & Archival Teams",
     icon: Server,
-    iconBg: "bg/50 text-emerald border/50",
+    iconBg: "bg-card/50 text-emerald border-border/50",
     badge: "Automated Synchronization",
     pain: "Docs change across releases without changelog notices. Mirroring docs locally often hits rate limits or gets blocked by Cloudflare.",
     solution: "Heuristic crawlers with cross-platform lock recovery, retry adapters, exponential backoffs, and automated Git diff tracking.",
@@ -60,7 +60,7 @@ export function PersonaShowcase() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               // 06 / BUILT FOR YOUR WORKFLOW
             </span>
-            <div className="h-px flex-1 bg-border/60" />
+            <div className="h-px flex-1 bg-border-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Three Specialized Workflows. Zero Friction.

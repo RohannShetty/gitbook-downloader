@@ -89,7 +89,7 @@ export function ExportStudioPreview() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               Export Studio Inspection
             </span>
-            <div className="h-px flex-1 bg-border/60" />
+            <div className="h-px flex-1 bg-border-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Inspect the Generated Compilation Artifacts
@@ -100,10 +100,10 @@ export function ExportStudioPreview() {
         </div>
 
         {/* Studio Window Card */}
-        <div className="border border/80 rounded-xl bg/95 shadow-2xl overflow-hidden">
+        <div className="border border-border/80 rounded-xl bg-card/95 shadow-2xl overflow-hidden">
           
           {/* Studio Navigation Bar */}
-          <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border/80 bg/90 gap-3">
+          <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-border/80 bg-card/90 gap-3">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab('markdown')}
@@ -112,7 +112,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'markdown'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text/40 hover:text-white hover:bg/80'
+                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
                 }`}
               >
                 <FileText className="h-3.5 w-3.5" />
@@ -126,7 +126,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'rag'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text/40 hover:text-white hover:bg/80'
+                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
                 }`}
               >
                 <Database className="h-3.5 w-3.5" />
@@ -140,7 +140,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'llmstxt'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text/40 hover:text-white hover:bg/80'
+                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
                 }`}
               >
                 <FileCode className="h-3.5 w-3.5" />
@@ -154,7 +154,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'fts5'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text/40 hover:text-white hover:bg/80'
+                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
                 }`}
               >
                 <Search className="h-3.5 w-3.5" />
@@ -164,31 +164,31 @@ export function ExportStudioPreview() {
 
             {/* Copy Artifact CTA */}
             <div className="flex items-center gap-3">
-              <span className="hidden sm:inline-block font-mono text-[10px] text/40">
+              <span className="hidden sm:inline-block font-mono text-[10px] text-cyan/40">
                 {current.filename}
               </span>
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border/70 bg/80 text-xs font-mono text/20 hover:text-white hover:border-primary/60 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border/70 bg-cyan/80 text-xs font-mono text-cyan/20 hover:text-white hover:border-primary/60 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
                 aria-label="Copy sample code"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text/40" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-cyan/40" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy Sample'}</span>
               </button>
             </div>
           </div>
 
           {/* Code Viewer Panel */}
-          <div className="p-5 overflow-x-auto font-mono text-xs leading-relaxed bg/95">
-            <pre className="!bg-transparent !p-0 !border-0 text/10">
+          <div className="p-5 overflow-x-auto font-mono text-xs leading-relaxed bg-card/95">
+            <pre className="!bg-transparent !p-0 !border-0 text-cyan/10">
               <code>{current.code}</code>
             </pre>
           </div>
 
           {/* Studio Footer */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-t border/80 bg/90 font-mono text-[10px] text/40">
+          <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/80 bg-card/90 font-mono text-[10px] text-cyan/40">
             <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg/40" />
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan/40" />
               <span>SYNTAX: {current.language.toUpperCase()}</span>
             </div>
             <span>ZERO CLIENT OVERHEAD</span>

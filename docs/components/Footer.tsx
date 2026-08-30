@@ -38,7 +38,7 @@ export function Footer() {
             {/* Creator Attribution Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground font-semibold shadow-xs">
               <span>Made with</span>
-              <Heart className="h-3.5 w-3.5 text/50 fill/50" />
+              <Heart className="h-3.5 w-3.5 text-cyan/50 fill-rose/50" />
               <span>by</span>
               <a
                 href="https://github.com/RohannShetty"

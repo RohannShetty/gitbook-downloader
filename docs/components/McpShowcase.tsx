@@ -86,11 +86,11 @@ export function McpShowcase() {
         {/* Section Title */}
         <div className="space-y-3 mb-12">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text/40 font-bold tracking-widest uppercase flex items-center gap-1.5">
-              <Bot className="h-4 w-4 text/40" />
+            <span className="font-mono text-xs text-cyan/40 font-bold tracking-widest uppercase flex items-center gap-1.5">
+              <Bot className="h-4 w-4 text-cyan/40" />
               <span>Model Context Protocol (FastMCP v2)</span>
             </span>
-            <div className="h-px flex-1 bg-border/60" />
+            <div className="h-px flex-1 bg-border-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Give Cursor &amp; Claude Native Documentation Powers
@@ -113,7 +113,7 @@ export function McpShowcase() {
                   onClick={() => setSelectedClient(key as any)}
                   className={`px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                     selectedClient === key
-                      ? 'border/50 bg/50 text-cyan font-bold'
+                      ? 'border-border/50 bg-card/50 text-cyan font-bold'
                       : 'border-border bg-card text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -123,21 +123,21 @@ export function McpShowcase() {
             </div>
 
             {/* Config Snippet Card */}
-            <div className="border border/80 rounded-xl bg/95 shadow-xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border/80 bg/90 font-mono text-[11px] text/40">
-                <span className="text/40 font-bold">{current.filename}</span>
+            <div className="border border-border/80 rounded-xl bg-card/95 shadow-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/80 bg-card/90 font-mono text-[11px] text-cyan/40">
+                <span className="text-cyan/40 font-bold">{current.filename}</span>
                 <button
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg/80 hover:bg-primary/20 hover:text-white transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary text-xs text/20 border border/70"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-cyan/80 hover:bg-primary/20 hover:text-white transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary text-xs text-cyan/20 border border-border/70"
                   aria-label="Copy MCP configuration"
                 >
-                  {copied ? <Check className="h-3 w-3 text/40" /> : <Copy className="h-3 w-3" />}
+                  {copied ? <Check className="h-3 w-3 text-cyan/40" /> : <Copy className="h-3 w-3" />}
                   <span>{copied ? 'Copied' : 'Copy JSON'}</span>
                 </button>
               </div>
 
-              <div className="p-4 bg/95 font-mono text-xs leading-relaxed overflow-x-auto">
-                <pre className="!bg-transparent !p-0 !border-0 text/10">
+              <div className="p-4 bg-card/95 font-mono text-xs leading-relaxed overflow-x-auto">
+                <pre className="!bg-transparent !p-0 !border-0 text-cyan/10">
                   <code>{current.snippet}</code>
                 </pre>
               </div>
@@ -157,7 +157,7 @@ export function McpShowcase() {
 
             <div className="space-y-2.5">
               {MCP_TOOLS.map((tool) => (
-                <div key={tool.name} className="p-3.5 rounded-lg border border-border bg-card font-mono text-xs space-y-1 hover:border/50 transition-colors">
+                <div key={tool.name} className="p-3.5 rounded-lg border border-border bg-card font-mono text-xs space-y-1 hover:border-border/50 transition-colors">
                   <div className="text-cyan font-bold">
                     @{tool.name}()
                   </div>
