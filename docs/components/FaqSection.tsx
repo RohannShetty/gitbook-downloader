@@ -42,7 +42,9 @@ export function FaqSection() {
               >
                 <button
                   onClick={() => toggleAccordion(index)}
-                  className="w-full flex items-center justify-between p-5 text-left font-mono text-xs sm:text-sm font-bold text-foreground hover:bg-secondary/40 transition-colors cursor-pointer"
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-content-${index}`}
+                  className="w-full flex items-center justify-between p-5 text-left font-mono text-xs sm:text-sm font-bold text-foreground hover:bg-secondary/40 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
                 >
                   <span className="pr-4">{item.q}</span>
                   <ChevronDown
@@ -55,6 +57,7 @@ export function FaqSection() {
                 <AnimatePresence>
                   {isOpen && (
                     <motion.div
+                      id={`faq-content-${index}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}

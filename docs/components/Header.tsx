@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTheme } from './ThemeProvider';
 import { Sun, Moon, Terminal, Download, Star, Sparkles } from 'lucide-react';
 import { GithubIcon } from './Icons';
+import { VERSION } from '../lib/version';
 
 interface HeaderProps {
   stars?: number;
@@ -28,8 +29,8 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
               <span className="font-mono text-base font-extrabold tracking-tight text-foreground">
                 DocHarvest
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-700 dark:text-cyan-400">
-                v11.0.1
+              <span className="inline-flex items-center gap-1 rounded-full border border/50 bg/50 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan">
+                v{VERSION}
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-mono tracking-wider">
@@ -40,7 +41,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
 
         {/* Navigation Anchors */}
         <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-muted-foreground">
-          <a href="#agents" className="hover:text-primary transition-colors text-cyan-700 dark:text-cyan-400">
+          <a href="#agents" className="hover:text-primary transition-colors text-cyan">
             Agents &amp; IDEs
           </a>
           <a href="#platforms" className="hover:text-foreground transition-colors">
@@ -82,20 +83,21 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
           {/* Theme Switcher */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg border border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-200 cursor-pointer"
+            className="p-2 rounded-lg border border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-amber-500" />
+              <Sun className="h-4 w-4 text/50" />
             ) : (
-              <Moon className="h-4 w-4 text-indigo-500" />
+              <Moon className="h-4 w-4 text/50" />
             )}
           </button>
 
           {/* Quick Install Trigger CTA */}
           <button
             onClick={onOpenInstallModal}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-xs font-mono font-bold text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 transition-all duration-200 cursor-pointer active:scale-95"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-xs font-mono font-bold text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Install CLI / GUI</span>

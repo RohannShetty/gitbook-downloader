@@ -4,26 +4,27 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Terminal, Download, ArrowRight, Play, Check, Copy, Sparkles, Layers, Cpu, FileText } from 'lucide-react';
 import { WindowsIcon, PythonIcon } from './Icons';
+import { VERSION, DOWNLOAD_URLS } from '../lib/version';
 
 interface HeroProps {
   onOpenInstallModal: () => void;
 }
 
 const TERMINAL_LOGS = [
-  { text: "$ docharvest crawl https://docs.openalgo.in/v/v2.0 --rag --pdf --fast-ast", color: "text-cyan-400 font-bold" },
-  { text: "⚡ [Heuristic] Detected GitBook Space engine (version selector: v2.0)", color: "text-indigo-300" },
-  { text: "🔍 Discovering documentation tree via sitemap and AST BFS...", color: "text-zinc-400" },
-  { text: "   ├── Discovered: /api-reference/oauth [3.2 KB raw .md]", color: "text-zinc-300" },
-  { text: "   ├── Discovered: /api-reference/orders [14.8 KB raw .md]", color: "text-zinc-300" },
-  { text: "   ├── Discovered: /api-reference/positions [6.1 KB raw .md]", color: "text-zinc-300" },
-  { text: "   └── Discovered: /algorithms/quickstart [8.4 KB raw .md]", color: "text-zinc-300" },
-  { text: "📥 Parallel AST crawl: 364 pages harvested in 18.2s (20.0 pages/sec)", color: "text-emerald-400 font-semibold" },
-  { text: "📦 Compiling outputs:", color: "text-amber-300 font-medium" },
-  { text: "   ├── book.md (consolidated single handbook with TOC)", color: "text-zinc-300" },
-  { text: "   ├── llms.txt (standardized AI context manifest)", color: "text-zinc-300" },
-  { text: "   ├── openalgo_rag.jsonl (vector chunks + SHA-256 metadata)", color: "text-zinc-300" },
-  { text: "   └── openalgo_handbook.pdf (publication-grade printable PDF)", color: "text-zinc-300" },
-  { text: "✨ FastMCP server listening on stdio. Ready for Cursor & Claude Code!", color: "text-cyan-300 font-bold" }
+  { text: "$ docharvest crawl https://docs.openalgo.in/v/v2.0 --rag --pdf --fast-ast", color: "text/40 font-bold" },
+  { text: "⚡ [Heuristic] Detected GitBook Space engine (version selector: v2.0)", color: "text/30" },
+  { text: "🔍 Discovering documentation tree via sitemap and AST BFS...", color: "text/40" },
+  { text: "   ├── Discovered: /api-reference/oauth [3.2 KB raw .md]", color: "text/30" },
+  { text: "   ├── Discovered: /api-reference/orders [14.8 KB raw .md]", color: "text/30" },
+  { text: "   ├── Discovered: /api-reference/positions [6.1 KB raw .md]", color: "text/30" },
+  { text: "   └── Discovered: /algorithms/quickstart [8.4 KB raw .md]", color: "text/30" },
+  { text: "📥 Parallel AST crawl: 364 pages harvested in 18.2s (20.0 pages/sec)", color: "text/40 font-semibold" },
+  { text: "📦 Compiling outputs:", color: "text/30 font-medium" },
+  { text: "   ├── book.md (consolidated single handbook with TOC)", color: "text/30" },
+  { text: "   ├── llms.txt (standardized AI context manifest)", color: "text/30" },
+  { text: "   ├── openalgo_rag.jsonl (vector chunks + SHA-256 metadata)", color: "text/30" },
+  { text: "   └── openalgo_handbook.pdf (publication-grade printable PDF)", color: "text/30" },
+  { text: "✨ FastMCP server listening on stdio. Ready for Cursor & Claude Code!", color: "text/30 font-bold" }
 ];
 
 const HERO_AGENTS = [
@@ -51,7 +52,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
       {/* Background Grid & Radial Glows */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
       <div className="absolute top-0 left-1/4 h-[400px] w-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 h-[300px] w-[300px] bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 h-[300px] w-[300px] bg/50 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -64,10 +65,10 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-xs font-mono font-bold text-cyan-700 dark:text-cyan-400"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border/50 bg/50 text-xs font-mono font-bold text-cyan"
             >
-              <Sparkles className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
-              <span>DocHarvest v11.0.1 — Local-First AI AST Compiler</span>
+              <Sparkles className="h-3.5 w-3.5 text-cyan" />
+              <span>DocHarvest v{VERSION} — Local-First AI AST Compiler</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -87,7 +88,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground font-mono leading-relaxed"
             >
-              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan-700 dark:text-cyan-400 font-bold">FastMCP v2</code> or offline PDFs.
+              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan font-bold">FastMCP v2</code> or offline PDFs.
             </motion.p>
 
             {/* Quick Agent Selector Pills */}
@@ -105,9 +106,10 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   <button
                     key={agent.id}
                     onClick={() => setSelectedAgentId(agent.id)}
-                    className={`px-2.5 py-1 rounded-md border font-mono text-[0.70rem] font-semibold transition-all cursor-pointer ${
+                    aria-pressed={selectedAgentId === agent.id}
+                    className={`px-2.5 py-1 rounded-md border font-mono text-[0.70rem] font-semibold transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                       selectedAgentId === agent.id
-                        ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 font-bold shadow-xs'
+                        ? 'border/50 bg/50 text-cyan font-bold shadow-xs'
                         : 'border-border/80 bg-card text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -125,7 +127,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="flex flex-wrap items-center gap-3 pt-1 w-full"
             >
               <a
-                href="https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-windows-latest.exe"
+                href={DOWNLOAD_URLS.windows}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-xs font-mono font-bold text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all duration-200"
               >
                 <WindowsIcon className="h-4 w-4" />
@@ -134,7 +136,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
 
               <button
                 onClick={onOpenInstallModal}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 text-xs font-mono font-bold text-foreground hover:border-primary/50 hover:bg-secondary transition-all duration-200 cursor-pointer"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 text-xs font-mono font-bold text-foreground hover:border-primary/50 hover:bg-secondary transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
               >
                 <PythonIcon className="h-4 w-4" />
                 <span>Install via PyPI / uvx</span>
@@ -148,13 +150,14 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex items-center gap-2 px-3.5 py-2 rounded-md border border-border/80 bg-card/80 font-mono text-xs text-muted-foreground w-full"
             >
-              <span className="text-cyan-600 dark:text-cyan-400">&gt;</span>
+              <span className="text-cyan">&gt;</span>
               <code className="flex-1 text-foreground font-semibold">pip install gitbook-downloader</code>
               <button
                 onClick={copyPipCommand}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer text-[11px]"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary text-[11px]"
+                aria-label="Copy pip install command"
               >
-                {copiedPip ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedPip ? <Check className="h-3.5 w-3.5 text/50" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copiedPip ? 'Copied' : 'Copy'}</span>
               </button>
             </motion.div>
@@ -163,11 +166,11 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 w-full font-mono text-xs border-t border-border/80">
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">THROUGHPUT</span>
-                <span className="font-bold text-cyan-600 dark:text-cyan-400">20 pgs/sec</span>
+                <span className="font-bold text-cyan">20 pgs/sec</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">TOKEN SAVINGS</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">89% Reduction</span>
+                <span className="font-bold text-emerald">89% Reduction</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">PRIVACY</span>
@@ -175,7 +178,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">AGENT MODELS</span>
-                <span className="font-bold text-cyan-600 dark:text-cyan-400">15+ Harnesses</span>
+                <span className="font-bold text-cyan">15+ Harnesses</span>
               </div>
             </div>
 
@@ -190,13 +193,13 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="border border-border rounded-xl bg-[#0d0d12] shadow-2xl overflow-hidden"
             >
               {/* Terminal Window Title Bar */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border/80 bg-zinc-950/80">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border/80 bg/95">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                  <div className="w-3 h-3 rounded-full bg/50" />
+                  <div className="w-3 h-3 rounded-full bg/50" />
+                  <div className="w-3 h-3 rounded-full bg/50" />
                   <span className="ml-2 font-mono text-[11px] text-muted-foreground">
-                    docharvest@terminal — v11.0.1
+                    docharvest@terminal — v{VERSION}
                   </span>
                 </div>
                 
@@ -204,7 +207,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                 <div className="flex items-center gap-1 font-mono text-[10px]">
                   <button
                     onClick={() => setActiveTab('terminal')}
-                    className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+                    role="tab"
+                    aria-selected={activeTab === 'terminal'}
+                    className={`px-2 py-1 rounded transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                       activeTab === 'terminal' ? 'bg-primary/20 text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -212,7 +217,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   </button>
                   <button
                     onClick={() => setActiveTab('ast')}
-                    className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+                    role="tab"
+                    aria-selected={activeTab === 'ast'}
+                    className={`px-2 py-1 rounded transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                       activeTab === 'ast' ? 'bg-primary/20 text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -220,7 +227,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   </button>
                   <button
                     onClick={() => setActiveTab('vector')}
-                    className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+                    role="tab"
+                    aria-selected={activeTab === 'vector'}
+                    className={`px-2 py-1 rounded transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                       activeTab === 'vector' ? 'bg-primary/20 text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -228,7 +237,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   </button>
                   <button
                     onClick={() => setActiveTab('mcp-stdio')}
-                    className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+                    role="tab"
+                    aria-selected={activeTab === 'mcp-stdio'}
+                    className={`px-2 py-1 rounded transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                       activeTab === 'mcp-stdio' ? 'bg-primary/20 text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -250,9 +261,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                 )}
 
                 {activeTab === 'ast' && (
-                  <div className="space-y-2 text-zinc-300 animate-fadeIn">
-                    <div className="text-cyan-400 font-bold">// AST Heuristic Boundary Isolation:</div>
-                    <pre className="text-[11px] text-zinc-400 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
+                  <div className="space-y-2 text/30 animate-fadeIn">
+                    <div className="text/40 font-bold">// AST Heuristic Boundary Isolation:</div>
+                    <pre className="text-[11px] text/40 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
 {`def extract_clean_article(soup: BeautifulSoup) -> str:
     # 1. Eliminate navigation, footers, & cookie banners
     for noise in soup.select("nav, footer, .sidebar, .cookie-banner"):
@@ -262,16 +273,16 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
     article = soup.find("article") or soup.find("main")
     return markdownify(str(article), heading_style="ATX")`}
                     </pre>
-                    <div className="text-emerald-400 text-[11px]">
+                    <div className="text/40 text-[11px]">
                       ✓ Extracted 364 articles with zero wrapper bloat (89% token reduction).
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'vector' && (
-                  <div className="space-y-2 text-zinc-300 animate-fadeIn">
-                    <div className="text-amber-400 font-bold">// RAG JSONL Vector Payload Chunk:</div>
-                    <pre className="text-[11px] text-zinc-400 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
+                  <div className="space-y-2 text/30 animate-fadeIn">
+                    <div className="text/40 font-bold">// RAG JSONL Vector Payload Chunk:</div>
+                    <pre className="text-[11px] text/40 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
 {`{
   "id": "openalgo_oauth_v2",
   "source_url": "https://docs.openalgo.in/v/v2.0/auth",
@@ -281,23 +292,23 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
   "chunk_text": "# OAuth 2.0 Authentication\\n\\nTokens expire in 3600s..."
 }`}
                     </pre>
-                    <div className="text-cyan-400 text-[11px]">
+                    <div className="text/40 text-[11px]">
                       ✓ Ready for LangChain, LlamaIndex &amp; ChromaDB ingest.
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'mcp-stdio' && (
-                  <div className="space-y-2 text-zinc-300 animate-fadeIn">
-                    <div className="text-cyan-400 font-bold">// FastMCP v2 stdio Tool Call:</div>
-                    <pre className="text-[11px] text-zinc-400 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
+                  <div className="space-y-2 text/30 animate-fadeIn">
+                    <div className="text/40 font-bold">// FastMCP v2 stdio Tool Call:</div>
+                    <pre className="text-[11px] text/40 bg-black/40 p-3 rounded border border-border/60 overflow-x-auto">
 {`$ docharvest mcp
 > Call: search_docs(query="OAuth token refresh", domain="openalgo")
 > Result (189 tokens):
   OAuth 2.0 Token Refresh: POST to /oauth/token with client_credentials.
   Tokens valid for 3600s.`}
                     </pre>
-                    <div className="text-emerald-400 text-[11px]">
+                    <div className="text/40 text-[11px]">
                       ✓ 10 FastMCP tools connected to Cursor / Claude Code.
                     </div>
                   </div>
@@ -305,9 +316,9 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
 
               {/* Terminal Footer Status Bar */}
-              <div className="flex items-center justify-between px-4 py-2 border-t border-border/60 bg-zinc-950 font-mono text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between px-4 py-2 border-t border-border/60 bg/95 font-mono text-[10px] text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="h-2 w-2 rounded-full bg/40" />
                   <span>STATUS: 364/364 HARVESTED</span>
                 </div>
                 <span>TIME: 18.2s (20.0 pgs/sec)</span>

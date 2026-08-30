@@ -36,7 +36,8 @@ export function DocTypeSelector() {
               <button
                 key={framework.id}
                 onClick={() => setSelectedFramework(framework)}
-                className={`p-3 rounded-lg border font-mono text-xs font-bold text-center transition-all cursor-pointer ${
+                aria-pressed={isSelected}
+                className={`p-3 rounded-lg border font-mono text-xs font-bold text-center transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                   isSelected
                     ? 'border-primary bg-primary/10 text-primary shadow-sm'
                     : 'border-border bg-card/40 text-muted-foreground hover:bg-card hover:text-foreground'
@@ -65,7 +66,7 @@ export function DocTypeSelector() {
             <div className="lg:col-span-5 space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 font-bold uppercase">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono border border/50 bg/50 text-cyan font-bold uppercase">
                     {selectedFramework.badge}
                   </span>
                   <span className="font-mono text-[10px] text-muted-foreground">
@@ -98,7 +99,7 @@ export function DocTypeSelector() {
                 <ul className="space-y-2 text-xs font-mono text-muted-foreground">
                   {selectedFramework.features.map((feat, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald shrink-0 mt-0.5" />
                       <span className="text-foreground/90">{feat}</span>
                     </li>
                   ))}
@@ -112,22 +113,22 @@ export function DocTypeSelector() {
                 
                 {/* Raw HTML Soup */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between font-mono text-[10px] text-rose-600 dark:text-rose-400 font-bold">
+                  <div className="flex items-center justify-between font-mono text-[10px] text-destructive font-bold">
                     <span>❌ Raw Scraper / Curl (HTML Noise)</span>
                     <span>~42.8 KB</span>
                   </div>
-                  <pre className="h-[260px] overflow-y-auto text-[10px] text-zinc-400 bg-zinc-950 p-3 rounded-lg border border-rose-500/30 dark:border-rose-950/40">
+                  <pre className="h-[260px] overflow-y-auto text-[10px] text/40 bg/95 p-3 rounded-lg border border-destructive/30">
                     <code>{selectedFramework.rawHtmlSnippet}</code>
                   </pre>
                 </div>
 
                 {/* Clean Markdown Output */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                  <div className="flex items-center justify-between font-mono text-[10px] text-emerald font-bold">
                     <span>✓ DocHarvest Output (LLM Context)</span>
                     <span>~3.2 KB Clean</span>
                   </div>
-                  <pre className="h-[260px] overflow-y-auto text-[10px] text-emerald-300 bg-zinc-950 p-3 rounded-lg border border-emerald-500/30 dark:border-emerald-950/40">
+                  <pre className="h-[260px] overflow-y-auto text-[10px] text/30 bg/95 p-3 rounded-lg border border-emerald/30">
                     <code>{selectedFramework.cleanMarkdownSnippet}</code>
                   </pre>
                 </div>

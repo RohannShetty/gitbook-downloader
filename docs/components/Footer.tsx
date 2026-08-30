@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Terminal, Heart, ArrowUp, Mail } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, XIcon } from './Icons';
+import { VERSION } from '../lib/version';
 
 export function Footer() {
   const scrollToTop = () => {
@@ -26,7 +27,7 @@ export function Footer() {
                 DocHarvest
               </span>
               <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground border border-border/50">
-                v11.0.1
+                v{VERSION}
               </span>
             </div>
 
@@ -37,7 +38,7 @@ export function Footer() {
             {/* Creator Attribution Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground font-semibold shadow-xs">
               <span>Made with</span>
-              <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
+              <Heart className="h-3.5 w-3.5 text/50 fill/50" />
               <span>by</span>
               <a
                 href="https://github.com/RohannShetty"
@@ -57,7 +58,7 @@ export function Footer() {
             </span>
             <ul className="space-y-2 text-muted-foreground font-sans text-xs">
               <li>
-                <a href="#agents" className="hover:text-primary transition-colors text-cyan-700 dark:text-cyan-400 font-semibold">Agents &amp; IDEs</a>
+                <a href="#agents" className="hover:text-primary transition-colors text-cyan font-semibold">Agents &amp; IDEs</a>
               </li>
               <li>
                 <a href="#platforms" className="hover:text-foreground transition-colors">Platforms</a>
@@ -140,7 +141,7 @@ export function Footer() {
 
           <button
             onClick={scrollToTop}
-            className="inline-flex items-center gap-1.5 hover:text-foreground text-left cursor-pointer transition-colors border border-border bg-card px-3 py-1.5 rounded-lg"
+            className="inline-flex items-center gap-1.5 hover:text-foreground text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-colors border border-border bg-card px-3 py-1.5 rounded-lg"
           >
             <span>Back to top</span>
             <ArrowUp className="h-3 w-3" />

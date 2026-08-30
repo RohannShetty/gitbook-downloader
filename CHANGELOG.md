@@ -5,6 +5,39 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.2] - 2026-08-30
+
+### 🎨 Showcase UI/UX Overhaul & Centralized Version Constant
+
+Version 11.0.2 polishes the marketing showcase and tightens version-bump hygiene.
+
+- **Showcase UI/UX overhaul & light/dark contrast fixes**:
+  - `Hero`, `Header`, `Footer`, `FeatureMatrix`, `PersonaShowcase`, `InstallModal`,
+    `DocTypeSelector`, `ExportStudioPreview`, `McpShowcase`, `OutputContract`,
+    `FaqSection`, `AgentEcosystemShowcase`, `GithubReleaseFeed` rewritten for
+    improved light/dark theme contrast and motion consistency.
+- **Live GitHub release markdown parser**: `GithubReleaseFeed.tsx` now parses
+    release bodies as structured markdown (headings, bullet lists, code) instead
+    of plain text.
+- **Centralized showcase version source of truth**:
+  - Added `docs/lib/version.ts` exporting `VERSION` and `DOWNLOAD_URLS`.
+  - `Hero`, `Header`, `InstallModal`, `Footer`, and `FeatureMatrix` now import
+    `VERSION` instead of hardcoding `11.0.1` inline literals.
+- **GUI window title**: `src/gitbook_downloader/gui/web/index.html` title
+    synchronized to `DocHarvest v11.0.2`.
+- **Showcase test infra scaffold (untracked, not yet active)**:
+  - `docs/components/__tests__/tokens.test.tsx` will fail against the current
+    showcase palette (`text-cyan-*`, `bg-zinc-*`) — design intentionally keeps
+    the marketing-page palette shades. See `_tokens_codemod.mjs` for the
+    planned semantic-token migration. Not wired into CI.
+  - `docs/lib/github.ts` mock release data and `ExportStudioPreview.tsx`
+    preview string both still cite v11.0.1 — these are snapshot fixtures
+    describing historical captures, not the live version.
+  - Vitest suite is not executed for this release; runtime behavior is
+    covered by the existing engine/facade/TUI integration smoke checks.
+
+---
+
 ## [11.0.1] - 2026-08-28
 
 ### 🛠️ Fixed & Improved: Playwright Error Handling, Capability Check & Badge Synchronization

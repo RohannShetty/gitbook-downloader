@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Copy, Check, Download, Terminal, Layers } from 'lucide-react';
 import { WindowsIcon, LinuxIcon, AppleIcon, PythonIcon, DockerIcon } from './Icons';
+import { VERSION, DOWNLOAD_URLS } from '../lib/version';
 
 interface InstallModalProps {
   isOpen: boolean;
@@ -14,8 +15,8 @@ const INSTALL_OPTIONS = [
     id: "windows",
     title: "Windows Standalone",
     icon: WindowsIcon,
-    command: "# Direct executable (zero Python install needed)\ncurl -LO https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-windows-latest.exe\n.\\docharvest-windows-latest.exe --gui",
-    ctaUrl: "https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-windows-latest.exe",
+    command: "# Direct executable (zero Python install needed)\ncurl -LO " + DOWNLOAD_URLS.windows + "\n.\\docharvest-windows-latest.exe --gui",
+    ctaUrl: DOWNLOAD_URLS.windows,
     ctaLabel: "Download docharvest.exe (32.9MB)"
   },
   {
@@ -80,7 +81,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">
-                Install DocHarvest v11.0.1
+                Install DocHarvest v{VERSION}
               </h3>
               <p className="text-xs text-muted-foreground font-mono">
                 Select your operating system or preferred package manager.
@@ -90,7 +91,8 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -105,7 +107,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
               <button
                 key={opt.id}
                 onClick={() => setActiveTab(opt)}
-                className={`p-3 rounded-lg border font-mono text-xs font-semibold flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                className={`p-3 rounded-lg border font-mono text-xs font-semibold flex flex-col items-center gap-1.5 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                   isSelected
                     ? 'border-primary bg-primary/15 text-primary'
                     : 'border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -124,15 +126,16 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             <span>Terminal Command:</span>
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-1 text-cyan-700 dark:text-cyan-400 font-bold hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1 text-cyan font-bold hover:underline cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+              aria-label="Copy install command"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text/50" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied to Clipboard!' : 'Copy'}</span>
             </button>
           </div>
 
-          <div className="p-4 rounded-lg bg-zinc-950 border border-slate-800 font-mono text-xs text-zinc-100 leading-relaxed overflow-x-auto shadow-inner">
-            <pre className="!bg-transparent !p-0 !border-0 text-zinc-100">
+          <div className="p-4 rounded-lg bg/95 border border/80 font-mono text-xs text/10 leading-relaxed overflow-x-auto shadow-inner">
+            <pre className="!bg-transparent !p-0 !border-0 text/10">
               <code>{activeTab.command}</code>
             </pre>
           </div>
@@ -152,7 +155,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
 
           <button
             onClick={onClose}
-            className="h-10 px-4 rounded-lg border border-border bg-secondary/50 font-mono text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            className="h-10 px-4 rounded-lg border border-border bg-secondary/50 font-mono text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
           >
             Close
           </button>

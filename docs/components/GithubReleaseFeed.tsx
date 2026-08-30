@@ -159,7 +159,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase flex items-center gap-1.5">
-                <Sparkles className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                <Sparkles className="h-4 w-4 text-cyan" />
                 <span>Releases &amp; Telemetry</span>
               </span>
               <div className="h-px w-24 bg-border/80" />
@@ -199,7 +199,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2.5">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg/50 text-cyan border border/50">
                       <Tag className="h-3 w-3" />
                       {release.tag}
                     </span>
@@ -238,7 +238,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                     <div key={idx} className="space-y-2 rounded-lg bg-muted/40 p-3.5 border border-border/60">
                       {sec.title && (
                         <h4 className="font-bold text-foreground text-xs flex items-center gap-2">
-                          <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                          <Zap className="h-3.5 w-3.5 text-accent" />
                           <span>{sec.title}</span>
                         </h4>
                       )}
@@ -248,7 +248,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                           const isHeading = item.startsWith('**');
                           return (
                             <li key={iIdx} className="flex items-start gap-2 leading-relaxed">
-                              <span className="text-cyan-600 dark:text-cyan-400 font-bold mt-0.5">•</span>
+                              <span className="text-cyan font-bold mt-0.5">•</span>
                               <span className={isHeading ? "text-foreground font-semibold" : "text-foreground/90"}>
                                 {cleanItem}
                               </span>
@@ -275,9 +275,9 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                   {/* Windows */}
                   <a
                     href={`https://github.com/RohannShetty/gitbook-downloader/releases/download/${release.tag}/docharvest-windows-latest.exe`}
-                    className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-secondary/60 hover:border-primary/50 hover:bg-primary/5 transition-all text-center group cursor-pointer shadow-xs"
+                    className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-secondary/60 hover:border-primary/50 hover:bg-primary/5 transition-all text-center group cursor-pointer focus-visible:outline-2 focus-visible:outline-primary shadow-xs"
                   >
-                    <WindowsIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform mb-1.5" />
+                    <WindowsIcon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform mb-1.5" />
                     <span className="font-mono text-xs font-bold text-foreground">Windows x64</span>
                     <span className="font-mono text-[10px] text-muted-foreground mt-0.5">docharvest.exe (34.5MB)</span>
                   </a>
@@ -285,9 +285,9 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                   {/* Linux */}
                   <a
                     href={`https://github.com/RohannShetty/gitbook-downloader/releases/download/${release.tag}/docharvest-ubuntu-latest`}
-                    className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-secondary/60 hover:border-primary/50 hover:bg-primary/5 transition-all text-center group cursor-pointer shadow-xs"
+                    className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-secondary/60 hover:border-primary/50 hover:bg-primary/5 transition-all text-center group cursor-pointer focus-visible:outline-2 focus-visible:outline-primary shadow-xs"
                   >
-                    <LinuxIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform mb-1.5" />
+                    <LinuxIcon className="h-5 w-5 text-accent group-hover:scale-110 transition-transform mb-1.5" />
                     <span className="font-mono text-xs font-bold text-foreground">Linux x64</span>
                     <span className="font-mono text-[10px] text-muted-foreground mt-0.5">Ubuntu Binary (48.3MB)</span>
                   </a>
@@ -295,9 +295,9 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                   {/* macOS */}
                   <a
                     href={`https://github.com/RohannShetty/gitbook-downloader/releases/download/${release.tag}/docharvest-macos-latest`}
-                    className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-secondary/60 hover:border-primary/50 hover:bg-primary/5 transition-all text-center group cursor-pointer shadow-xs"
+                    className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-secondary/60 hover:border-primary/50 hover:bg-primary/5 transition-all text-center group cursor-pointer focus-visible:outline-2 focus-visible:outline-primary shadow-xs"
                   >
-                    <AppleIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-400 group-hover:scale-110 transition-transform mb-1.5" />
+                    <AppleIcon className="h-5 w-5 text-cyan group-hover:scale-110 transition-transform mb-1.5" />
                     <span className="font-mono text-xs font-bold text-foreground">macOS</span>
                     <span className="font-mono text-[10px] text-muted-foreground mt-0.5">Apple/Intel (30.4MB)</span>
                   </a>
@@ -307,16 +307,17 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
               {/* SHA256 Verification Bar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-muted-foreground border-t border-border pt-4 bg-muted/20 -mx-6 -mb-6 p-4 sm:px-6 rounded-b-xl">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <ShieldCheck className="h-4 w-4 text-emerald shrink-0" />
                   <span>Signed &amp; verified with SHA-256 in GitHub Actions CI.</span>
                 </div>
 
                 <button
                   onClick={handleCopyVerify}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary hover:bg-primary/10 hover:text-primary transition-colors text-[11px] font-semibold text-foreground shrink-0 cursor-pointer border border-border"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary hover:bg-primary/10 hover:text-primary transition-colors text-[11px] font-semibold text-foreground shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary border border-border"
                   title="Copy PowerShell verification command"
+                  aria-label="Copy SHA-256 verification command"
                 >
-                  {copiedVerify ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                  {copiedVerify ? <Check className="h-3 w-3 text/50" /> : <Copy className="h-3 w-3" />}
                   <span>{copiedVerify ? 'Copied' : 'Copy Hash Check'}</span>
                 </button>
               </div>
@@ -328,10 +329,10 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
           <div className="lg:col-span-5 space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-2 font-mono text-xs">
               <span className="font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                <GitCommit className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                <GitCommit className="h-4 w-4 text-cyan" />
                 <span>Recent Commit Stream (master)</span>
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg/50 text-emerald border border/50">
                 LIVE
               </span>
             </div>
@@ -344,11 +345,12 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                 >
                   <button
                     onClick={() => handleCopySha(commit.sha)}
-                    className="text-cyan-700 dark:text-cyan-400 pt-0.5 select-none font-bold hover:underline cursor-pointer flex items-center gap-1 shrink-0"
+                    className="text-cyan pt-0.5 select-none font-bold hover:underline cursor-pointer focus-visible:outline-2 focus-visible:outline-primary flex items-center gap-1 shrink-0"
                     title="Click to copy commit hash"
+                    aria-label="Copy commit hash"
                   >
                     <span>[{commit.sha}]</span>
-                    {copiedSha === commit.sha && <Check className="h-3 w-3 text-emerald-500" />}
+                    {copiedSha === commit.sha && <Check className="h-3 w-3 text/50" />}
                   </button>
 
                   <div className="flex-1 space-y-1 overflow-hidden">

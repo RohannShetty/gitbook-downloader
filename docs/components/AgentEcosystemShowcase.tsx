@@ -40,7 +40,7 @@ export function AgentEcosystemShowcase() {
         <div className="space-y-3 mb-10">
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase flex items-center gap-1.5">
-              <Bot className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+              <Bot className="h-4 w-4 text-cyan" />
               <span>Supported IDEs &amp; AI Coding Agents</span>
             </span>
             <div className="h-px flex-1 bg-border/60" />
@@ -61,7 +61,7 @@ export function AgentEcosystemShowcase() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                 selectedCategory === cat
-                  ? 'border-cyan-500/60 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 font-bold shadow-xs'
+                  ? 'border/50 bg/50 text-cyan font-bold shadow-xs'
                   : 'border-border bg-card text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -80,9 +80,9 @@ export function AgentEcosystemShowcase() {
                 <button
                   key={agent.id}
                   onClick={() => setSelectedAgentId(agent.id)}
-                  className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${
+                  className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary flex items-center justify-between group ${
                     isSelected
-                      ? 'border-cyan-500/60 bg-cyan-500/10 dark:bg-cyan-950/30 text-foreground shadow-md'
+                      ? 'border/50 bg-cyan/10 text-foreground shadow-md'
                       : 'border-border bg-card hover:border-border/90 text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -102,7 +102,7 @@ export function AgentEcosystemShowcase() {
 
                   <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full border ${
                     isSelected
-                      ? 'border-cyan-500/40 bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 font-bold'
+                      ? 'border/50 bg/50 text-cyan font-bold'
                       : 'border-border/60 bg-secondary text-muted-foreground'
                   }`}>
                     {agent.badge}
@@ -128,13 +128,15 @@ export function AgentEcosystemShowcase() {
                     </span>
                   </div>
                   <p className="text-xs font-mono text-muted-foreground">
-                    Configuration File: <code className="text-cyan-700 dark:text-cyan-400 font-bold">{selectedAgent.configPath}</code>
+                    Configuration File: <code className="text-cyan font-bold">{selectedAgent.configPath}</code>
                   </p>
                 </div>
 
                 <button
                   onClick={handleCopy}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-mono text-xs font-semibold hover:bg-primary/90 transition-colors cursor-pointer shadow-sm shrink-0">
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-mono text-xs font-semibold hover:bg-primary/90 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary shadow-sm shrink-0"
+                  aria-label="Copy FastMCP configuration"
+                >
                   {copied ? <Check className="h-3.5 w-3.5 text-white" /> : <Copy className="h-3.5 w-3.5 text-white" />}
                   <span>{copied ? 'Config Copied' : 'Copy FastMCP JSON'}</span>
                 </button>
@@ -146,8 +148,8 @@ export function AgentEcosystemShowcase() {
                   <span>1-Click FastMCP Configuration Snippet:</span>
                   <span>stdio protocol</span>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-950 border border-slate-800 font-mono text-xs leading-relaxed overflow-x-auto text-zinc-100 shadow-inner">
-                  <pre className="!bg-transparent !p-0 !border-0 text-zinc-100"><code>{selectedAgent.configSnippet}</code></pre>
+                <div className="p-4 rounded-lg bg/95 border border/80 font-mono text-xs leading-relaxed overflow-x-auto text/10 shadow-inner">
+                  <pre className="!bg-transparent !p-0 !border-0 text/10"><code>{selectedAgent.configSnippet}</code></pre>
                 </div>
               </div>
 
@@ -157,12 +159,14 @@ export function AgentEcosystemShowcase() {
                   <span>Direct CLI Invocation:</span>
                   <button
                     onClick={handleCopyCli}
-                    className="text-primary hover:underline inline-flex items-center gap-1 cursor-pointer font-semibold">
-                    {copiedCli ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                    className="text-primary hover:underline inline-flex items-center gap-1 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary font-semibold"
+                    aria-label="Copy CLI command"
+                  >
+                    {copiedCli ? <Check className="h-3 w-3 text/50" /> : <Copy className="h-3 w-3" />}
                     <span>{copiedCli ? 'Copied' : 'Copy CLI'}</span>
                   </button>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-zinc-950 border border-border/80 font-mono text-xs text-cyan-300 flex items-center justify-between overflow-x-auto">
+                <div className="px-3.5 py-2.5 rounded-lg bg/95 border border-border/80 font-mono text-xs text/30 flex items-center justify-between overflow-x-auto">
                   <code>$ {selectedAgent.cliCommand}</code>
                 </div>
               </div>
@@ -176,7 +180,7 @@ export function AgentEcosystemShowcase() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {selectedAgent.highlights.map((h, i) => (
                     <div key={i} className="p-2.5 rounded-lg border border-border/60 bg-background/50 font-mono text-[11px] text-foreground flex items-start gap-1.5">
-                      <Zap className="h-3.5 w-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                      <Zap className="h-3.5 w-3.5 text/40 shrink-0 mt-0.5" />
                       <span>{h}</span>
                     </div>
                   ))}

@@ -46,7 +46,8 @@ export function OutputContract() {
               <button
                 key={fmt.id}
                 onClick={() => setSelectedFormat(fmt)}
-                className={`p-5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between h-[160px] ${
+                aria-pressed={isSelected}
+                className={`p-5 rounded-xl border text-left transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary flex flex-col justify-between h-[160px] ${
                   isSelected
                     ? 'border-primary bg-primary/10 shadow-lg'
                     : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/40'
@@ -84,7 +85,7 @@ export function OutputContract() {
             {/* Left: Spec Details */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 font-bold uppercase">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono border border/50 bg/50 text-cyan font-bold uppercase">
                   {selectedFormat.badge}
                 </span>
                 <span className="font-mono text-[10px] text-muted-foreground">
@@ -107,7 +108,7 @@ export function OutputContract() {
                 <ul className="space-y-2 text-xs font-mono text-muted-foreground">
                   {selectedFormat.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald shrink-0 mt-0.5" />
                       <span className="text-foreground/90">{feature}</span>
                     </li>
                   ))}
@@ -117,14 +118,14 @@ export function OutputContract() {
 
             {/* Right: Architectural Mock Display */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm border border-slate-800 rounded-xl bg-zinc-950 p-5 font-mono text-xs space-y-3 shadow-inner">
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-2 text-[10px] text-muted-foreground">
+              <div className="w-full max-w-sm border border/80 rounded-xl bg/95 p-5 font-mono text-xs space-y-3 shadow-inner">
+                <div className="flex items-center justify-between border-b border/80 pb-2 text-[10px] text-muted-foreground">
                   <span>TARGET: {selectedFormat.fileExt}</span>
-                  <span className="text-emerald-400 font-bold">READY</span>
+                  <span className="text/40 font-bold">READY</span>
                 </div>
-                <div className="text-zinc-100 text-[11px] leading-relaxed space-y-2">
-                  <div className="text-cyan-400 font-bold">$ docharvest export --format {selectedFormat.id}</div>
-                  <div className="text-zinc-400 text-[10px]">
+                <div className="text/10 text-[11px] leading-relaxed space-y-2">
+                  <div className="text/40 font-bold">$ docharvest export --format {selectedFormat.id}</div>
+                  <div className="text/40 text-[10px]">
                     ✓ Synthesized AST nodes into uniform format.<br/>
                     ✓ Injected SHA-256 cryptographic hashes.<br/>
                     ✓ Output written to disk in 0.4s.
