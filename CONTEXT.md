@@ -1,6 +1,6 @@
 # CONTEXT.md — Domain Glossary
 
-Shared vocabulary for DocHarvest (`gitbook-downloader`) v11.0.1. Nothing here describes implementation — only what words mean.
+Shared vocabulary for DocHarvest (`gitbook-downloader`) v11.0.2. Nothing here describes implementation — only what words mean.
 
 ## Core nouns
 

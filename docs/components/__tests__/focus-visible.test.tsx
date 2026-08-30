@@ -64,11 +64,11 @@ const mockGithubData = {
     updatedAt: '2026-08-30',
   },
   latestRelease: {
-    tag: 'v11.0.1',
-    name: 'v11.0.1',
-    publishedAt: '2026-08-23',
+    tag: 'v11.0.2',
+    name: 'v11.0.2',
+    publishedAt: '2026-08-30',
     body: '## What’s Changed\nSome changes',
-    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.1',
+    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.2',
     assets: [],
   },
   recentCommits: [

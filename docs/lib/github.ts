@@ -157,31 +157,31 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
 
 function getFallbackRelease(): ReleaseInfo {
   return {
-    tag: 'v11.0.1',
-    name: 'DocHarvest v11.0.1 — Playwright SPA Diagnostics & Engine Sync',
-    publishedAt: '2026-08-28',
-    body: 'Maintenance & stability release featuring loud Playwright error propagation, real-time GUI render capability detection, context-aware SPA diagnostics, and synchronized v11.0.1 engine badges.',
-    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.1',
+    tag: 'v11.0.2',
+    name: 'DocHarvest v11.0.2 — Showcase UI/UX Overhaul & Centralized Version',
+    publishedAt: '2026-08-30',
+    body: 'Showcase UI/UX overhaul with light/dark contrast fixes, live GitHub release markdown parsing, and centralized showcase version source of truth (docs/lib/version.ts).',
+    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.2',
     assets: [
       {
         name: 'docharvest-windows-latest.exe',
         size: 34500000,
         downloadCount: 520,
-        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-windows-latest.exe',
+        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.2/docharvest-windows-latest.exe',
         os: 'windows',
       },
       {
         name: 'docharvest-linux-x86_64',
         size: 48300000,
         downloadCount: 210,
-        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-ubuntu-latest',
+        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.2/docharvest-ubuntu-latest',
         os: 'linux',
       },
       {
         name: 'docharvest-macos-universal',
         size: 30400000,
         downloadCount: 290,
-        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.1/docharvest-macos-latest',
+        browserDownloadUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.2/docharvest-macos-latest',
         os: 'macos',
       },
     ],

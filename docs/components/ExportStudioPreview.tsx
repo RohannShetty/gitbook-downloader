@@ -13,7 +13,7 @@ title: "OpenAlgo v2.0 Complete Developer Handbook"
 source_domain: "docs.openalgo.in"
 harvest_timestamp: "2026-08-23T16:42:19Z"
 total_pages: 364
-generator: "DocHarvest v11.0.1"
+generator: "DocHarvest v11.0.2"
 ---
 
 # Table of Contents

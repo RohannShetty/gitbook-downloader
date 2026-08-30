@@ -347,7 +347,7 @@ class NewProvider(Provider):
 - **v8**: GUI (PyWebView), MCP server, concept graph
 - **v9**: Search FTS5, provider auto-detect registry
 - **v10**: Config system (TOML + presets), splitter, export utilities
-- **v11.0.1**: Current — modern shadcn/ui Desktop & CLI platform
+- **v11.0.2**: Current — showcase UI/UX overhaul & centralized version constant
 
 ---
 
@@ -419,7 +419,7 @@ uv run pytest -k "not slow"         # skip slow tests
 cd docs && npm install && npm run build  # static export to docs/out/
 
 # Generate release notes
-python scripts/generate_release_notes.py --tag v11.0.1
+python scripts/generate_release_notes.py --tag v11.0.2
 ```
 
 ---

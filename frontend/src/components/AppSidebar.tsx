@@ -71,7 +71,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               <div className="flex items-center gap-1.5">
                 <span className="font-bold tracking-tight text-foreground text-sm font-mono">DocHarvest</span>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-cyan-500/30 text-cyan-400 bg-cyan-500/10 font-mono">
-                  v11.0.1
+                  v11.0.2
                 </Badge>
               </div>
               <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Harvester</span>
