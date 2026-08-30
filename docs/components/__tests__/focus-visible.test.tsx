@@ -4,7 +4,7 @@ import React from 'react';
 
 // Mock next/link to avoid Next.js router dependency
 vi.mock('next/link', () => ({
-  default: ({ children, ...props }: Record<string, unknown>) =>
+  default: ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
     React.createElement('a', props, children),
   __esModule: true,
 }));
@@ -22,7 +22,7 @@ import { InstallModal } from '../InstallModal';
 import { McpShowcase } from '../McpShowcase';
 import { OutputContract } from '../OutputContract';
 import { ThemeProvider } from '../ThemeProvider';
-import type { DocHarvestGithubData } from '../lib/github';
+import type { DocHarvestGithubData } from '../../lib/github';
 
 /**
  * Helper: find every <button> with cursor-pointer in the rendered output
@@ -48,10 +48,9 @@ function verifyFocusVisibleButtons(
       .toContain('focus-visible:outline-primary');
   });
 
-  expect(cursorButtons).toBeGreaterThan(
-    0,
-    `${componentName}: expected at least one button with cursor-pointer to verify — guard against false positives`,
-  );
+  if (cursorButtons === 0) {
+    throw new Error(`${componentName}: expected at least one button with cursor-pointer to verify — guard against false positives`);
+  }
 }
 
 // Minimal mock data for GithubReleaseFeed

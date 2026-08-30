@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock navigator.clipboard for all tests
 const mockClipboard = {

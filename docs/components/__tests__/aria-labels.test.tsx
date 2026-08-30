@@ -16,7 +16,7 @@ import type { DocHarvestGithubData } from '@/lib/github';
 // Mock next/link to avoid needing Next.js router context
 vi.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, ...props }: React.Props & { children: React.ReactNode }) =>
+  default: ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
     React.createElement('a', props, children),
 }));
 
