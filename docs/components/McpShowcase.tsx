@@ -80,7 +80,7 @@ export function McpShowcase() {
   };
 
   return (
-    <section id="mcp" className="border-b border-border bg-card/20 py-20 scroll-mt-16">
+    <section id="mcp" className="border-b border-border bg-card/20 py-16 scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}
@@ -90,7 +90,7 @@ export function McpShowcase() {
               <Bot className="h-4 w-4 text-cyan/40" />
               <span>Model Context Protocol (FastMCP v2)</span>
             </span>
-            <div className="h-px flex-1 bg-border-border/60" />
+            <div className="h-px flex-1 bg-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Give Cursor &amp; Claude Native Documentation Powers

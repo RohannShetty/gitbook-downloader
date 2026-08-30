@@ -26,7 +26,7 @@ from pathlib import Path
 try:
     from . import __version__
 except ImportError:  # pragma: no cover - direct-script fallback
-    __version__ = "9.0.0b1"
+    __version__ = "11.0.3"
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
@@ -90,6 +90,9 @@ def _launch_gui() -> int:
         return _launch_tui()
 
 
+def _banner(title: str, char: str = "─", width: int = 60) -> tuple[str, str, str]:
+    """Return (top_rule, title_line, bottom_rule) for a section banner."""
+    return (char * width, f"  {title}", char * width)
 
 def _print_progress(event) -> None:
     """Render one facade ProgressEvent as a console line."""
@@ -111,10 +114,6 @@ def _print_capture_result(result) -> None:
     print(f"  Provider:      {result.provider}")
     print(f"  Pages:         {result.pages_captured}"
           f"   (skipped: {result.skipped})")
-    if result.site_versions_found:
-        print(f"  Site versions: {', '.join(result.site_versions_found)}")
-    if result.version_id:
-        print(f"  Snapshot of previous capture: {result.version_id}")
     if result.local_path:
         print(f"  Local output:  {result.local_path}")
     if result.library_path:
@@ -181,15 +180,16 @@ def cmd_capture(args) -> int:
             return 2
         target = str(preset_table["url"])
 
+    top, title, bottom = _banner(f"Capturing {target}", char="=", width=50)
     print()
-    print("=" * 50)
-    print(f"  Capturing {target}")
+    print(top)
+    print(title)
     print(f"  Output mode: {options.output_mode}   Workers: {options.workers}")
     if options.max_pages:
         print(f"  Max pages:   {options.max_pages}")
     if getattr(options, "render", False):
         print("  JS Rendering: enabled (headless browser)")
-    print("=" * 50)
+    print(bottom)
     print()
 
     try:
@@ -212,9 +212,11 @@ def cmd_capture(args) -> int:
             st = StorageManager()
             parsed_u = urlparse(target)
             domain = parsed_u.netloc.replace("www.", "")
-            base_out = result.local_path or (result.library_path.parent if result.library_path else Path.cwd() / f"{domain}-docs")
-            rag_dest = base_out / "exports" / f"{domain}_rag.jsonl" if (base_out / "exports").exists() or result.local_path else base_out / f"{domain}_rag.jsonl"
-            export_to_jsonl(domain, st, rag_dest)
+            exports_dir = base_out / "exports"
+            if exports_dir.exists():
+                rag_dest = exports_dir / f"{domain}_rag.jsonl"
+            else:
+                rag_dest = base_out / f"{domain}_rag.jsonl"
             print(f"  📄 RAG JSONL:   {rag_dest}")
         except Exception as exc:
             print(f"  ⚠ RAG export failed: {exc}", file=sys.stderr)
@@ -225,9 +227,11 @@ def cmd_capture(args) -> int:
             from .utils.export import export_to_pdf
             parsed_u = urlparse(target)
             domain = parsed_u.netloc.replace("www.", "")
-            base_out = result.local_path or (result.library_path.parent if result.library_path else Path.cwd() / f"{domain}-docs")
-            pdf_dest = base_out / "exports" / f"{domain}_handbook.pdf" if (base_out / "exports").exists() or result.local_path else base_out / f"{domain}_handbook.pdf"
-            pdf_path = export_to_pdf(result.book_file, pdf_dest)
+            exports_dir = base_out / "exports"
+            if exports_dir.exists():
+                pdf_dest = exports_dir / f"{domain}_handbook.pdf"
+            else:
+                pdf_dest = base_out / f"{domain}_handbook.pdf"
             print(f"  📑 PDF Book:    {pdf_path}")
         except Exception as exc:
             print(f"  ⚠ PDF export failed: {exc}", file=sys.stderr)
@@ -248,9 +252,10 @@ def cmd_search(args) -> int:
         print(f"No results found for '{args.query}'.")
         return 0
 
-    print(f"\n{'─' * 60}")
-    print(f"  Search results for: {args.query}")
-    print(f"{'─' * 60}\n")
+    _top, _title, _bottom = _banner(f"Search results for: {args.query}")
+    print(f"\n{_top}")
+    print(_title)
+    print(f"{_bottom}\n")
 
     for i, r in enumerate(results, 1):
         print(f"  {i}. {r['title']}")
@@ -259,9 +264,10 @@ def cmd_search(args) -> int:
         print(f"     Score:  {r.get('rank', 0):.2f}")
         print()
 
-    print(f"{'─' * 60}")
-    print(f"  {len(results)} result(s)")
-    print(f"{'─' * 60}\n")
+    _top, _title, _bottom = _banner(f"{len(results)} result(s)")
+    print(_top)
+    print(_title)
+    print(f"{_bottom}\n")
     return 0
 
 
@@ -276,9 +282,10 @@ def cmd_list(args) -> int:
         print("No domains captured yet. Try: gitbook-dl capture <url>")
         return 0
 
-    print(f"\n{'─' * 60}")
-    print(f"  Library Domains ({len(domains)} total)")
-    print(f"{'─' * 60}\n")
+    _top, _title, _bottom = _banner(f"Library Domains ({len(domains)} total)")
+    print(f"\n{_top}")
+    print(_title)
+    print(f"{_bottom}\n")
 
     for meta in domains:
         print(f"  📚 {meta.get('domain', '?')}")
@@ -303,9 +310,10 @@ def cmd_history(args) -> int:
     meta = storage.get_metadata(args.domain) or {}
     versions = versioning.get_versions(args.domain)
 
-    print(f"\n{'─' * 60}")
-    print(f"  History: {args.domain}")
-    print(f"{'─' * 60}\n")
+    _top, _title, _bottom = _banner(f"History: {args.domain}")
+    print(f"\n{_top}")
+    print(_title)
+    print(f"{_bottom}\n")
     print(f"  Provider: {meta.get('provider') or '?'}   "
           f"Pages: {meta.get('total_pages', '?')}")
     print(f"  Latest:   {meta.get('latest_version', '?')}\n")
@@ -347,9 +355,10 @@ def cmd_diff(args) -> int:
     removed = [l for l in diff_text.splitlines()
                if l.startswith("-") and not l.startswith("---")]
 
-    print(f"\n{'─' * 60}")
-    print(f"  Diff: {args.domain}  {args.v1} vs {args.v2}")
-    print(f"{'─' * 60}\n")
+    _top, _title, _bottom = _banner(f"Diff: {args.domain}  {args.v1} vs {args.v2}")
+    print(f"\n{_top}")
+    print(_title)
+    print(f"{_bottom}\n")
     print(f"  Lines added:   {len(added)}")
     print(f"  Lines removed: {len(removed)}\n")
 
@@ -418,13 +427,14 @@ def cmd_config(args) -> int:
 
     # show (default)
     cfg = load_full_config()
-    print(f"\n{'─' * 60}")
-    print("  Configuration")
+    _top, _title, _bottom = _banner("Configuration")
+    print(f"\n{_top}")
+    print(_title)
     if cfg.sources:
         print(f"  Sources: {', '.join(cfg.sources)}")
     else:
         print("  Sources: (none found — using built-in defaults)")
-    print(f"{'─' * 60}\n")
+    print(f"{_bottom}\n")
     for key in sorted(cfg.values):
         print(f"  {key}: {cfg.values[key]}")
     if cfg.presets:
@@ -521,10 +531,7 @@ def build_parser() -> argparse.ArgumentParser:
                      help="Export vector RAG JSONL dataset after capture")
     cap.add_argument("--pdf", action="store_true", default=False,
                      help="Export styled PDF handbook after capture")
-    cap.add_argument("--fast-ast", action="store_true", default=False,
-                     help="Use AST-based cleaning (standard)")
     cap.set_defaults(func=cmd_capture)
-
     # search
     srch = sub.add_parser("search", help="Search captured documentation")
     srch.add_argument("query", help="Search query (FTS5 syntax)")

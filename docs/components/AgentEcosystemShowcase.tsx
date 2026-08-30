@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Bot, Copy, Check, Zap } from 'lucide-react';
 import { AI_AGENTS } from '@/data/showcaseData';
+import { STATS } from '../lib/stats';
 
 
 const CATEGORIES = ['All', 'AI IDE', 'Terminal Agent', 'CLI Harness', 'Extension'] as const;
@@ -33,7 +34,7 @@ export function AgentEcosystemShowcase() {
 
 
   return (
-    <section id="agents" className="border-b border-border bg-card/10 py-20 scroll-mt-16">
+    <section id="agents" className="border-b border-border bg-card/10 py-16 scroll-mt-16">
       <div className="mx-auto max-w-7x px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}
@@ -43,10 +44,10 @@ export function AgentEcosystemShowcase() {
               <Bot className="h-4 w-4 text-cyan" />
               <span>Supported IDEs &amp; AI Coding Agents</span>
             </span>
-            <div className="h-px flex-1 bg-border-border/60" />
+            <div className="h-px flex-1 bg-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Native FastMCP Server for 11+ Modern Coding Harnesses
+            Native FastMCP Server for {STATS.agentsShipped}+ Modern Coding Harnesses
           </h2>
           <p className="text-sm text-muted-foreground font-mono max-w-2xl">
             Plug DocHarvest directly into Cursor, Claude Code, OpenCode, Pi, Windsurf, or Codex. Your agents gain 10 native tools to crawl, index, and query documentation on demand over stdio.
@@ -65,7 +66,7 @@ export function AgentEcosystemShowcase() {
                   : 'border-border bg-card text-muted-foreground hover:text-foreground'
               }`}
             >
-              {cat === 'All' ? 'All 12+ Harnesses' : cat + 's'}
+              {cat === 'All' ? `All ${STATS.agentsShipped}+ Harnesses` : cat + 's'}
             </button>
           ))}
         </div>
@@ -117,7 +118,7 @@ export function AgentEcosystemShowcase() {
             <div className="border border-border rounded-xl bg-card p-6 shadow-xl space-y-6">
               
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-bold text-foreground">

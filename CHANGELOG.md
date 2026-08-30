@@ -5,10 +5,82 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.3] - 2026-08-30
+
+### 🛠️ Critical Bug Fixes, Visual Polish, Thread-Safety Hardening & Centralized Marketing Stats
+
+Version 11.0.3 is a focused stability release: it removes 7 user-reported P0 functional bugs, hardens the GUI bridge against a Windows WebView2 race, centralizes the version constant and marketing stats, applies Direction A (Tightened dark) visual polish to the showcase, and lands 17 new regression tests. Backwards compatible with 11.0.x.
+
+### Fixed
+
+- **Invisible install command on showcase** (`docs/components/InstallModal.tsx`): the install panel rendered at `text-cyan/10` (effectively transparent). Bumped to `text-cyan/90` so the command is now readable.
+- **PDF export toast printed `undefined`** (`frontend/src/components/DocReaderModal.tsx`): the modal read `res.file` but the Python bridge returns `res.path`. The toast now shows the real file path.
+- **DiffView always showed a fake `["1.0.0"]` snapshot list**:
+  - `src/gitbook_downloader/gui/bridge.py` `list_library()` now includes a real `snapshots: list[str]` field populated from `VersionManager.list_snapshots()`.
+  - `frontend/src/views/DiffView.tsx` removes the hardcoded fallback and shows an empty state when no snapshots exist.
+- **Capture Studio Batch tab had no Run button**: the URL queue was decorative. Added a `Run Batch` button (and a matching `Cancel Batch` button) that calls `pyApi.startCapture` once per URL sequentially, reusing the existing `ProgressEvent` pipeline.
+- **CLI `--rag` and `--pdf` post-capture exports had a broken path ternary** (`src/gitbook_downloader/cli.py:215-219, 230-234`): the right-hand branch was dead because of `or result.local_path` precedence. Rewrote as straight `if exports_dir.exists(): ... else: ...` blocks.
+- **Hardcoded `User-Agent: gitbook-downloader/9.0.0`** in the bridge `detect()` method: now uses `f"gitbook-downloader/{__version__}"`.
+- **Stale CLI `--fast-ast` flag** (`src/gitbook_downloader/cli.py:524-525`): registered but never read, with no slow alternative. Removed from argparse entirely.
+- **CommandMenu showed fake `Tab 1..Tab 6` shortcuts** that did not match the real bindings. Replaced with the real shortcuts (`Ctrl+K` command palette, `1..5` tab switch, `Ctrl+T` theme toggle, `Ctrl+R` refresh diagnostics) and added a `KEYBINDINGS` constants object.
+
+### Changed
+
+- **Centralized version source of truth** at `11.0.3`:
+  - `src/gitbook_downloader/__version__` is the canonical source.
+  - `src/gitbook_downloader/cli.py` direct-script fallback aligned.
+  - `src/gitbook_downloader/gui/bridge.py` `User-Agent` and `getSystemInfo` now use the live `__version__`.
+  - `frontend/src/lib/bridge.ts` `getSystemInfo` fallback aligned.
+  - `README.md` version badge updated.
+  - `docs/lib/version.ts` `VERSION` constant updated.
+  - `frontend/index.html` GUI window title updated.
+- **Centralized marketing stats** at `docs/lib/stats.ts`:
+  - New `STATS` object exports `agentsShipped`, `harnesses`, `pagesCaptured`, `reductionPct`, `speedPagesPerSec`, `captureTimeSec`.
+  - `Hero.tsx` (4 sites), `AgentEcosystemShowcase.tsx` (2 sites), `PersonaShowcase.tsx` (1 site), `ExportStudioPreview.tsx` (`total_pages` + `harvest_timestamp`) now read from `STATS`.
+- **Defined missing `animate-fadeIn` keyframe** in `docs/app/globals.css`. The keyframe was referenced 4× in `Hero.tsx` but never defined. Existing `prefers-reduced-motion` media query still neutralizes the animation for users who request it.
+- **Unified spacing scale** across the showcase: `gap-3 → gap-4`, `py-20 → py-16` (and `py-12 → py-8` where consistent). 21 substitutions across 11 components.
+- **Hero direction-A polish**: dropped the two decorative radial glows, collapsed the redundant `STATUS:` / `TIME:` labels into a single dot-separated line, reduced hero gradient overlay opacity.
+- **CLI command canonicalization** (`README.md`): the `docharvest capture` verb is the primary form; `crawl` is documented as a documented alias.
+- **Removed dead `open_local_folder` alias** from `src/gitbook_downloader/gui/bridge.py` (never called from the TS surface, never typed in the frontend).
+- **Hardened `_emit_to_js` against the Windows WebView2 message-loop race** (`src/gitbook_downloader/gui/bridge.py`): the bridge now enqueues emit calls on a `queue.Queue` consumed by a dedicated `ApiBridge.emit-drain` daemon thread. The drain thread is the only caller of `window.evaluate_js` and is started automatically by `set_window()` and stopped in `cleanup()`.
+- **CLI banner dedupe**: extracted a `_banner(title, char, width)` helper that returns `(top_rule, title_line, bottom_rule)`. Replaced 8 inline `print("─" * 60)` / `print("=" * 50)` blocks across `cmd_capture`, `cmd_search`, `cmd_list`, `cmd_history`, `cmd_diff`, and `cmd_config` with `_banner()` calls.
+- **Fixed `bg-border-border/60` Tailwind typo** in 8 component files (AgentEcosystemShowcase, DocTypeSelector, ExportStudioPreview, FeatureMatrix, GithubReleaseFeed, McpShowcase, OutputContract, PersonaShowcase). Now `bg-border/60` everywhere.
+- **CommandMenu Global Shortcuts group**: added a new disabled `CommandGroup` documenting the 3 real global bindings (`Ctrl+K`, `Ctrl+T`, `Ctrl+R`) so the user can discover them via the in-app command palette.
+- **GUI shell parity**: `frontend/src/views/CaptureStudio.tsx` spacing tokens aligned to the showcase's 4-step scale. `frontend/src/components/CommandMenu.tsx` shortcut chips use the cyan accent to match the showcase.
+
+### Added
+
+- **17 new regression tests** covering every P0/P1/P2 fix and every hygiene refactor. New test modules:
+  - `tests/test_version_drift.py` — version constant drift across 5 files.
+  - `tests/test_stats_drift.py` — STATS-only source of truth across 16 components.
+  - `tests/test_install_modal_opacity.py` — install text opacity regression.
+  - `tests/test_doc_reader_toast.py` — PDF toast reads `res.path`.
+  - `tests/test_diff_view_snapshots.py` — DiffView + bridge `snapshots` field.
+  - `tests/test_batch_run_button.py` — Batch Run + Cancel Batch buttons.
+  - `tests/test_cli_rag_pdf_paths.py` — straight `if exports_dir.exists()`.
+  - `tests/test_command_menu_shortcuts.py` — no fake `Tab N`, real bindings.
+  - `tests/test_fast_ast_removed.py` — `--fast-ast` not in argparse / help.
+  - `tests/test_visual_anchors.py` — Hero, InstallModal, Batch, DiffView anchors.
+  - `tests/test_typo_classes.py` — `bg-border-border`, `text-cyan/10` banned; `animate-fadeIn` keyframe defined in `globals.css`.
+  - `tests/test_bridge_contract.py` — every Python method has a TS counterpart; `list_library` includes `snapshots: list[str]`.
+  - `tests/test_cli_banner.py` — `_banner()` helper used in every command.
+  - `tests/test_bridge_dead_alias.py` — `open_local_folder` removed from both Python and TS sides.
+  - `tests/test_bridge_thread_safety.py` — 50-burst queue dispatcher delivery + drain-thread lifecycle smoke.
+
+### Verified
+
+- 661/661 tests pass on Windows + Python 3.13.
+- `gitbook-dl --version` reports `gitbook-downloader 11.0.3`.
+- End-to-end capture: `gitbook-dl capture https://docs.readthedocs.io/en/stable/ --max-pages 3` produced a 3-page harvest with library + local outputs, banner via `_banner()` renders correctly.
+- User-Agent verified at runtime: `gitbook-downloader/11.0.3`.
+- Showcase builds with zero errors / zero warnings (`docs/`).
+- `list_library()` returns real `snapshots: list[str]` for every domain (e.g. `["1.0.0"]` for a fresh capture, ordered newest-first).
+
+---
+
 ## [11.0.2] - 2026-08-30
 
 ### 🎨 Showcase UI/UX Overhaul & Centralized Version Constant
-
 Version 11.0.2 polishes the marketing showcase and tightens version-bump hygiene.
 
 - **Showcase UI/UX overhaul & light/dark contrast fixes**:

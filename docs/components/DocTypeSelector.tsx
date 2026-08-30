@@ -9,7 +9,7 @@ export function DocTypeSelector() {
   const [selectedFramework, setSelectedFramework] = useState<DocFramework>(DOC_FRAMEWORKS[0]);
 
   return (
-    <section id="platforms" className="border-b border-border bg-card/20 py-20 scroll-mt-16">
+    <section id="platforms" className="border-b border-border bg-card/20 py-16 scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}
@@ -18,7 +18,7 @@ export function DocTypeSelector() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               Framework Intelligence
             </span>
-            <div className="h-px flex-1 bg-border-border/60" />
+            <div className="h-px flex-1 bg-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Engineered For Every Major Documentation Platform

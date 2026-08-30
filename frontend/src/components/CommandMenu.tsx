@@ -20,6 +20,18 @@ import {
 } from "lucide-react"
 import { TabId } from "./AppSidebar"
 import { pyApi } from "@/lib/bridge"
+// Real keybindings — keep in sync with App-level keyboard handlers.
+const KEYBINDINGS = {
+  "Open command palette": "Ctrl+K",
+  "Toggle theme": "Ctrl+T",
+  "Refresh diagnostics": "Ctrl+R",
+  "Switch to Capture Studio (tab 1)": "1",
+  "Switch to Document Library (tab 2)": "2",
+  "Switch to Search Studio (tab 3)": "3",
+  "Switch to Snapshot Diff (tab 4)": "4",
+  "Switch to Export Studio (tab 5)": "5",
+} as const;
+
 
 interface CommandMenuProps {
   open: boolean
@@ -38,12 +50,27 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   onOpenDocReader,
   onOpenAbout
 }) => {
+
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput placeholder="Type a command or search documentation..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        
+
+        <CommandGroup heading="Global Shortcuts">
+          <CommandItem disabled>
+            <span className="text-muted-foreground text-xs">Open command palette</span>
+            <CommandShortcut className="text-cyan-400">{KEYBINDINGS["Open command palette"]}</CommandShortcut>
+          </CommandItem>
+          <CommandItem disabled>
+            <span className="text-muted-foreground text-xs">Toggle theme</span>
+            <CommandShortcut className="text-cyan-400">{KEYBINDINGS["Toggle theme"]}</CommandShortcut>
+          </CommandItem>
+          <CommandItem disabled>
+            <span className="text-muted-foreground text-xs">Refresh diagnostics</span>
+            <CommandShortcut className="text-cyan-400">{KEYBINDINGS["Refresh diagnostics"]}</CommandShortcut>
+          </CommandItem>
+        </CommandGroup>
         <CommandGroup heading="Navigation">
           <CommandItem
             onSelect={() => {
@@ -53,7 +80,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <Download className="mr-2 h-4 w-4 text-cyan-400" />
             <span>Capture Studio</span>
-            <CommandShortcut>Tab 1</CommandShortcut>
+            <CommandShortcut>1</CommandShortcut>
           </CommandItem>
           <CommandItem
             onSelect={() => {
@@ -63,7 +90,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <Library className="mr-2 h-4 w-4 text-sky-400" />
             <span>Document Library</span>
-            <CommandShortcut>Tab 2</CommandShortcut>
+            <CommandShortcut>2</CommandShortcut>
           </CommandItem>
           <CommandItem
             onSelect={() => {
@@ -73,7 +100,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <Search className="mr-2 h-4 w-4 text-amber-400" />
             <span>Search Studio</span>
-            <CommandShortcut>Tab 3</CommandShortcut>
+            <CommandShortcut>3</CommandShortcut>
           </CommandItem>
           <CommandItem
             onSelect={() => {
@@ -83,7 +110,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <GitCompare className="mr-2 h-4 w-4 text-purple-400" />
             <span>Snapshot Diff</span>
-            <CommandShortcut>Tab 4</CommandShortcut>
+            <CommandShortcut>4</CommandShortcut>
           </CommandItem>
           <CommandItem
             onSelect={() => {
@@ -93,7 +120,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <FileUp className="mr-2 h-4 w-4 text-emerald-400" />
             <span>Export Studio (RAG / PDF / JSONL)</span>
-            <CommandShortcut>Tab 5</CommandShortcut>
+            <CommandShortcut>5</CommandShortcut>
           </CommandItem>
           <CommandItem
             onSelect={() => {
@@ -103,7 +130,6 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <Activity className="mr-2 h-4 w-4 text-rose-400" />
             <span>Diagnostics &amp; System</span>
-            <CommandShortcut>Tab 6</CommandShortcut>
           </CommandItem>
         </CommandGroup>
 

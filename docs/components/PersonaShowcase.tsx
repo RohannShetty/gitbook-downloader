@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Bot, BookOpen, Server, CheckCircle2, ArrowRight } from 'lucide-react';
+import { STATS } from '../lib/stats';
 
 const PERSONAS = [
   {
@@ -14,7 +15,7 @@ const PERSONAS = [
     pain: "LLMs hallucinate on outdated training data. Scraping docs with curl dumps 40KB+ HTML noise that exhausts context windows.",
     solution: "DocHarvest compiles clean vector JSONL datasets with token counts, SHA-256 hashes, and standard llms.txt manifests for instant agent indexing.",
     highlights: [
-      "Zero noise (89% prompt token reduction)",
+      `Zero noise (${STATS.reductionPct}% prompt token reduction)`,
       "Direct drop-in for LangChain & ChromaDB",
       "FastMCP server for Cursor & Claude Desktop"
     ]
@@ -51,7 +52,7 @@ const PERSONAS = [
 
 export function PersonaShowcase() {
   return (
-    <section className="border-b border-border bg-background py-20">
+    <section className="border-b border-border bg-background py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}
@@ -60,7 +61,7 @@ export function PersonaShowcase() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               // 06 / BUILT FOR YOUR WORKFLOW
             </span>
-            <div className="h-px flex-1 bg-border-border/60" />
+            <div className="h-px flex-1 bg-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Three Specialized Workflows. Zero Friction.

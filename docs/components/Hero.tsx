@@ -5,20 +5,21 @@ import { motion } from 'framer-motion';
 import { Terminal, Download, ArrowRight, Play, Check, Copy, Sparkles, Layers, Cpu, FileText } from 'lucide-react';
 import { WindowsIcon, PythonIcon } from './Icons';
 import { VERSION, DOWNLOAD_URLS } from '../lib/version';
+import { STATS } from '../lib/stats';
 
 interface HeroProps {
   onOpenInstallModal: () => void;
 }
 
 const TERMINAL_LOGS = [
-  { text: "$ docharvest crawl https://docs.openalgo.in/v/v2.0 --rag --pdf --fast-ast", color: "text-cyan/40 font-bold" },
+  { text: "$ docharvest crawl https://docs.openalgo.in/v/v2.0 --rag --pdf", color: "text-cyan/40 font-bold" },
   { text: "⚡ [Heuristic] Detected GitBook Space engine (version selector: v2.0)", color: "text-cyan/30" },
   { text: "🔍 Discovering documentation tree via sitemap and AST BFS...", color: "text-cyan/40" },
   { text: "   ├── Discovered: /api-reference/oauth [3.2 KB raw .md]", color: "text-cyan/30" },
   { text: "   ├── Discovered: /api-reference/orders [14.8 KB raw .md]", color: "text-cyan/30" },
   { text: "   ├── Discovered: /api-reference/positions [6.1 KB raw .md]", color: "text-cyan/30" },
   { text: "   └── Discovered: /algorithms/quickstart [8.4 KB raw .md]", color: "text-cyan/30" },
-  { text: "📥 Parallel AST crawl: 364 pages harvested in 18.2s (20.0 pages/sec)", color: "text-cyan/40 font-semibold" },
+  { text: `📥 Parallel AST crawl: ${STATS.pagesCaptured} pages harvested in ${STATS.captureTimeSec}s (${STATS.speedPagesPerSec} pages/sec)`, color: "text-cyan/40 font-semibold" },
   { text: "📦 Compiling outputs:", color: "text-cyan/30 font-medium" },
   { text: "   ├── book.md (consolidated single handbook with TOC)", color: "text-cyan/30" },
   { text: "   ├── llms.txt (standardized AI context manifest)", color: "text-cyan/30" },
@@ -49,10 +50,8 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
 
   return (
     <section className="relative overflow-hidden border-b border-border bg-background py-16 lg:py-24">
-      {/* Background Grid & Radial Glows */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 h-[400px] w-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 h-[300px] w-[300px] bg-card/50 rounded-full blur-[100px] pointer-events-none" />
+      {/* Background Grid (single subtle overlay) */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -86,7 +85,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base sm:text-lg text-muted-foreground font-mono leading-relaxed"
+              className="text-base sm:text-lg text-muted-foreground font-mono font-normal leading-relaxed"
             >
               Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan font-bold">FastMCP v2</code> or offline PDFs.
             </motion.p>
@@ -124,7 +123,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap items-center gap-3 pt-1 w-full"
+              className="flex flex-wrap items-center gap-4 pt-1 w-full"
             >
               <a
                 href={DOWNLOAD_URLS.windows}
@@ -170,7 +169,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">TOKEN SAVINGS</span>
-                <span className="font-bold text-emerald">89% Reduction</span>
+                <span className="font-bold text-emerald">{STATS.reductionPct}% Reduction</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">PRIVACY</span>
@@ -178,7 +177,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">AGENT MODELS</span>
-                <span className="font-bold text-cyan">15+ Harnesses</span>
+                <span className="font-bold text-cyan">{STATS.harnesses}+ Harnesses</span>
               </div>
             </div>
 
@@ -274,7 +273,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
     return markdownify(str(article), heading_style="ATX")`}
                     </pre>
                     <div className="text-cyan/40 text-[11px]">
-                      ✓ Extracted 364 articles with zero wrapper bloat (89% token reduction).
+                      ✓ Extracted {STATS.pagesCaptured} articles with zero wrapper bloat ({STATS.reductionPct}% token reduction).
                     </div>
                   </div>
                 )}
@@ -319,9 +318,8 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               <div className="flex items-center justify-between px-4 py-2 border-t border-border/60 bg-card/95 font-mono text-[10px] text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-cyan/40" />
-                  <span>STATUS: 364/364 HARVESTED</span>
+                  <span>{STATS.pagesCaptured}/{STATS.pagesCaptured} pages · {STATS.captureTimeSec}s · {STATS.speedPagesPerSec} pgs/sec</span>
                 </div>
-                <span>TIME: 18.2s (20.0 pgs/sec)</span>
               </div>
 
             </motion.div>

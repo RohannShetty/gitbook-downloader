@@ -50,8 +50,14 @@ def test_bridge_start_capture_payload_contract():
             "elapsed": 1.2,
         },
     )
-
+    # Phase 4 step 3: emits are queued and drained asynchronously. Wait
+    # up to 1s for the drain thread to call evaluate_js.
+    import time
+    deadline = time.time() + 1.0
+    while time.time() < deadline and len(emitted_events) == 0:
+        time.sleep(0.05)
     assert len(emitted_events) == 1
+    bridge.cleanup()  # stop drain thread
     event = emitted_events[0]
     assert event["kind"] == "downloaded"
     assert event["percent"] == 20

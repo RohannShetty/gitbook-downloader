@@ -215,7 +215,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
                 onExportPdf={() => {
                   if (docData?.domain) {
                     pyApi.exportDoc(docData.domain, "pdf").then((res) => {
-                      if (res.success) toast.success(`PDF exported to: ${res.file}`)
+                      if (res.success) toast.success(`PDF exported to: ${res.path}`)
                     }).catch((err) => toast.error(`PDF export failed: ${err.message}`))
                   }
                 }}

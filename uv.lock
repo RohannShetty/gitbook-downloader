@@ -679,7 +679,7 @@ wheels = [
 
 [[package]]
 name = "gitbook-downloader"
-version = "11.0.2"
+version = "11.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },

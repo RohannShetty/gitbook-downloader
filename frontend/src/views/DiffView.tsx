@@ -19,7 +19,9 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
   const [loading, setLoading] = useState<boolean>(false)
 
   const currentItem = library.find((item) => item.domain === selectedDomain)
-  const snapshots = currentItem?.snapshots || currentItem?.versions || ["1.0.0"]
+  const snapshots = (currentItem?.snapshots && currentItem.snapshots.length > 0)
+    ? currentItem.snapshots
+    : []
 
   const handleCompare = async () => {
     if (!selectedDomain || !v1 || !v2) {

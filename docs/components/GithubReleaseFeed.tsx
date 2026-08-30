@@ -151,7 +151,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
   const parsedSections = formatReleaseBody(release.body);
 
   return (
-    <section id="releases" className="border-b border-border bg-card/30 dark:bg-card/15 py-20 scroll-mt-16 transition-colors duration-200">
+    <section id="releases" className="border-b border-border bg-card/30 dark:bg-card/15 py-16 scroll-mt-16 transition-colors duration-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -162,7 +162,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                 <Sparkles className="h-4 w-4 text-cyan" />
                 <span>Releases &amp; Telemetry</span>
               </span>
-              <div className="h-px w-24 bg-border-border/80" />
+              <div className="h-px w-24 bg-border/80" />
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               Latest Release &amp; Live Build Telemetry
@@ -173,7 +173,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
           </div>
 
           {/* GitHub Star & Repo Callout */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <a
               href="https://github.com/RohannShetty/gitbook-downloader"
               target="_blank"
@@ -196,7 +196,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
             <div className="border border-border rounded-xl bg-card p-6 sm:p-7 shadow-lg shadow-black/5 dark:shadow-2xl dark:shadow-black/40 space-y-6">
               
               {/* Release Header Banner */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2.5">
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-card/50 text-cyan border border-border/50">
@@ -271,7 +271,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
                   Official Cross-Platform Standalone Binaries:
                 </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Windows */}
                   <a
                     href={`https://github.com/RohannShetty/gitbook-downloader/releases/download/${release.tag}/docharvest-windows-latest.exe`}
@@ -305,7 +305,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
               </div>
 
               {/* SHA256 Verification Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-muted-foreground border-t border-border pt-4 bg-muted/20 -mx-6 -mb-6 p-4 sm:px-6 rounded-b-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-mono text-muted-foreground border-t border-border pt-4 bg-muted/20 -mx-6 -mb-6 p-4 sm:px-6 rounded-b-xl">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-emerald shrink-0" />
                   <span>Signed &amp; verified with SHA-256 in GitHub Actions CI.</span>
@@ -341,7 +341,7 @@ export function GithubReleaseFeed({ data }: GithubReleaseFeedProps) {
               {commits.map((commit, index) => (
                 <div
                   key={commit.sha + index}
-                  className="p-3.5 flex gap-3 text-xs font-mono group hover:bg-secondary/40 transition-colors"
+                  className="p-3.5 flex gap-4 text-xs font-mono group hover:bg-secondary/40 transition-colors"
                 >
                   <button
                     onClick={() => handleCopySha(commit.sha)}

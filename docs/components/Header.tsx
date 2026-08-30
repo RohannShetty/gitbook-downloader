@@ -20,7 +20,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Brand identity */}
-        <Link href="/" className="group flex items-center gap-3">
+        <Link href="/" className="group flex items-center gap-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-mono font-bold text-lg shadow-md group-hover:scale-105 transition-transform duration-200">
             <Terminal className="h-5 w-5 text-white" />
           </div>
@@ -65,7 +65,7 @@ export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
         </nav>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {/* GitHub Star Button */}
           <a
             href="https://github.com/RohannShetty/gitbook-downloader"

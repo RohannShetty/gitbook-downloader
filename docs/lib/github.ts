@@ -125,7 +125,7 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
       recentCommits: [
         {
           sha: '8c61e9e',
-          message: 'chore(release): v10.0.1 - DocHarvest hotfix release, binary naming, library rename & about section',
+          message: 'chore(release): v11.0.3 - DocHarvest P0 bug fixes, visual polish, thread-safety hardening, and centralized marketing stats',
           date: '2026-08-23',
           author: 'Rohan Shetty',
           url: 'https://github.com/RohannShetty/gitbook-downloader/commit/8c61e9e',

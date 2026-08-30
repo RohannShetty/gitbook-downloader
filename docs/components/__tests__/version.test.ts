@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { VERSION, DOWNLOAD_URLS } from '../../lib/version';
 
 describe('version constants', () => {
-  it('should export VERSION as 11.0.2', () => {
-    expect(VERSION).toBe('11.0.2');
+  it('should export VERSION as 11.0.3', () => {
+    expect(VERSION).toBe('11.0.3');
   });
 
   it('should export DOWNLOAD_URLS with correct Windows URL', () => {

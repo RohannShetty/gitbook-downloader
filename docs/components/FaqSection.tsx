@@ -13,7 +13,7 @@ export function FaqSection() {
   };
 
   return (
-    <section className="border-b border-border bg-background py-20">
+    <section className="border-b border-border bg-background py-16">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}

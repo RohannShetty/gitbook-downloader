@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import sys
+import queue
 import threading
 import time
 from pathlib import Path
@@ -31,8 +32,6 @@ from ..storage import StorageManager
 
 
 class ApiBridge:
-    """Methods exposed to the WebView JavaScript environment."""
-
     def __init__(self, window=None, storage_manager=None) -> None:
         self._window = window
         self._storage = storage_manager or StorageManager()
@@ -40,9 +39,61 @@ class ApiBridge:
         self._cancel_event = threading.Event()
         self._active_thread: threading.Thread | None = None
         self._last_run: dict[str, Any] | None = None
+        # Phase 4 step 3: marshal _emit_to_js calls onto the UI thread.
+        # PyWebView's `window.evaluate_js` must be called from the UI thread;
+        # the capture worker thread used to call it directly, racing the
+        # WebView2 message loop on Windows. The drain thread below
+        # consumes the queue and is the only caller of evaluate_js.
+        self._emit_queue: queue.Queue[tuple[str, Any]] = queue.Queue()
+        self._emit_drain_stop = threading.Event()
+        self._emit_drain_thread: threading.Thread | None = None
+
+    def start_emit_drain(self) -> None:
+        """Start the queue-drain thread (call once after window is set)."""
+        if self._emit_drain_thread is not None and self._emit_drain_thread.is_alive():
+            return
+        self._emit_drain_stop.clear()
+        self._emit_drain_thread = threading.Thread(
+            target=self._drain_emit_queue,
+            name="ApiBridge.emit-drain",
+            daemon=True,
+        )
+        self._emit_drain_thread.start()
+
+    def _drain_emit_queue(self) -> None:
+        """Consume _emit_queue and call evaluate_js on the UI thread side."""
+        while not self._emit_drain_stop.is_set():
+            try:
+                func_name, data = self._emit_queue.get(timeout=0.1)
+            except queue.Empty:
+                continue
+            if self._window is None:
+                continue
+            payload = json.dumps(data)
+            js_code = f"if (window.{func_name}) {{ window.{func_name}({payload}); }}"
+            try:
+                self._window.evaluate_js(js_code)
+            except Exception:
+                # Swallow JS errors; emit is best-effort progress reporting.
+                pass
+
+    def _emit_to_js(self, func_name: str, data: Any) -> None:
+        """Queue a JS callback for the drain thread to fire on the UI thread.
+
+        Safe to call from any thread (worker or UI). Returns immediately;
+        actual evaluate_js happens on the drain thread.
+        """
+        if self._window is None:
+            return
+        try:
+            self._emit_queue.put_nowait((func_name, data))
+        except queue.Full:  # pragma: no cover - queue has no max size
+            pass
 
     def set_window(self, window) -> None:
         self._window = window
+        # Auto-start the emit-drain thread once a window is attached.
+        self.start_emit_drain()
 
     def cleanup(self) -> None:
         """Called when WebView window closes or app exits."""
@@ -54,18 +105,10 @@ class ApiBridge:
             self._storage.clear_all_locks(force=False)
         except Exception:
             pass
-
-    def _emit_to_js(self, func_name: str, data: Any) -> None:
-        if self._window is None:
-            return
-        payload = json.dumps(data)
-        js_code = f"if (window.{func_name}) {{ window.{func_name}({payload}); }}"
-        try:
-            self._window.evaluate_js(js_code)
-        except Exception:
-            pass
-
-    # ── Detection ────────────────────────────────────────────────────────
+        # Stop the drain thread.
+        self._emit_drain_stop.set()
+        if self._emit_drain_thread and self._emit_drain_thread.is_alive():
+            self._emit_drain_thread.join(timeout=0.5)
 
     def detect(self, url: str) -> dict[str, Any]:
         """Detect the documentation provider and site versions for *url*."""
@@ -74,11 +117,11 @@ class ApiBridge:
             return {"success": False, "error": "Enter a valid http(s) URL"}
         try:
             sess = requests.Session()
-            sess.headers["User-Agent"] = "gitbook-downloader/9.0.0"
+            sess.headers["User-Agent"] = f"gitbook-downloader/{__version__}"
             p = detect_provider(url, sess)
             provider_name = getattr(p, "name", "generic")
             evidence = getattr(p, "evidence", "") or f"Matched {provider_name} rules"
-            
+
             site_versions = ()
             try:
                 if hasattr(p, "discover_urls"):
@@ -97,8 +140,6 @@ class ApiBridge:
             }
         except Exception as exc:
             return {"success": False, "error": str(exc)}
-
-    # ── Lock Management ──────────────────────────────────────────────────
 
     def get_lock_status(self, domain: str | None = None) -> dict[str, Any]:
         """Query status of active locks and current worker thread."""
@@ -312,6 +353,11 @@ class ApiBridge:
             for meta in self._storage.list_domains():
                 domain = meta.get("domain", "")
                 versions = meta.get("versions") or []
+                try:
+                    snapshots = self.list_snapshots(domain)
+                    snapshot_versions = [s.get("version_id", "?") for s in snapshots]
+                except Exception:
+                    snapshot_versions = []
                 entries.append(
                     {
                         "domain": domain,
@@ -322,6 +368,7 @@ class ApiBridge:
                         "size_bytes": int(meta.get("total_size_kb", 0) or 0) * 1024,
                         "last_crawled": meta.get("last_scraped", ""),
                         "snapshot_count": len(versions),
+                        "snapshots": snapshot_versions,
                         "path": str(self._storage._domain_dir(domain)),
                     }
                 )
@@ -466,10 +513,8 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
-    def open_local_folder(self, target: str) -> dict[str, Any]:
-        """Alias for open_folder."""
-        return self.open_folder(target)
-
+    # (open_local_folder alias removed in Phase 4 step 2: dead method,
+    # never called from the TS surface, never typed in the frontend.)
     def open_file(self, target: str) -> dict[str, Any]:
         """Open a document / export file directly with the operating system's default application."""
         try:

@@ -134,8 +134,8 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             </button>
           </div>
 
-          <div className="p-4 rounded-lg bg-card/95 border border-border/80 font-mono text-xs text-cyan/10 leading-relaxed overflow-x-auto shadow-inner">
-            <pre className="!bg-transparent !p-0 !border-0 text-cyan/10">
+          <div className="p-4 rounded-lg bg-card/95 border border-border/80 font-mono text-xs text-cyan/90 leading-relaxed overflow-x-auto shadow-inner">
+            <pre className="!bg-transparent !p-0 !border-0 text-cyan/90">
               <code>{activeTab.command}</code>
             </pre>
           </div>

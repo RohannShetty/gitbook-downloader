@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Database, FileCode, Search, Copy, Check, Sparkles } from 'lucide-react';
+import { STATS } from '../lib/stats';
 
 const PREVIEWS = {
   markdown: {
@@ -10,10 +11,9 @@ const PREVIEWS = {
     language: "markdown",
     code: `---
 title: "OpenAlgo v2.0 Complete Developer Handbook"
-source_domain: "docs.openalgo.in"
-harvest_timestamp: "2026-08-23T16:42:19Z"
-total_pages: 364
-generator: "DocHarvest v11.0.2"
+harvest_timestamp: "2026-08-30T00:00:00Z"
+total_pages: ${STATS.pagesCaptured}
+generator: "DocHarvest v11.0.3"
 ---
 
 # Table of Contents
@@ -80,7 +80,7 @@ export function ExportStudioPreview() {
   };
 
   return (
-    <section id="studio" className="border-b border-border bg-card/20 py-20 scroll-mt-16">
+    <section id="studio" className="border-b border-border bg-card/20 py-16 scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}
@@ -89,7 +89,7 @@ export function ExportStudioPreview() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               Export Studio Inspection
             </span>
-            <div className="h-px flex-1 bg-border-border/60" />
+            <div className="h-px flex-1 bg-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Inspect the Generated Compilation Artifacts
@@ -103,7 +103,7 @@ export function ExportStudioPreview() {
         <div className="border border-border/80 rounded-xl bg-card/95 shadow-2xl overflow-hidden">
           
           {/* Studio Navigation Bar */}
-          <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-border/80 bg-card/90 gap-3">
+          <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-border/80 bg-card/90 gap-4">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab('markdown')}
@@ -163,7 +163,7 @@ export function ExportStudioPreview() {
             </div>
 
             {/* Copy Artifact CTA */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <span className="hidden sm:inline-block font-mono text-[10px] text-cyan/40">
                 {current.filename}
               </span>

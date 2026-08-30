@@ -8,7 +8,7 @@
 
 **Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
 
-[![Version: 11.0.0](https://img.shields.io/badge/version-11.0.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 11.0.3](https://img.shields.io/badge/version-11.0.3-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
@@ -128,7 +128,7 @@ pip install "gitbook-downloader[mcp]"
 docharvest --gui
 
 # Or run a CLI crawl:
-docharvest crawl https://docs.openalgo.in/ --rag --pdf
+docharvest capture https://docs.openalgo.in/ --rag --pdf
 ```
 
 ### Option 3: Ultra-Fast One-Liner via uv / uvx
@@ -146,16 +146,17 @@ uv tool install gitbook-downloader
 
 ```bash
 # Basic Documentation Crawl (aliases: capture, dl, crawl)
-docharvest crawl https://docs.openalgo.in/
+# `docharvest capture` is the canonical verb; `crawl` remains as a documented alias.
+docharvest capture https://docs.openalgo.in/
 
 # Full Compilation (Markdown + RAG JSONL + llms.txt + PDF Handbook)
-docharvest crawl https://docs.openalgo.in/ --rag --pdf
+docharvest capture https://docs.openalgo.in/ --rag --pdf
 
 # Crawl Dynamic Client-Rendered SPAs (Playwright Headless Browser)
-docharvest crawl https://omp.sh/docs --render
+docharvest capture https://omp.sh/docs --render
 
 # Restrict Crawl to Specific Path Prefix & Limit Depth
-docharvest crawl https://docs.example.com/ --scope /api/ --max-pages 50
+docharvest capture https://docs.example.com/ --scope /api/ --max-pages 50
 
 # Full-Text BM25 Search across Harvested Docs
 docharvest search "OAuth 2.0 authentication token"

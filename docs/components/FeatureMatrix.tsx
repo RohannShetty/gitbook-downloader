@@ -7,7 +7,7 @@ import { VERSION } from '../lib/version';
 
 export function FeatureMatrix() {
   return (
-    <section id="matrix" className="border-b border-border bg-background py-20 scroll-mt-16">
+    <section id="matrix" className="border-b border-border bg-background py-16 scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Title */}
@@ -16,7 +16,7 @@ export function FeatureMatrix() {
             <span className="font-mono text-xs text-primary font-bold tracking-widest uppercase">
               Capability Comparison
             </span>
-            <div className="h-px flex-1 bg-border-border/60" />
+            <div className="h-px flex-1 bg-border/60" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Why DocHarvest Outperforms Raw Scrapers &amp; Cloud APIs
