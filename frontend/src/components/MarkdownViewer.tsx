@@ -287,7 +287,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         elements.push(
           <blockquote
             key={`bq-${index}`}
-            className="my-3 border-l-4 border-cyan-500/60 bg-cyan-500/5 px-4 py-2 text-xs italic text-muted-foreground rounded-r-md"
+            className="my-3 border-l border-border pl-4 py-1 text-xs italic text-muted-foreground"
           >
             {line.slice(2)}
           </blockquote>

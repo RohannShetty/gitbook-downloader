@@ -26,7 +26,7 @@ from pathlib import Path
 try:
     from . import __version__
 except ImportError:  # pragma: no cover - direct-script fallback
-    __version__ = "11.0.3"
+    __version__ = "11.0.4"
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────

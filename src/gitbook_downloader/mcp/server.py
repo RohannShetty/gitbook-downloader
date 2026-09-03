@@ -245,6 +245,108 @@ async def list_domains() -> list[dict]:
 
 
 @mcp.tool()
+async def find_docs(query: str, limit: int = 10) -> list[dict]:
+    """Find documentation libraries or domains matching a query.
+
+    Resolves library/framework names (e.g. "react", "nextjs", "zustand")
+    to indexed domains stored in the local library.
+
+    Args:
+        query: Name, keyword, or domain to find (e.g. "zustand" or "tailwind").
+        limit: Maximum results to return (default 10).
+
+    Returns:
+        List of matching domain metadata dicts (domain, title, pages, last_crawled).
+    """
+    try:
+        domains = _storage.list_domains()
+        q = query.strip().lower()
+        matches = []
+        for d in domains:
+            domain_name = d.get("domain", "").lower()
+            title = d.get("title", "").lower()
+            if q in domain_name or q in title or any(q in str(v).lower() for v in d.values()):
+                matches.append(d)
+        return matches[:limit]
+    except Exception as exc:
+        return [{"error": str(exc)}]
+
+
+@mcp.tool()
+async def read_doc(
+    domain: str,
+    path: Optional[str] = None,
+    topic: Optional[str] = None,
+    max_tokens: int = 4000,
+    version: Optional[str] = None,
+) -> dict:
+    """Read documentation content for an agent with AST-safe token bounding.
+
+    Retrieves either a specific page file (via `path`), or extracts a topic
+    section from the documentation without breaking code blocks or tables.
+
+    Args:
+        domain: Domain name (e.g. "react.dev" or "docs.example.com").
+        path: Optional specific page path within pages/ (e.g. "hooks/useState.md").
+        topic: Optional topic or section title to extract (e.g. "Quickstart" or "useState").
+        max_tokens: Maximum token budget to return (default 4000).
+        version: Optional version tag (e.g. "v1.0.0").
+
+    Returns:
+        Dict with domain, path/topic, token_estimate, content, and found status.
+    """
+    try:
+        from gitbook_downloader.splitter import extract_topic_context
+
+        # 1. If path is provided, attempt to load that specific page
+        if path:
+            clean_p = path.replace("\\", "/")
+            page_content = _storage.load_page(domain, clean_p)
+            if page_content is None and not clean_p.endswith(".md"):
+                page_content = _storage.load_page(domain, f"{clean_p}.md")
+            if page_content is not None:
+                bounded = extract_topic_context(page_content, topic=topic, max_tokens=max_tokens)
+                return {
+                    "domain": domain,
+                    "path": path,
+                    "topic": topic,
+                    "found": True,
+                    "token_estimate": len(bounded) // 4,
+                    "content": bounded,
+                }
+
+        # 2. Load the combined book or versioned content
+        if version:
+            raw_content = _versioning.get_version_content(domain, version)
+        else:
+            raw_content = _storage.load_doc(domain)
+
+        if raw_content is None:
+            return {
+                "domain": domain,
+                "found": False,
+                "error": f"Documentation not found for domain '{domain}'",
+            }
+
+        bounded = extract_topic_context(raw_content, topic=topic, max_tokens=max_tokens)
+        return {
+            "domain": domain,
+            "path": path,
+            "topic": topic,
+            "found": True,
+            "token_estimate": len(bounded) // 4,
+            "content": bounded,
+        }
+    except Exception as exc:
+        return {
+            "domain": domain,
+            "found": False,
+            "error": str(exc),
+        }
+
+
+
+@mcp.tool()
 async def get_doc(
     domain: str,
     version: Optional[str] = None,

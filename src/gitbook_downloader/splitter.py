@@ -105,3 +105,76 @@ def split_file(input_path, output_dir=None, max_mb=1.0, quiet=False, progress_ca
         print(f"\n  Done! {len(chunks)} chunks created ({total_kb:.0f} KB total)")
 
     return chunks
+
+
+def extract_topic_context(content: str, topic: str | None = None, max_tokens: int = 4000) -> str:
+    """Extract topic or section context bounded by a token budget without breaking code blocks.
+
+    Args:
+        content: Raw markdown text.
+        topic: Optional section or keyword to filter.
+        max_tokens: Approximate token budget (1 token ≈ 4 characters).
+
+    Returns:
+        Bounded, clean markdown string.
+    """
+    if not content:
+        return ""
+
+    max_chars = max(max_tokens * 4, 200)
+
+    # Split on header boundaries so each block starts with '#'
+    raw_sections = content.split("\n#")
+    sections: list[str] = []
+    for i, s in enumerate(raw_sections):
+        if i > 0:
+            s = "#" + s
+        sections.append(s)
+
+    selected_sections: list[str] = []
+
+    if topic and topic.strip():
+        t_lower = topic.strip().lower()
+        # Find matching sections
+        matched_indices = []
+        for idx, sec in enumerate(sections):
+            first_line = sec.split("\n", 1)[0].lower()
+            if t_lower in first_line:
+                matched_indices.append(idx)
+            elif t_lower in sec.lower():
+                matched_indices.append(idx)
+
+        if matched_indices:
+            # Collect matching sections
+            for idx in matched_indices:
+                selected_sections.append(sections[idx])
+        else:
+            selected_sections = sections
+    else:
+        selected_sections = sections
+
+    # Assemble sections under max_chars budget
+    assembled: list[str] = []
+    current_length = 0
+
+    for sec in selected_sections:
+        sec_len = len(sec)
+        if current_length + sec_len <= max_chars:
+            assembled.append(sec)
+            current_length += sec_len + 1
+        else:
+            # If nothing added yet, try to include a safe prefix of this section
+            if not assembled:
+                truncated = sec[:max_chars]
+                # Ensure we don't break mid-code-block (unclosed ```)
+                if truncated.count("```") % 2 != 0:
+                    last_fence = truncated.rfind("```")
+                    if last_fence > 0:
+                        truncated = truncated[:last_fence].rstrip()
+                if truncated.strip():
+                    assembled.append(truncated)
+            break
+
+    result = "\n".join(assembled).strip()
+    return result
+

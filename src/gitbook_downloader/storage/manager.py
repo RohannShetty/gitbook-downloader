@@ -447,6 +447,27 @@ class StorageManager:
         vpath = self.versions_dir(domain) / f"v{str(version).lstrip('v')}.md"
         return vpath.read_text(encoding="utf-8") if vpath.exists() else None
 
+    def load_page(self, domain: str, relpath: str) -> str | None:
+        """Read an individual page from the domain's pages/ tree.
+
+        Returns None if the page file does not exist.
+        """
+        clean_rel = str(relpath).lstrip("/\\")
+        page_path = self._domain_dir(domain) / "pages" / clean_rel
+        return page_path.read_text(encoding="utf-8") if page_path.exists() and page_path.is_file() else None
+
+    def list_pages(self, domain: str) -> list[str]:
+        """Return a list of relative paths for all pages in the domain's pages/ tree."""
+        pages_dir = self._domain_dir(domain) / "pages"
+        if not pages_dir.exists() or not pages_dir.is_dir():
+            return []
+        results = []
+        for p in pages_dir.rglob("*.md"):
+            if p.is_file():
+                results.append(str(p.relative_to(pages_dir)))
+        return sorted(results)
+
+
     # ------------------------------------------------------------------
     # Metadata
     # ------------------------------------------------------------------

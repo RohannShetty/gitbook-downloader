@@ -8,11 +8,11 @@
 
 **Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
 
-[![Version: 11.0.3](https://img.shields.io/badge/version-11.0.3-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 11.0.4](https://img.shields.io/badge/version-11.0.4-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
-[![MCP: 10 Tools & Resources](https://img.shields.io/badge/MCP-10%20Tools%20%26%20Resources-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-server)
+[![MCP: 12 Tools & Resources](https://img.shields.io/badge/MCP-12%20Tools%20%26%20Resources-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-server)
 [![Tests: 531 Passing](https://img.shields.io/badge/tests-531%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-64748b?style=flat-square&labelColor=090d16)](#)
 [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)

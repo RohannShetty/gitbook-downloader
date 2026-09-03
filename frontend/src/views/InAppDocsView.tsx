@@ -519,8 +519,9 @@ docharvest --gui`}</pre>
 
           <div className="space-y-4">
             <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-2">
-              <h3 className="text-sm font-semibold font-mono text-cyan-400">
-                1. Vector RAG JSONL Chunks
+              <h3 className="text-sm font-semibold font-mono text-foreground flex items-center gap-2">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">01</span>
+                Vector RAG JSONL Chunks
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 AST header-split markdown chunks with token metadata, URLs, page titles, and content hashes ready for LangChain, LlamaIndex, ChromaDB, and Pinecone vector stores.
@@ -528,8 +529,9 @@ docharvest --gui`}</pre>
             </div>
 
             <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-2">
-              <h3 className="text-sm font-semibold font-mono text-emerald-400">
-                2. Pure-Python PDF Handbooks (fpdf2)
+              <h3 className="text-sm font-semibold font-mono text-foreground flex items-center gap-2">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">02</span>
+                Pure-Python PDF Handbooks (fpdf2)
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 High-contrast printable PDF books with automatic cover page, table of contents, syntax highlighting, and page numbers generated with pure Python (zero heavy headless browser dependencies).
@@ -537,8 +539,9 @@ docharvest --gui`}</pre>
             </div>
 
             <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-2">
-              <h3 className="text-sm font-semibold font-mono text-purple-400">
-                3. Standardized llms.txt Manifest
+              <h3 className="text-sm font-semibold font-mono text-foreground flex items-center gap-2">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">03</span>
+                Standardized llms.txt Manifest
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Automatically created at the root of every harvested documentation folder to adhere to standardized LLM agent context discovery protocols.

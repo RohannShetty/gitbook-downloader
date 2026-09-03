@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.4] - 2026-09-04
+
+### 🚀 Advanced Agent MCP Suite, Granular Storage Loaders & AST-Safe Context Chunker
+
+Version 11.0.4 modernizes the offline agent interface and documentation chunking capabilities:
+- Integrates `find_docs` to resolve library/framework names to indexed domains.
+- Integrates `read_doc` for AI coding agents to perform AST-safe page and topic reads with token bounding.
+- Implements `extract_topic_context` in the splitter, ensuring fenced code blocks, tables, and callouts are never broken mid-element.
+- Exposes `load_page` and `list_pages` on `StorageManager` for granular file access without loading monolithic documents into memory.
+- Adds comprehensive TDD unit and regression test coverage.
+
+### Added
+
+- **`find_docs` MCP tool** (`src/gitbook_downloader/mcp/server.py`): resolves library queries and aliases (e.g. `"react"`, `"zustand"`) against local library domains and titles.
+- **`read_doc` MCP tool** (`src/gitbook_downloader/mcp/server.py`): provides bounded, topic-filtered or page-level context reading for agents without truncating code fences.
+- **`extract_topic_context` helper** (`src/gitbook_downloader/splitter.py`): extracts header-bounded Markdown sections and clamps to token budgets without breaking code blocks.
+- **`load_page` and `list_pages`** (`src/gitbook_downloader/storage/manager.py`): allows individual page retrieval and page-tree inspection directly from `pages/`.
+- **TDD Test Suite** (`tests/test_mcp_advanced_tools.py`): 4 new unit tests covering topic extraction, fence preservation, page tree loaders, and MCP tool execution.
+
 ## [11.0.3] - 2026-08-30
 
 ### 🛠️ Critical Bug Fixes, Visual Polish, Thread-Safety Hardening & Centralized Marketing Stats
