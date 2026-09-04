@@ -12,9 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
-[![MCP: 12 Tools & Resources](https://img.shields.io/badge/MCP-12%20Tools%20%26%20Resources-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-server)
-[![Tests: 531 Passing](https://img.shields.io/badge/tests-531%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
-[![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-64748b?style=flat-square&labelColor=090d16)](#)
+[![Tests: 665 Passing](https://img.shields.io/badge/tests-665%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)
 [![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/gitbook-downloader/)
 
@@ -28,9 +26,22 @@
 
 ## ⚡ Overview
 
-**DocHarvest** (package: `gitbook-downloader`) is a high-performance, local-first documentation compiler and AI context platform. It automatically detects documentation platforms, bounds crawls strictly to documentation subpaths, extracts clean markdown via direct `.md` endpoint probing and AST-based DOM cleaning, and compiles structured output corpora.
+**Your coding agent doesn't read documentation — it reads web pages.** Navbars, cookie banners, search modals, and footer scripts can make up 80–85% of a raw page's bytes before a single API fact arrives. Chunks captured without source URLs make hallucinations unfalsifiable, and per-page cloud API bills spike the moment you index a real docs portal.
 
-Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, building vector RAG pipelines with **LangChain & LlamaIndex**, reading offline on an airplane, or archiving technical libraries, DocHarvest delivers a deterministic, noise-free knowledge corpus in seconds.
+**DocHarvest** (package: `gitbook-downloader`) fixes that locally, in one command. It detects the documentation platform, bounds the crawl strictly to documentation subpaths, extracts clean markdown via direct `.md` endpoint probing and AST-based DOM cleaning, and compiles a deterministic, noise-free knowledge corpus — measured at **~83% token reduction** on a real portal (full-suite reference capture: **673 pages in 18.2 seconds**).
+
+Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, building vector RAG pipelines with **LangChain & LlamaIndex**, reading offline on an airplane, or archiving technical libraries — every capture ends in the same verifiable shape: clean markdown with SHA-256 provenance, ready for your agent or your bookshelf.
+
+---
+
+## ⏱️ 30-Second Start
+
+```bash
+pip install gitbook-downloader
+docharvest capture https://docs.openalgo.in/ --rag --pdf
+```
+
+No API key. No account. No telemetry. When the command finishes you own a `book.md`, an `llms.txt`, a RAG JSONL dataset, and a printable PDF — all local, all MIT. Full install paths (standalone `.exe`, uvx, optional extras) are in [Quick Start](#-quick-start).
 
 ---
 
@@ -57,14 +68,19 @@ DocHarvest features dedicated, priority-ordered parsers that extract clean artic
 
 ## 🌟 Key Capabilities
 
-- 🤖 **Zero-Noise LLM Context**: Probes native `.md` endpoints and cleans DOM trees, eliminating up to 89% of token-wasting navigation boilerplate, scripts, and cookie banners.
-- 📦 **Four-Part Output Contract**: Every capture generates a modular `pages/` tree with YAML frontmatter, a consolidated `book.md` with TOC, a standardized `llms.txt` manifest, and search index records.
-- 🚀 **AI Export Studio**: Export to **RAG JSONL** (for vector databases), **Pure-Python PDF** (syntax-highlighted printable handbooks via `fpdf2`), and **AST Markdown chunks**.
-- 🔌 **Native FastMCP Server**: Built-in Model Context Protocol server exposing 8 tools compatible with Cursor, Claude Code, Windsurf, VS Code, and 10+ other harnesses.
-- 🎨 **Modern Desktop GUI**: React + Tailwind CSS + shadcn/ui desktop application featuring real-time radial progress, in-app doc reader, document library renaming, and batch queues.
-- 🔍 **SQLite FTS5 Full-Text Search**: Embedded BM25 search engine with `porter unicode61` stemming across all downloaded documentation.
-- 🔒 **Process-Safe Storage & Diffs**: Active PID-validated `DomainLock`, atomic file staging (`os.replace` + `os.fsync`), and semver snapshot version diffing.
-- 🛡️ **100% Local, Private & Free**: Zero cloud API fees, zero telemetry, air-gap ready, and MIT-licensed.
+- 🤖 **Zero-Noise LLM Context**: Auto-detects 8 documentation frameworks, probes native `.md` endpoints, and cleans DOM trees — measured at ~83% token reduction vs raw pages.
+- 📦 **Four-Part Output Contract**: Every capture yields a modular `pages/` tree with SHA-256 YAML frontmatter, a consolidated `book.md` with TOC, a standardized `llms.txt` manifest, and search index records.
+- 🚀 **Export Studio & Local Search**: RAG JSONL for vector databases, pure-Python PDF handbooks (`fpdf2`, zero C-dependencies), and AST markdown chunks — all indexed into embedded SQLite FTS5 BM25 search.
+- 🔌 **Native FastMCP v2 Server**: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more). Crash-safe atomic storage and semver snapshot diffing included.
+
+### What DocHarvest Is *Not* For
+
+A tool that claims to do everything has earned none of your trust. Honest scope:
+
+- **Not for login-walled, paywalled, or CAPTCHA-protected content.** DocHarvest is built for public technical documentation and will not bypass access controls.
+- **Not for internet-scale crawling.** Millions of arbitrary URLs is Common Crawl / Scrapy territory; this is a documentation compiler, not a search-engine crawler.
+- **Not for e-commerce or social feeds.** Product catalogs and social streams are out of scope by design.
+- **Not a cloud service.** No dashboard, no subscription, no telemetry — because nothing of yours ever leaves your machine.
 
 ---
 
@@ -84,10 +100,46 @@ The desktop application includes a dedicated **Document Library** for managing a
 
 ## 📋 The Four-Part Output Contract
 
-Every crawl produces a standardized, deterministic directory structure:
+**What a generic crawler hands your LLM** (every page, every time):
+
+```html
+<nav class="sidebar">…47 links…</nav>
+<div class="cookie-banner">We value your privacy…</div>
+<main>
+  <h1>OAuth 2.0<a class="anchor" href="#oauth2">¶</a></h1>
+  <pre><code><span class="token-keyword">import</span> <span class="token-variable">requests</span>…</code></pre>
+</main>
+```
+
+**What DocHarvest delivers** — the same page, with cryptographic provenance:
+
+````markdown
+---
+source_url: https://docs.openalgo.in/v/v2.0/api-reference/oauth
+title: "OAuth 2.0 Authentication"
+content_hash: "sha256-2fa9ca2a57c4e974f1725657f88f757e25b90adee3e18ef809f65932d283746c"
+---
+
+# OAuth 2.0 Authentication
+
+## Request Signature
+
+```python
+import requests
+
+response = requests.post(
+    "https://api.openalgo.in/oauth/token",
+    json={"client_id": "pk_live_..."},
+)
+```
+````
+
+The `content_hash` is the real SHA-256 of the markdown body shown above — paste it into any SHA-256 tool and it verifies.
+
+Every crawl produces the same standardized, deterministic directory structure:
 
 ```
-data/
+~/.gitbook-downloader/docs/
 └── docs.openalgo.in/
     ├── pages/                     # Modular individual markdown files
     │   ├── 001_quickstart.md
@@ -166,7 +218,7 @@ docharvest ls
 
 # Show Snapshot History & Diff Versions
 docharvest history docs.example.com
-docharvest diff docs.example.com snap-20260822 snap-20260828
+docharvest diff docs.example.com v1.0.0 v1.0.1
 
 # Start FastMCP Server over Stdio for AI IDEs
 docharvest --mcp
@@ -179,29 +231,33 @@ docharvest --gui
 
 ## 🔌 AI Agent Integration: Native FastMCP v2 Server
 
-DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that exposes 10 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
+DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that exposes 12 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
 
-### All 10 Native MCP Tools
+### All 12 Native MCP Tools
 
 1. `download_docs(url, max_pages=None, workers=8, path_scope=[], exclude_paths=[], site_versions=None, output_mode="both")`
    Captures any documentation URL into Markdown, `book.md`, and `llms.txt`.
 2. `search_docs(query, domain=None, limit=10)`
    Full-text search across downloaded documentation via SQLite FTS5 BM25.
-3. `query_doc_graph(domain, query, limit=10)`
-   Queries the semantic entity & concept graph to discover connected API endpoints and sections without reading full files.
-4. `get_related_concepts(domain, concept)`
-   Returns 1-hop and 2-hop connected concepts and prerequisite sections.
-5. `list_domains()`
-   Returns metadata for all harvested documentation portals in local storage.
-6. `get_doc(domain, version=None)`
+3. `find_docs(query, limit=10)`
+   Resolves library/framework names ("react", "nextjs") to indexed domains in the local library.
+4. `read_doc(domain, path=None, topic=None, max_tokens=4000, version=None)`
+   Reads a specific page or topic section with AST-safe token bounding — code blocks and tables are never split.
+5. `get_doc(domain, version=None)`
    Retrieves the compiled documentation content or preview for a domain.
-7. `diff_versions(domain, v1, v2)`
+6. `list_domains()`
+   Returns metadata for all harvested documentation portals in local storage.
+7. `query_doc_graph(domain, query, limit=10)`
+   Queries the semantic entity & concept graph to discover connected API endpoints and sections without reading full files.
+8. `get_related_concepts(domain, concept)`
+   Returns 1-hop and 2-hop connected concepts and prerequisite sections.
+9. `diff_versions(domain, v1, v2)`
    Computes unified diffs and line change statistics between two snapshots.
-8. `list_versions(domain)`
-   Lists available captured snapshots and timestamps for a domain.
-9. `export_docs(domain, format="markdown")`
-   Exports documentation into `"markdown"`, `"jsonl"`, or `"rag"` metadata formats.
-10. `get_changelog(domain)`
+10. `list_versions(domain)`
+    Lists available captured snapshots and timestamps for a domain.
+11. `export_docs(domain, format="markdown")`
+    Exports documentation into `"markdown"`, `"jsonl"`, or `"rag"` metadata formats.
+12. `get_changelog(domain)`
     Auto-generates version changelogs across captured snapshot iterations.
 
 ### MCP v2 Resources & Prompts
@@ -211,6 +267,8 @@ DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that
 ---
 
 ### IDE & Agent Configuration Matrix (14 Clients)
+
+*The three most common clients are shown inline — expand the list for all 14.*
 
 #### 1. Claude Code
 ```bash
@@ -251,6 +309,9 @@ Or in `~/.claude.json`:
   }
 }
 ```
+
+<details>
+<summary><strong>11 more client configs — Windsurf · VS Code · JetBrains · Zed · Cline · Continue · Kiro · OpenCode · Pi/Oh My Pi · Gemini CLI · Codex CLI</strong></summary>
 
 #### 4. Windsurf (`~/.codeium/windsurf/mcp_config.json`)
 ```json
@@ -385,6 +446,8 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
 }
 ```
 
+</details>
+
 ---
 
 ## 🐍 Python SDK Example
@@ -413,7 +476,7 @@ print(f"Manifest:  {result.manifest_file}")
 
 DocHarvest is continuously tested across Windows, Linux, and macOS:
 
-- **531 Automated Tests**: 100% test pass rate across engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, and MCP v2 tools.
+- **665 Automated Tests**: 100% pass rate across engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, and MCP v2 tools (verified on this release).
 - **73%+ Statement Coverage**: Rigorous test suites covering error recovery, invalid signatures, domain locks, and AST link normalization.
 - **Windows CRLF Safe**: All link and boilerplate stripping routines are cross-platform normalized against Windows CRLF and Unix LF linebreaks.
 

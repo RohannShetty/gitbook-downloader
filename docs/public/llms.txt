@@ -1,0 +1,22 @@
+# DocHarvest
+
+> Turn any documentation site into LLM-ready Markdown, vector RAG context & offline books. 100% local, MIT-licensed, zero telemetry.
+
+DocHarvest (PyPI package: `gitbook-downloader`) is a local-first documentation compiler: it auto-detects the documentation platform (GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, ReadTheDocs, generic SPAs), probes native `.md` endpoints, and compiles a deterministic knowledge corpus — per-page Markdown with SHA-256 YAML frontmatter, a consolidated `book.md` with table of contents, an `llms.txt` manifest, RAG-ready JSONL, and an embedded SQLite FTS5 search index.
+
+Measured on the canonical full-suite capture: **673 pages in 18.2 seconds at ~83% token reduction** vs raw pages.
+
+## Interfaces
+
+- [DocHarvest Showcase](https://rohannshetty.github.io/gitbook-downloader/): Product overview, output contract, agent integrations, and FAQ.
+- [GitHub Repository](https://github.com/RohannShetty/gitbook-downloader): Source code, releases, and the 14 documented AI client configs.
+- [PyPI: gitbook-downloader](https://pypi.org/project/gitbook-downloader/): `pip install gitbook-downloader`.
+
+## Use With AI Coding Agents
+
+DocHarvest ships a FastMCP v2 server (`docharvest mcp`) exposing 12 tools — including `download_docs`, `search_docs`, `find_docs`, and `read_doc` with AST-safe token bounding — for Cursor, Claude Code/Desktop, Windsurf, VS Code, OpenCode, and other MCP clients. Ready-made configs for 14 clients are in the README.
+
+## Optional
+
+- [Changelog](https://github.com/RohannShetty/gitbook-downloader/blob/master/CHANGELOG.md): Release history and version notes.
+- [MIT License](https://github.com/RohannShetty/gitbook-downloader/blob/master/LICENSE): 100% free and open source, no API keys, no telemetry.

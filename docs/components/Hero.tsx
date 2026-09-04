@@ -6,6 +6,7 @@ import { Terminal, Download, ArrowRight, Play, Check, Copy, Sparkles, Layers, Cp
 import { WindowsIcon, PythonIcon } from './Icons';
 import { VERSION, DOWNLOAD_URLS } from '../lib/version';
 import { STATS } from '../lib/stats';
+import { AI_AGENTS } from '../data/showcaseData';
 
 interface HeroProps {
   onOpenInstallModal: () => void;
@@ -25,7 +26,8 @@ const TERMINAL_LOGS = [
   { text: "   ├── llms.txt (standardized AI context manifest)", color: "text-cyan/30" },
   { text: "   ├── openalgo_rag.jsonl (vector chunks + SHA-256 metadata)", color: "text-cyan/30" },
   { text: "   └── openalgo_handbook.pdf (publication-grade printable PDF)", color: "text-cyan/30" },
-  { text: "✨ FastMCP server listening on stdio. Ready for Cursor & Claude Code!", color: "text-cyan/30 font-bold" }
+  { text: "✨ Done — book.md, llms.txt, rag.jsonl & handbook.pdf are ready to open.", color: "text-cyan/40 font-semibold" },
+  { text: "✨ FastMCP listening on stdio. Cursor & Claude Code can search these docs now.", color: "text-cyan/30 font-bold" }
 ];
 
 const HERO_AGENTS = [
@@ -39,6 +41,7 @@ const HERO_AGENTS = [
 
 export function Hero({ onOpenInstallModal }: HeroProps) {
   const [selectedAgentId, setSelectedAgentId] = useState('cursor');
+  const selectedAgent = AI_AGENTS.find((a) => a.id === selectedAgentId) ?? AI_AGENTS[0];
   const [copiedPip, setCopiedPip] = useState(false);
   const [activeTab, setActiveTab] = useState<'terminal' | 'ast' | 'vector' | 'mcp-stdio'>('terminal');
 
@@ -77,7 +80,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-foreground"
             >
-              Turn any documentation into <span className="text-primary font-bold">pure context</span> for Cursor, Claude Code &amp; OpenCode.
+              Stop feeding your agent <span className="text-primary font-bold">cookie banners</span>. Feed it documentation.
             </motion.h1>
 
             {/* Subtitle */}
@@ -87,7 +90,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground font-mono font-normal leading-relaxed"
             >
-              Crawl GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs with AST precision. Strip 89% of HTML noise and connect directly via <code className="text-cyan font-bold">FastMCP v2</code> or offline PDFs.
+              DocHarvest turns GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs into pure, LLM-ready context — one command, 83% less noise, 100% local. Connect via <code className="text-cyan font-bold">FastMCP v2</code> or read offline as PDF.
             </motion.p>
 
             {/* Quick Agent Selector Pills */}
@@ -98,7 +101,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               className="w-full space-y-2 pt-1"
             >
               <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block">
-                1-Click Connect to Your Favorite Coding Harness:
+                Pick your harness — copy its config:
               </span>
               <div className="flex flex-wrap items-center gap-1.5">
                 {HERO_AGENTS.map((agent) => (
@@ -116,6 +119,25 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                   </button>
                 ))}
               </div>
+              <motion.div
+                key={selectedAgent.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className="rounded-lg border border-border/60 bg-card/60 p-2.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] font-bold text-cyan">
+                    {selectedAgent.name} · {selectedAgent.configPath}
+                  </span>
+                  <span className="font-mono text-[9px] text-muted-foreground whitespace-nowrap">
+                    {selectedAgent.badge}
+                  </span>
+                </div>
+                <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 font-mono text-[10px] leading-relaxed text-cyan/40">
+                  {selectedAgent.configSnippet}
+                </pre>
+              </motion.div>
             </motion.div>
 
             {/* Primary Action Buttons */}
@@ -142,6 +164,16 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </button>
             </motion.div>
 
+            {/* Zero-Risk Microcopy (regret aversion) */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="font-mono text-[11px] text-muted-foreground"
+            >
+              Free &amp; MIT · No API key · No account · Zero telemetry
+            </motion.p>
+
             {/* Install Pip Copy Bar */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -165,7 +197,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 w-full font-mono text-xs border-t border-border/80">
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">THROUGHPUT</span>
-                <span className="font-bold text-cyan">20 pgs/sec</span>
+                <span className="font-bold text-cyan">37 pgs/sec</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">TOKEN SAVINGS</span>
@@ -177,7 +209,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">AGENT MODELS</span>
-                <span className="font-bold text-cyan">{STATS.harnesses}+ Harnesses</span>
+                <span className="font-bold text-cyan">{STATS.harnesses} Harnesses</span>
               </div>
             </div>
 
@@ -286,7 +318,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
   "id": "openalgo_oauth_v2",
   "source_url": "https://docs.openalgo.in/v/v2.0/auth",
   "title": "OAuth 2.0 Authentication",
-  "content_hash": "sha256-e3b0c44...",
+  "content_hash": "sha256-2fa9ca2a...",
   "tokens": 412,
   "chunk_text": "# OAuth 2.0 Authentication\\n\\nTokens expire in 3600s..."
 }`}
@@ -308,7 +340,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
   Tokens valid for 3600s.`}
                     </pre>
                     <div className="text-cyan/40 text-[11px]">
-                      ✓ 10 FastMCP tools connected to Cursor / Claude Code.
+                      ✓ 12 FastMCP tools connected to Cursor / Claude Code.
                     </div>
                   </div>
                 )}

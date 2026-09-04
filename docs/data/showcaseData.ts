@@ -58,7 +58,7 @@ export const AI_AGENTS: AgentHarness[] = [
   }
 }`,
     cliCommand: "uv run docharvest mcp",
-    description: "Equip Claude Code CLI and Claude Desktop with 10 native documentation tools, pre-structured prompt templates, and docs:// resources.",
+    description: "Equip Claude Code CLI and Claude Desktop with 12 native documentation tools, pre-structured prompt templates, and docs:// resources.",
     highlights: ["MCP Prompts (search_docset, summarize_library)", "docs://{domain}/book resource URIs", "Zero hallucination on new APIs"]
   },
   {
@@ -277,7 +277,7 @@ export const DOC_FRAMEWORKS: DocFramework[] = [
 source_url: https://docs.openalgo.in/v/v2.0/api-reference/oauth
 title: "OAuth 2.0 Authentication"
 crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+content_hash: "sha256-9b99da415c218d5a7faeefd0e1562d31134686790cbb9db5e0fd0e5f73db2491"
 site_version: "v2.0"
 ---
 
@@ -327,7 +327,7 @@ response = requests.post(
 source_url: https://docs.anthropic.com/en/docs/api-reference/messages
 title: "Create a Message"
 crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-a1b2c3d4..."
+content_hash: "sha256-6390baeb88e3c3e53bd0919c23b891517436d6f373a80b5b02be70c819ede6f9"
 framework: "mintlify"
 ---
 
@@ -369,7 +369,7 @@ framework: "mintlify"
 source_url: https://reactnative.dev/docs/getting-started
 title: "Environment Setup"
 crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-f5e4d3c2..."
+content_hash: "sha256-5137e1f50cf27887cacd03deab8807d96828b4f837f87712d82be61bdd675c45"
 framework: "docusaurus"
 ---
 
@@ -405,7 +405,7 @@ framework: "docusaurus"
 source_url: https://swr.vercel.app/docs/getting-started
 title: "Getting Started"
 crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-b7a6c5d4..."
+content_hash: "sha256-01cf8e05e3da0c9ada8b44cec414c2780a5f946699482b856a0945113cdefe64"
 framework: "nextra"
 ---
 
@@ -618,18 +618,18 @@ export const MATRIX_ROWS = [
     detail: "Automatically isolates article DOMs and probes raw markdown endpoints directly."
   },
   {
-    feature: "Zero HTML/JSX Soup in Markdown Output (89% Token Cut)",
+    feature: "Zero HTML/JSX Soup in Markdown Output (83% Token Cut)",
     docharvest: true,
     rawScrapers: false,
     cloudApis: true,
     detail: "Strips cookie banners, navbars, sidebars, and interactive widget code."
   },
   {
-    feature: "Built-in FastMCP v2 Server for 15+ AI Coding Agents (Cursor, Claude, OpenCode, Pi)",
+    feature: "Built-in FastMCP v2 Server for 14 Documented AI Coding Agents (Cursor, Claude, OpenCode, Pi)",
     docharvest: true,
     rawScrapers: false,
     cloudApis: "API Key Req",
-    detail: "10 native MCP tools, resources & prompts running over stdio directly inside your agent."
+    detail: "12 native MCP tools, resources & prompts running over stdio directly inside your agent."
   },
   {
     feature: "Standard llms.txt & Vector RAG JSONL Compilation",
@@ -679,7 +679,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Which AI coding agents and IDEs support DocHarvest FastMCP?",
-    a: "DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and works out of the box with 15+ modern AI coding agents: Cursor, Claude Code, Claude Desktop, OpenCode, Pi Coding Agent & Oh My Pi (omp.sh), Windsurf (Codeium), VS Code (Copilot, Cline, Roo Code, Continue), CommandCode / Codex CLI, Kilo Code, Grok Build, Gemini CLI, ByteDance Trae, Qoder, Mistral Vibe, and Atlassian Rovo Dev."
+    a: "DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and ships ready-made configs for 14 documented clients: Cursor, Claude Code, Claude Desktop, OpenCode, Pi Coding Agent & Oh My Pi (omp.sh), Windsurf (Codeium), VS Code (Copilot, Cline, Roo Code, Continue), JetBrains, Zed, Kiro, Gemini CLI, and OpenAI Codex CLI."
   },
   {
     q: "Does it work with client-rendered JavaScript Single-Page Applications (SPAs)?",

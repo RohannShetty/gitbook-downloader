@@ -13,7 +13,7 @@
 | `r/LocalLLaMA` | 350k+ | Local AI / RAG Builders | Token economy, zero cloud fees, chunking quality, local vector search with Ollama / ChromaDB. | *I built a free tool to download entire doc sites and convert them to clean RAG JSONL & Markdown books (no cloud APIs, 100% local)* | `Project / Resource` | 08:30 AM PST |
 | `r/Python` | 1.2M+ | Python Devs & Engineers | Python architecture deep-dive: `requests`, `fpdf2`, `ThreadPoolExecutor`, SQLite FTS5, cross-platform PID locks. | *DocHarvest: A Python CLI + GUI tool to turn documentation websites into clean Markdown, RAG JSONL, and PDF handbooks* | `Showcase` / `Project` | 09:15 AM PST |
 | `r/selfhosted` | 400k+ | Homelab / SysAdmins | Data sovereignty, vanishing docs, air-gapped homelabs, semver snapshot diffing (`gitbook-dl diff`). | *DocHarvest: Self-hosted documentation archiver with full-text search, offline PDF books, and snapshot diffing* | `Self-Hosted Software` | 10:00 AM PST |
-| `r/ClaudeAI` | 150k+ | Claude Code & Desktop | Claude Code FastMCP stdio server, book.md for Project Knowledge, 89% token reduction. | *Stop copy-pasting docs into Claude Projects: 1-click tool to compile entire doc sites into clean book.md + FastMCP* | `Prompt Engineering` / `Tutorial` | 10:45 AM PST |
+| `r/ClaudeAI` | 150k+ | Claude Code & Desktop | Claude Code FastMCP stdio server, book.md for Project Knowledge, 83% token reduction. | *Stop copy-pasting docs into Claude Projects: 1-click tool to compile entire doc sites into clean book.md + FastMCP* | `Prompt Engineering` / `Tutorial` | 10:45 AM PST |
 
 ---
 
@@ -33,14 +33,14 @@ I built a free tool to give Cursor instant BM25 doc search via FastMCP without w
 ```markdown
 Hey Cursor community,
 
-If you use Cursor's Composer or Agent mode to build against newer libraries (or internal private tools), you've probably noticed that typing `@Docs` or asking it to scrape a documentation site often wastes **5,000+ context tokens** on navbar links, footer scripts, and cookie banners. Worse, it often hallucinates old API syntax.
+If you use Cursor's Composer or Agent mode to build against newer libraries (or internal private tools), you've probably noticed that typing `@Docs` or asking it to scrape a documentation site often burns most of the page's context tokens on navbar links, footer scripts, and cookie banners. Worse, it often hallucinates old API syntax.
 
 I built **DocHarvest** (Python package: `gitbook-downloader`) — a 100% free, local-first documentation compiler with a native FastMCP v2 server built specifically for coding assistants like Cursor.
 
 ### What it does:
-1. **Harvests Any Documentation Site:** Point it at GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, or ReadMe, and it pulls every page down into clean Markdown in seconds (20 pgs/sec parallel crawl).
-2. **Strips 89% of HTML Noise:** AST extractors isolate pure code blocks and prose, discarding headers, navbars, and banners before tokens reach your LLM.
-3. **1-Click FastMCP stdio Server:** Exposes 10 native tools (`search_docs`, `query_doc_graph`, `download_docs`, `get_doc`) directly to Cursor via `~/.cursor/mcp.json`.
+1. **Harvests Any Documentation Site:** Point it at GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, or ReadMe, and it pulls every page down into clean Markdown in seconds (37 pgs/sec parallel crawl).
+2. **Strips ~83% of Page Noise:** AST extractors isolate pure code blocks and prose, discarding headers, navbars, and banners before tokens reach your LLM.
+3. **1-Click FastMCP stdio Server:** Exposes 12 native tools (`search_docs`, `query_doc_graph`, `download_docs`, `get_doc`, …) directly to Cursor via `~/.cursor/mcp.json`.
 
 ### FastMCP Setup for Cursor (`~/.cursor/mcp.json`)
 ```json
@@ -62,7 +62,9 @@ Cursor automatically calls `search_docs` and receives a ranked, token-efficient 
 ### Links:
 - **GitHub (MIT):** https://github.com/RohannShetty/gitbook-downloader
 - **Showcase Site:** https://rohannshetty.github.io/gitbook-downloader/
-- **PyPI:** `pip install gitbook-downloader`
+- **PyPI:** `pip install gitbook-downloader` — no API key, no account, no telemetry.
+
+*Scope note: built for public technical documentation — it doesn't bypass login walls or CAPTCHAs, and e-commerce/social crawling is out of scope. If the docs are public, this works.*
 
 Would love to hear what other MCP tools or doc frameworks you'd like to see added!
 ```
@@ -88,12 +90,12 @@ Hey everyone,
 Like many of you running local models (Llama 3, Qwen 2.5, DeepSeek-Coder via Ollama / vLLM), I ran into a major headache when building local RAG pipelines for coding: **modern documentation websites are absolute poison for LLM context windows**.
 
 If you point `wget`, `curl`, or generic web scrapers at doc portals (GitBook, Mintlify, Docusaurus, Nextra), you usually end up with:
-1. **80%+ token bloat:** Navigation bars, search modals, breadcrumbs, and cookie banners wasting your precious context tokens.
+1. **80%+ raw-page bloat:** Navigation bars, search modals, breadcrumbs, and cookie banners make up most of the raw bytes before any documentation content.
 2. **Corrupted code blocks:** Indentation gets destroyed during naive HTML-to-text conversion, causing local LLMs to hallucinate invalid syntax.
 3. **Unscoped crawling:** The scraper follows navbar links into marketing landing pages and blogs instead of staying in `/docs/`.
 4. **Metered SaaS APIs:** Cloud scrapers charge per page and require sending your URLs to external servers.
 
-To fix this, I built **DocHarvest** (formerly `gitbook-downloader`) — a 100% free, MIT-licensed Python tool that automatically detects doc platforms, extracts pristine Markdown, and compiles structured RAG datasets locally.
+To fix this, I built **DocHarvest** (PyPI package: `gitbook-downloader`) — a 100% free, MIT-licensed Python tool that automatically detects doc platforms, extracts pristine Markdown, and compiles structured RAG datasets locally.
 
 ### How it works:
 - **Provider Auto-Detection:** Automatically recognizes GitBook, Mintlify, Docusaurus, ReadTheDocs, and generic docs.
@@ -112,8 +114,8 @@ docs.openalgo.in-docs/
 ├── book.md                 # Single consolidated handbook with auto-generated TOC
 ├── llms.txt                # Standardized agent discovery manifest
 └── exports/
-    ├── openalgo_rag.jsonl  # Structured RAG dataset with token counts & hashes
-    └── openalgo.pdf        # Styled printable PDF (pure-Python, zero C-deps)
+    ├── openalgo_rag.jsonl  # Structured RAG dataset with source metadata
+    └── openalgo_handbook.pdf  # Styled printable PDF (pure-Python, zero C-deps)
 ```
 
 ### Example: Running a 1-Command Capture
@@ -122,7 +124,7 @@ docs.openalgo.in-docs/
 pip install gitbook-downloader
 
 # Capture any doc portal into Markdown + RAG JSONL
-gitbook-dl capture https://docs.openalgo.in/ --export jsonl,pdf
+docharvest capture https://docs.openalgo.in/ --rag --pdf
 ```
 *Benchmark: Crawled, cleaned, and exported all 673 pages of OpenAlgo docs into a 5.0 MB clean Markdown tree and structured RAG JSONL in **18.2 seconds** on local hardware.*
 
@@ -145,9 +147,9 @@ with open("docs.openalgo.in-docs/exports/openalgo_rag.jsonl", "r", encoding="utf
             ids=[item["id"]],
             embeddings=[embedding],
             documents=[item["text"]],
-            metadatas=[{"title": item["title"], "url": item["url"], "hash": item["content_hash"]}]
+            metadatas=[{"title": item["title"], "source": item["metadata"]["source"], "domain": item["metadata"]["domain"]}]
         )
-print("Ingestion complete! All chunks are cryptographically grounded with source URLs.")
+print("Ingestion complete! Every record carries its source URL in metadata.")
 ```
 
 ### Model Context Protocol (FastMCP) for Coding Agents
@@ -159,6 +161,8 @@ It also includes a built-in FastMCP server. If you use Cursor or Claude Code, yo
 - **Python:** 3.10+ (CLI, TUI, and PyWebView + React 18 Desktop GUI included)
 - **GitHub:** https://github.com/RohannShetty/gitbook-downloader
 - **Interactive Showcase:** https://rohannshetty.github.io/gitbook-downloader/
+
+*Scope note: built for public technical documentation — no login-wall or CAPTCHA bypassing, no e-commerce crawling. Everything above runs 100% locally; no API key or account required.*
 
 Would love to hear feedback on chunking strategies or edge cases on specific doc frameworks!
 ```
@@ -201,7 +205,7 @@ Whether you want to feed documentation to AI coding assistants without token blo
 Here is how the pipeline is designed:
 
 1. **Provider Registry & Heuristic Detection (`providers/`):**
-   Uses an extensible plugin architecture (`ProviderRegistry`) that inspects URLs, DOM anchors, and headers with prioritized heuristics (GitBook: 100, Mintlify: 90, Docusaurus: 80, ReadTheDocs: 70, Generic: 0).
+   Uses an extensible plugin architecture (`ProviderRegistry`) that inspects URLs, DOM anchors, and headers with prioritized heuristics (GitBook: 100, Mintlify: 90, Docusaurus: 80, ReadTheDocs: 60, Generic: 0).
    
 2. **Direct `.md` Probing:**
    Instead of converting messy HTML to Markdown, the engine first probes platform-specific raw endpoints (e.g., `<url>.md` on GitBook/Mintlify) to download pristine author markdown directly.
@@ -219,7 +223,7 @@ Here is how the pipeline is designed:
    All downloaded docs are automatically indexed into an embedded SQLite FTS5 virtual table with `porter unicode61` stemming, giving you sub-10ms BM25 full-text search across your entire offline documentation library.
 
 7. **FastMCP Server (`mcp/server.py`):**
-   Exposes 8 standard tools over JSON-RPC stdio for coding assistants like Cursor and Claude Desktop.
+   Exposes 12 tools over JSON-RPC stdio for coding assistants like Cursor and Claude Desktop.
 
 ### Quickstart
 
@@ -239,26 +243,26 @@ gitbook-dl --gui
 
 ### Code Example: Using the Python API directly
 ```python
-from gitbook_downloader.api import capture_docs, search_library
+from gitbook_downloader.api import capture, CaptureOptions
 
-# Capture documentation programmatically
-result = capture_docs(
-    url="https://docs.openalgo.in/",
-    exports=["jsonl", "pdf"],
-    concurrency=5
+# Capture documentation programmatically (workers=8 by default)
+result = capture(
+    "https://docs.openalgo.in/",
+    CaptureOptions(output_mode="both", snapshot=True),
+    progress=lambda ev: print(f"[{ev.kind}] {ev.url or ev.message}"),
 )
-print(f"Captured {result.total_pages} pages to {result.output_dir}")
+print(f"Captured {result.pages_captured} pages via {result.provider}")
+print(f"Book: {result.book_file}")
+print(f"Manifest: {result.manifest_file}")
 
-# Query the local SQLite FTS5 search index
-matches = search_library("authentication token")
-for match in matches:
-    print(f"[{match.domain}] {match.title} -> {match.snippet}")
+# Query the local SQLite FTS5 search index via the CLI:
+#   docharvest search "authentication token" --domain docs.openalgo.in
 ```
 
 ### Project Info & Verification
 - **GitHub:** https://github.com/RohannShetty/gitbook-downloader
 - **Showcase Site:** https://rohannshetty.github.io/gitbook-downloader/
-- **Test Suite:** 484 unit and integration tests passing (`pytest`)
+- **Test Suite:** 665 unit and integration tests passing (`pytest`)
 - **License:** MIT License
 
 I’d love to get feedback on the Python architecture, concurrency handling, or suggestions for additional documentation provider extractors!
@@ -315,29 +319,28 @@ You can run it via Python/pip, standalone executable, or Docker:
 pip install gitbook-downloader
 
 # Archive a full documentation portal
-gitbook-dl capture https://docs.openalgo.in/ --export pdf,jsonl
+docharvest capture https://docs.openalgo.in/ --pdf --rag
 
 # Diff two versions of a documentation site to audit API changes
-gitbook-dl diff docs.openalgo.in v1.0.0 v1.0.1
+docharvest diff docs.openalgo.in v1.0.0 v1.0.1
 
 # Search all archived documentation locally
-gitbook-dl search "reverse proxy configuration"
+docharvest search "reverse proxy configuration"
 ```
 
 ### Docker Compose Setup
+The repo ships a `Dockerfile`, so the compose file builds it directly and mounts your library:
 ```yaml
-version: '3.8'
 services:
   docharvest:
-    image: python:3.12-slim
+    build: .
+    image: gitbook-downloader:latest
     container_name: docharvest
-    working_dir: /data
+    command: capture https://docs.openalgo.in/ --rag --pdf
     volumes:
-      - ./docs_library:/root/.gitbook-downloader
-      - ./archives:/data
-    command: >
-      bash -c "pip install gitbook-downloader && 
-               gitbook-dl capture https://docs.openalgo.in/ --export pdf"
+      - type: bind
+        source: ~/.gitbook-downloader
+        target: /root/.gitbook-downloader
 ```
 
 ### Project Links
@@ -352,18 +355,17 @@ Hope this helps anyone looking to build a resilient, offline knowledge base for 
 ```markdown
 OP here. For storage layout, DocHarvest maintains an organized directory in `~/.gitbook-downloader/`:
 
-- `library/<domain>/`: Contains the clean `pages/` hierarchy, `book.md`, `llms.txt`, and `exports/`.
-- `versions/<domain>/`: Stores historical semver snapshots for instant diffing.
-- `search/index.db`: The SQLite FTS5 database enabling instant keyword and boolean queries across all libraries.
+- `docs/<domain>/`: The clean `pages/` hierarchy, `book.md`, `llms.txt`, and `exports/` (`<domain>_rag.jsonl`, `<domain>_handbook.pdf`).
+- `docs/<domain>/versions/`: Historical semver snapshots (`v1.0.0` → `v1.0.1`) for instant diffing.
+- `search.db`: The SQLite FTS5 database enabling instant keyword and boolean queries across all libraries.
 
-If you're running this as a scheduled cron job on a Linux server to monitor vendor API docs, you can set up a simple daily bash script:
+If you're running this as a scheduled cron job on a Linux server to monitor vendor API docs, each capture automatically snapshots the previous state before overwriting:
+
 ```bash
 #!/bin/bash
-gitbook-dl capture https://api.vendor.com/docs/
-DIFF=$(gitbook-dl diff api.vendor.com latest previous)
-if [ ! -z "$DIFF" ]; then
-    echo "Vendor docs updated!" | mail -s "Doc Drift Alert" admin@homelab.local
-fi
+docharvest capture https://api.vendor.com/docs/   # pre-capture snapshot is automatic
+# Then diff any two snapshot versions to see what the vendor changed:
+# docharvest diff api.vendor.com v1.0.0 v1.0.1
 ```
 ```
 
@@ -441,3 +443,16 @@ Happy to answer any questions about setting up the FastMCP server with Claude De
 - [ ] **Staggered Timing:** Space out subreddit submissions by 45–60 minutes to prevent triggering Reddit sitewide rate-limiting algorithms.
 - [ ] **First Comment Rule:** Post the OP technical follow-up comment within 2 minutes of post creation.
 - [ ] **Active Engagement:** Check each post every 10–15 minutes for the first 3 hours to respond to every technical comment, answer questions, and acknowledge feedback.
+
+---
+
+## Psychology Playbook Notes (Why the Copy Is Written This Way)
+
+For the operator, not for posting:
+
+1. **Titles are loss-framed in the reader's own words (Loss Aversion + Customer Language):** "wasting tokens," "no cloud APIs," "silently change" — each title mirrors verbatim pain from real developer complaints rather than product vocabulary.
+2. **Immediate payoff over future ROI (Present Bias):** Every post shows the one-command result in seconds; none argue long-term efficiency gains.
+3. **Scope notes (Pratfall Effect):** "Doesn't bypass login walls" sounds like a limitation and functions as proof of honesty — it also preempts mod removal for "scraping tool" reports.
+4. **Zero-risk lines (Regret Aversion + Zero-Price Effect):** "no API key, no account, no telemetry" removes every residual cost of trying it; for a free tool, the only risk left is the reader's five minutes.
+5. **OP follow-up comments (Authority + Commitment & Consistency):** Technical deep-dives posted immediately give early voters something substantive to engage with and set the thread's technical register.
+6. **Per-subreddit language matching (Unity Principle):** Each post uses that community's insider vocabulary ("context window" on r/cursor, "token economy" on r/LocalLLaMA, "docs drift" on r/selfhosted) — "one of us" framing before any ask.

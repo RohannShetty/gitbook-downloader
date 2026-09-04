@@ -85,7 +85,7 @@ python -m gitbook_downloader      # same as gitbook-dl
 | `src/gitbook_downloader/utils/retry.py` | `create_session()`: requests Session with `TimeoutHTTPAdapter`, exponential backoff, retry strategy |
 | `src/gitbook_downloader/utils/discovery.py` | `discover_from_llms_txt()`, `discover_from_sitemap()`, URL normalization (re-exports from `providers.base`) |
 | `src/gitbook_downloader/utils/export.py` | `wrap_with_rag_metadata()`, `export_to_jsonl()`, `export_to_pdf()` |
-| `src/gitbook_downloader/mcp/server.py` | FastMCP server: tools `download_docs`, `search_docs`, `list_domains`, `get_doc`, `diff_versions`, `export_docs`, `query_doc_graph`, `get_related_concepts`; resources `docs://{domain}/book`; prompts |
+| `src/gitbook_downloader/mcp/server.py` | FastMCP server: 12 tools (`download_docs`, `search_docs`, `find_docs`, `read_doc`, `get_doc`, `list_domains`, `query_doc_graph`, `get_related_concepts`, `diff_versions`, `list_versions`, `export_docs`, `get_changelog`); resources `docs://{domain}/book` + `docs://{domain}/manifest`; prompts |
 | `src/gitbook_downloader/gui/app.py` | PyWebView launcher (Edge WebView2 on Windows), loads bundled `web/index.html` |
 | `src/gitbook_downloader/gui/bridge.py` | `ApiBridge`: JS↔Python API (capture, search, library, versions, diff, export, provider detection) |
 | `src/gitbook_downloader/tui/app.py` | Textual TUI shell: 5 tabbed surfaces (Wizard, Library, Search, Diff, Diagnostics), `EngineProtocol` seam |
@@ -110,7 +110,7 @@ python -m gitbook_downloader      # same as gitbook-dl
 
 ### 3. Normalize & Contract (`api.py` + `output_contract.py`)
 - `normalize_engine_result()` coerces engine output → `list[CapturedPage]`
-- `CaptureOptions` filters: `max_pages`, `scope`, `exclude`, `site_versions`, `render_js`
+- `CaptureOptions` filters: `max_pages`, `path_scope`, `exclude_paths`, `site_versions`, `output_mode`, `render`
 - `publish()` writes: page tree (`pages/`), combined `docs.md`, `llms.txt` manifest, search index, concept graph
 
 ### 4. Store (`storage/manager.py`)
@@ -185,26 +185,37 @@ class GitBookProvider(Provider):
 ```python
 @dataclass(frozen=True)
 class CaptureOptions:
-    max_pages: int | None = None
-    scope: tuple[str, ...] = ()
-    exclude: tuple[str, ...] = ()
-    site_versions: tuple[str, ...] = ()
-    render: bool = False
+    workers: int = 8                      # parallel fetches
+    max_pages: int | None = None          # None = unlimited (0 is INVALID)
+    path_scope: tuple[str, ...] = ()      # URL path prefixes to include
+    exclude_paths: tuple[str, ...] = ()   # path patterns to skip inside scope
+    site_versions: tuple[str, ...] | None = None  # None = all; subset filters
+    output_mode: Literal["both", "library", "local"] = "both"
+    local_dir: Path | None = None         # default ./<domain>-docs/
+    snapshot: bool = True                 # snapshot previous before overwrite
     timeout: float = 20.0
+    cancel_check: Callable[[], bool] | None = None
+    render: bool = False                  # headless render for client-side SPAs
 
 @dataclass(frozen=True)
 class CaptureResult:
-    ok: bool
-    domain: str
-    pages: int
-    bytes_written: int
-    version_id: str | None
-    error: str | None = None
+    source_url: str
+    provider: str                  # gitbook|mintlify|docusaurus|readthedocs|mkdocs|generic
+    site_versions_found: tuple[str, ...]
+    pages_captured: int
+    skipped: int                   # filtered/excluded/duplicate count
+    warnings: tuple[str, ...]      # non-fatal issues surfaced to user/diagnostics
+    library_path: Path | None
+    local_path: Path | None
+    book_file: Path | None
+    manifest_file: Path | None     # llms.txt
+    version_id: str | None         # snapshot id created, if snapshotting
 
-def capture(url: str, options: CaptureOptions, progress=None) -> CaptureResult
+def capture(url: str, options: CaptureOptions, *, progress=None) -> CaptureResult
+# Failures raise CaptureError — CaptureResult carries no ok/error field
 ```
 
-**TUI mirrors this exactly** in `engine_protocol.py` — **do not edit casually**.
+**TUI mirrors this contract** in `engine_protocol.py` — **do not edit casually**.
 
 ### Async Patterns
 - **Engine**: synchronous (`requests` + `ThreadPoolExecutor` in `download_urls()`)
@@ -225,7 +236,7 @@ def capture(url: str, options: CaptureOptions, progress=None) -> CaptureResult
 ### Error Handling Conventions
 1. **Provider errors**: Return `PageContent` with `error` field; engine continues crawling
 2. **Engine errors**: Collected in `failed: list[tuple[url, error]]`; returned in normalized result
-3. **Facade (`api.py`)**: `CaptureError` for invalid options/lock conflicts; `CaptureResult.ok=False` for runtime failures
+3. **Facade (`api.py`)**: Raises `CaptureError` for invalid options, lock conflicts, and runtime failures — `CaptureResult` carries no ok/error field; non-fatal issues surface via `CaptureResult.warnings`
 4. **MCP tools**: Catch all exceptions → return `{"error": str(exc)}` dict
 5. **TUI**: `Diagnostics` screen shows `CaptureRun` with `event_counts` + `errors: list[str]`
 6. **GUI**: Bridge returns `{"success": bool, "error": str?, ...}` objects
@@ -268,7 +279,7 @@ timeout = 10.0
 - **TUI protocol**: `EngineProtocol` enables fake engine for screen tests
 - **Provider tests**: Use `providers.base.Provider` ABC; test with captured HTML fixtures
 - **Storage tests**: Use temp dirs via `StorageManager(base_dir=tmp_path)`
-- **No project-wide test suite** in this repo (tests live in `.tmp_pytest/` as ad-hoc fixtures)
+- **Project-wide suite**: 665 tests live in `tests/` (`uv run pytest`); `.tmp_pytest/` is scratch output only
 
 ---
 
@@ -347,7 +358,7 @@ class NewProvider(Provider):
 - **v8**: GUI (PyWebView), MCP server, concept graph
 - **v9**: Search FTS5, provider auto-detect registry
 - **v10**: Config system (TOML + presets), splitter, export utilities
-- **v11.0.2**: Current — showcase UI/UX overhaul & centralized version constant
+- **v11.0.4**: Current — DocHarvest advanced MCP suite (12 tools), granular storage, AST topic extraction & UI polish
 
 ---
 
@@ -409,7 +420,7 @@ gitbook-dl mcp                      # MCP server (stdio)
 gitbook-dl gui                      # Desktop GUI
 gitbook-dl tui                      # Terminal UI
 
-# Run tests (ad-hoc fixtures in .tmp_pytest/)
+# Run tests (665 tests in tests/)
 uv run pytest                       # all tests
 uv run pytest tests/test_mcp_server.py -v
 uv run pytest tests/test_providers.py -v
@@ -419,7 +430,7 @@ uv run pytest -k "not slow"         # skip slow tests
 cd docs && npm install && npm run build  # static export to docs/out/
 
 # Generate release notes
-python scripts/generate_release_notes.py --tag v11.0.2
+python scripts/generate_release_notes.py --tag v11.0.4
 ```
 
 ---
@@ -438,7 +449,7 @@ python scripts/generate_release_notes.py --tag v11.0.2
 ### Error Handling
 - **Provider layer**: Return `PageContent(error="...")`; engine continues
 - **Engine layer**: Collect failures in `failed: list[tuple[url, str]]`
-- **Facade (`api.py`)**: Raise `CaptureError` for invalid options/locks; return `CaptureResult(ok=False, error=...)` for runtime failures
+- **Facade (`api.py`)**: Raises `CaptureError` for invalid options, lock conflicts, and runtime failures — `CaptureResult` carries no ok/error field; non-fatal issues surface via `CaptureResult.warnings`
 - **MCP tools**: Catch all → return `{"error": str(exc)}` dict
 - **TUI**: `CaptureRun` surfaces `errors: list[str]` + `event_counts` on Diagnostics screen
 - **GUI**: `ApiBridge` returns `{"success": bool, "error": str?, ...}` objects
@@ -475,28 +486,39 @@ class GitBookProvider(Provider):
 ```
 
 ### Pinned Facade Contract (Plan §2)
-**api.py** defines the **only** public capture interface. TUI mirrors this exactly in `engine_protocol.py` — **do not edit casually**.
+**api.py** defines the **only** public capture interface. TUI mirrors this contract in `engine_protocol.py` — **do not edit casually**.
 
 ```python
 @dataclass(frozen=True)
 class CaptureOptions:
-    max_pages: int | None = None
-    scope: tuple[str, ...] = ()
-    exclude: tuple[str, ...] = ()
-    site_versions: tuple[str, ...] = ()
-    render: bool = False
+    workers: int = 8                      # parallel fetches
+    max_pages: int | None = None          # None = unlimited (0 is INVALID)
+    path_scope: tuple[str, ...] = ()      # URL path prefixes to include
+    exclude_paths: tuple[str, ...] = ()   # path patterns to skip inside scope
+    site_versions: tuple[str, ...] | None = None  # None = all; subset filters
+    output_mode: Literal["both", "library", "local"] = "both"
+    local_dir: Path | None = None         # default ./<domain>-docs/
+    snapshot: bool = True                 # snapshot previous before overwrite
     timeout: float = 20.0
+    cancel_check: Callable[[], bool] | None = None
+    render: bool = False                  # headless render for client-side SPAs
 
 @dataclass(frozen=True)
 class CaptureResult:
-    ok: bool
-    domain: str
-    pages: int
-    bytes_written: int
-    version_id: str | None
-    error: str | None = None
+    source_url: str
+    provider: str                  # gitbook|mintlify|docusaurus|readthedocs|mkdocs|generic
+    site_versions_found: tuple[str, ...]
+    pages_captured: int
+    skipped: int                   # filtered/excluded/duplicate count
+    warnings: tuple[str, ...]      # non-fatal issues surfaced to user/diagnostics
+    library_path: Path | None
+    local_path: Path | None
+    book_file: Path | None
+    manifest_file: Path | None     # llms.txt
+    version_id: str | None         # snapshot id created, if snapshotting
 
-def capture(url: str, options: CaptureOptions, progress=None) -> CaptureResult
+def capture(url: str, options: CaptureOptions, *, progress=None) -> CaptureResult
+# Failures raise CaptureError — CaptureResult carries no ok/error field
 ```
 
 ### State Management
@@ -554,8 +576,8 @@ def capture(url: str, options: CaptureOptions, progress=None) -> CaptureResult
 ### Test Framework
 - **pytest** with `pytest-asyncio`, `pytest-timeout`, `pytest-cov`
 - **Fixtures**: `conftest.py` provides `tmp_path`, `create_session`, mock HTML fixtures
-- **No project-wide test suite** in this repo — tests live as ad-hoc fixtures in `.tmp_pytest/`
-- **Key test modules** (when present):
+- **Project-wide suite**: 665 tests in `tests/` — `uv run pytest` (the `.tmp_pytest/` dir is scratch output, not test sources)
+- **Key test modules**:
   - `tests/test_mcp_server.py` — MCP tool contracts
   - `tests/test_providers.py` — Provider extraction logic
   - `tests/test_engine_providers.py` — Engine+provider integration

@@ -8,7 +8,7 @@
 
 ## 1. Submission Details
 
-- **Title:** `Show HN: DocHarvest – Turn any doc site into LLM-ready Markdown, JSONL, and PDF`
+- **Title:** `Show HN: DocHarvest – Turn any doc site into clean LLM context (local, MIT)`
 - **URL / Target Link:** `https://github.com/RohannShetty/gitbook-downloader`
 - **Canonical Landing Page:** `https://rohannshetty.github.io/gitbook-downloader/`
 - **Submitter:** Rohan Shetty (`RohannShetty`)
@@ -21,6 +21,8 @@
 
 ```text
 Hi HN,
+
+The short version first, so you can decide whether the rest is worth your time: pointed at a 673-page documentation portal, DocHarvest captured, cleaned, and exported the entire corpus in 18.2 seconds, cutting ~83% of the context-window footprint. Full benchmark below.
 
 I built DocHarvest (https://github.com/RohannShetty/gitbook-downloader) to solve a problem I kept running into: preparing clean, accurate documentation context for LLMs, local RAG pipelines, and offline reference.
 
@@ -58,7 +60,17 @@ We implemented cross-platform process-aware domain locks (`DomainLock`). By insp
 All captured documentation is automatically indexed into an embedded SQLite database using FTS5 virtual tables with `porter unicode61` stemming, giving you sub-10ms BM25 ranking across your entire offline documentation library.
 
 • Model Context Protocol (FastMCP v2) & Coding Agent Support:
-DocHarvest includes a built-in FastMCP v2 server (`docharvest mcp`) exposing 10 native tools over stdio for coding assistants like Cursor, Claude Code, OpenCode, Pi Coding Agent, and Windsurf. For non-terminal workflows, we also bundle a standalone desktop application built with PyWebView, React 18, and shadcn/ui.
+DocHarvest includes a built-in FastMCP v2 server (`docharvest mcp`) exposing 12 native tools over stdio for coding assistants like Cursor, Claude Code, OpenCode, Pi Coding Agent, and Windsurf. For non-terminal workflows, we also bundle a standalone desktop application built with PyWebView, React 18, and shadcn/ui.
+
+---
+
+### What DocHarvest deliberately does not do
+
+Honest scope, because a tool that claims everything has earned none of your trust:
+
+- It will not bypass logins, paywalls, or CAPTCHAs. It targets public technical documentation that welcomes developer access.
+- It is not for e-commerce catalogs, social feeds, or internet-scale crawling. It is a documentation compiler, not a search-engine crawler.
+- On unknown platforms it falls back to generic heuristics (`main`/`article` selector chains + readability-style cleaning). That is good, but not platform-perfect — if you hit an extraction edge case, I want the URL.
 
 ---
 
@@ -67,7 +79,7 @@ Crawling the complete OpenAlgo documentation suite (673 pages):
 - Crawl & Extraction Time: 18.2 seconds (5 streaming workers)
 - Raw HTML Size: ~28.4 MB (estimated ~7.1M tokens)
 - DocHarvest Clean Markdown Size: 5.0 MB (estimated ~1.2M tokens)
-- Token Reduction: ~82.8% reduction in context window footprint
+- Token Reduction: ~82.8% (≈83%) reduction in context window footprint
 - Output: 673 modular pages, 1 unified `book.md`, 1 `llms.txt`, 1 RAG JSONL dataset, 1 styled PDF.
 
 The project is 100% free, MIT-licensed, and runs completely locally on your hardware with zero telemetry or external API keys.
@@ -75,7 +87,10 @@ The project is 100% free, MIT-licensed, and runs completely locally on your hard
 GitHub: https://github.com/RohannShetty/gitbook-downloader
 Web Showcase: https://rohannshetty.github.io/gitbook-downloader/
 
-I’d love to hear feedback from the HN community on our extraction edge cases, chunking strategies, or suggestions for additional doc frameworks to support!
+Two specific asks for the HN crowd:
+
+1. Point it at the gnarliest public docs portal you know and tell me exactly what extraction got wrong — edge-case URLs become test fixtures, and prior edge cases are why the language-code filtering (60+ locales) and permalink dedup exist.
+2. If you run RAG pipelines, tell me your chunking strategy — I want to benchmark the AST header splitter against it rather than assert it is better.
 ```
 
 ---
@@ -86,19 +101,18 @@ I’d love to hear feedback from the HN community on our extraction edge cases, 
 > **Prepared Answer:**  
 > Playwright/Chromium is fantastic for dynamic single-page applications, but it introduces significant overhead: 200MB+ RAM per browser context, heavy binary dependencies, and slow execution when crawling 1,000+ pages. 
 > 
-> Technical documentation platforms (GitBook, Mintlify, Docusaurus) follow structured architectural conventions. By probing native `.md` endpoints, parsing sitemaps, and applying AST-level clean selectors, DocHarvest achieves 10x higher throughput (~35–50 pages/sec) with an ultra-lightweight memory footprint (<50MB RAM in CI/CD) and zero browser automation dependencies.
+> Technical documentation platforms (GitBook, Mintlify, Docusaurus) follow structured architectural conventions. By probing native `.md` endpoints, parsing sitemaps, and applying AST-level clean selectors, DocHarvest achieves ~37 pages/sec sustained (673 pages / 18.2 s) with an ultra-lightweight memory footprint (<50MB RAM in CI/CD) and zero browser automation dependencies.
 
 ---
 
 ### Q2: "How do you handle rate limiting, CAPTCHAs, or bot protection like Cloudflare?"
 > **Prepared Answer:**  
 > DocHarvest is specifically designed for public technical documentation sites that encourage developer access. We implement polite, respectful crawling:
-> 1. Configurable concurrency workers (`--concurrency 5` default) and optional delay intervals.
+> 1. Bounded parallelism via `--workers N` (8 by default), with socket connect timeouts through a custom `TimeoutHTTPAdapter` so connections neither hang nor hammer.
 > 2. Sitemap-first discovery to minimize unnecessary GET requests.
-> 3. Configurable custom User-Agent strings.
-> 4. Socket connect timeouts via a custom `TimeoutHTTPAdapter` to prevent hung connections.
-> 
-> If a target site requires authenticated sessions, DocHarvest allows passing custom HTTP request headers and authorization cookies (`--headers '{"Authorization": "Bearer ..."}')`.
+> 3. A configurable custom User-Agent via `create_session(user_agent=...)` in the Python API.
+>
+> It deliberately does not handle authenticated sessions or bypass bot protection — if a portal sits behind a login wall, it is outside DocHarvest's scope by design.
 
 ---
 
@@ -123,13 +137,26 @@ I’d love to hear feedback from the HN community on our extraction edge cases, 
 
 ### Q5: "How does the Model Context Protocol (FastMCP) server work?"
 > **Prepared Answer:**  
-> DocHarvest implements the Model Context Protocol specification over standard input/output (stdio JSON-RPC). When you add DocHarvest as an MCP server in Cursor (`.cursor/mcp.json`) or Claude Desktop (`claude_desktop_config.json`), the agent is given 8 tools:
+> DocHarvest implements the Model Context Protocol specification over standard input/output (stdio JSON-RPC). When you add DocHarvest as an MCP server in Cursor (`.cursor/mcp.json`) or Claude Desktop (`claude_desktop_config.json`), the agent gets 12 tools plus resources and prompts, including:
 > - `download_docs(url)`: Harvests a documentation site in the background.
 > - `search_docs(query)`: Performs BM25 full-text search against the local SQLite FTS5 index.
-> - `read_doc_page(domain, path)`: Retrieves the clean markdown content of a specific page.
-> - `list_libraries()`: Lists all locally indexed documentation suites.
-> 
+> - `read_doc(domain, path, topic, max_tokens)`: Retrieves a specific page or topic section with AST-safe token bounding — code blocks are never split.
+> - `find_docs(query)`: Resolves a library name like "react" or "nextjs" to indexed domains.
+> - `diff_versions(domain, v1, v2)`: Unified diff between two documentation snapshots.
+>
+> (Full inventory: `download_docs`, `search_docs`, `find_docs`, `read_doc`, `get_doc`, `list_domains`, `query_doc_graph`, `get_related_concepts`, `diff_versions`, `list_versions`, `export_docs`, `get_changelog`.)
+>
 > This allows the AI agent to autonomously look up exact SDK documentation without human intervention.
+
+### Q6: "Why not just use r.jina.ai or the site's llms.txt directly?"
+> **Prepared Answer:**  
+> Three gaps. `r.jina.ai` is single-page and cloud-hosted — every lookup needs a network round trip and sends your browsing to a third party; DocHarvest compiles an entire hierarchy once and serves it locally forever after. `llms.txt` only exists if the site publishes it, and it's a link index, not content — you still have to fetch and clean every page. And neither provides provenance (SHA-256 hashes, source URLs in frontmatter), snapshot diffing, or a local BM25 index. DocHarvest probes a site's `llms.txt`/sitemap when present and goes further: it compiles, hashes, versions, indexes, and serves the result to agents over MCP.
+
+---
+
+### Q7: "How is this different from Crawl4AI?"
+> **Prepared Answer:**  
+> Crawl4AI is a solid general-purpose LLM crawler, and I'd recommend it for arbitrary sites. The differences are in defaults and deliverables: Crawl4AI leans on Playwright/Chromium (heavy in CI), needs per-site extraction rules written by you, and returns raw dicts. DocHarvest ships platform heuristics for 8 documentation frameworks out of the box, probes native `.md` endpoints where they exist, and every capture produces the same deterministic output contract — `pages/` with hashed frontmatter, `book.md`, `llms.txt`, RAG JSONL, PDF — plus semver snapshots with unified diffs and a local FTS5 search index. Different tools for different jobs; I optimize for "point at a docs portal, get a finished corpus."
 
 ---
 
@@ -139,3 +166,15 @@ I’d love to hear feedback from the HN community on our extraction edge cases, 
 2. **Never downvote or argue:** Answer criticism with code, benchmarks, and architecture explanations.
 3. **Keep replies concise and readable:** Format code snippets in mono; avoid marketing jargon.
 4. **Active monitoring:** Keep the HN tab open and refresh every 5–10 minutes for the first 6 hours of the submission.
+
+---
+
+## 5. Psychology Notes (Why the Copy Is Structured This Way)
+
+For the operator, not for posting:
+
+1. **Number-first opening (Anchoring):** "18.2 seconds, ~83% cut" in line 1 frames every subsequent claim. HN readers decide in the first two sentences whether to keep reading.
+2. **Vivid loss framing (Loss Aversion / Availability Heuristic):** The four bottlenecks are written as failures the reader has personally experienced (cookie banners, scrambled indentation), not as abstract feature categories.
+3. **"Deliberately does not do" section (Pratfall Effect):** Admitting scope limits before critics find them measurably increases trust in the remaining claims — and preempts the inevitable "can it scrape my Instagram?" thread.
+4. **Specific asks at the end (Peak-End Rule + Commitment):** "Give me your worst docs URL" converts readers into contributors and seeds test fixtures — the comment thread ends on an action, not a thank-you.
+5. **No scarcity, no urgency tactics:** On HN these read as SaaS-pattern noise and would contradict the "quietly confident" voice. Credibility is the only currency here.
