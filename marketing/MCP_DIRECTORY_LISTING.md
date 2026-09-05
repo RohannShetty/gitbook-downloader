@@ -124,7 +124,7 @@ One-time setup. After that, just ask your agent: "Search the OpenAlgo docs for O
 ### Smithery (smithery.ai)
 - **Display name / description:** use the canonical fields above.
 - **Start command (stdio):** `uvx gitbook-downloader mcp`
-- **Tools:** paste the 10-tool inventory table (Smithery renders each tool with its schema).
+- **Tools:** paste the 12-tool inventory table (Smithery renders each tool with its schema).
 - **Emphasis:** the config-card snippet — Smithery users are one "Install" click away.
 
 ### Glama (glama.ai)

@@ -1,4 +1,4 @@
-/* gitbook-downloader v7 TUI — global stylesheet.
+/* gitbook-downloader TUI — global stylesheet.
    Tokens come from theme.py via Textual theme variables ($hairline,
    $ink-muted, $mono-font …). Flat surfaces + hairlines; amber only for
    primary action / active markers / focus / highlights. */
@@ -249,7 +249,7 @@ TabPane {
 
 /* Content columns stay capped so lines stay readable on wide terminals,
    but the SURFACES themselves are full-width — their scrollbars must sit
-   at the true screen edge, not floating mid-screen (v7.0.1 fix). */
+   at the true screen edge, not floating mid-screen (scrollbar containment fix). */
 WizardSurface > *,
 SearchSurface > *,
 DiagnosticsSurface > * {

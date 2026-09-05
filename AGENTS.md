@@ -117,7 +117,7 @@ python -m gitbook_downloader      # same as gitbook-dl
 - `StorageManager`: base dir `~/.gitbook-downloader/docs/<domain>/`
 - `atomic_write_text()`: temp file + `os.replace()` for crash safety
 - `DomainLock`: per-domain file lock (stale after 15 min)
-- Metadata registry: `meta.json` tracks versions, snapshots, page counts
+- Metadata registry: `metadata.json` tracks versions, snapshots, page counts
 
 ### 5. Version (`storage/versioning.py`)
 - Semver snapshots: `v<major>.<minor>.<patch>.md` in `versions/`
@@ -125,8 +125,8 @@ python -m gitbook_downloader      # same as gitbook-dl
 - `snapshot()` → new version; `rollback(target)` → restore + safety snapshot; `diff(v1, v2)` → unified diff
 
 ### 6. Index (`search/index.py` + `search/graph.py`)
-- FTS5: `pages_fts` table (page_id, url, title, content, site_version, domain)
-- `SearchIndex.add_pages()`, `search()`, `get_page()`, `list_domains()`
+- FTS5 external-content table `pages_fts(title, content, url UNINDEXED, domain UNINDEXED, section_heading)` over `pages_meta(url, title, content, domain, section_heading, indexed_at, UNIQUE(url, section_heading))` plus a `domains(name, url, pages, last_indexed)` bookkeeping table; `porter unicode61` tokenizer
+- `SearchIndex.index_domain()`, `index_domain_from_storage()`, `search()`, `list_indexed_domains()`, `remove_domain()`
 - `DocGraph.build_from_pages()` parses markdown headings/code/endpoints → nodes + edges
 
 ### 7. Serve (CLI/TUI/GUI/MCP)
@@ -230,7 +230,7 @@ def capture(url: str, options: CaptureOptions, *, progress=None) -> CaptureResul
 | TUI | `AppState` dataclass | Survives tab switches; `last_run: CaptureRun \| None` |
 | GUI | `ApiBridge` instance | Singleton per window; `threading.Event` for progress |
 | MCP | Module-level singletons | `_storage`, `_versioning`, `_search` (lazy init) |
-| Storage | `DomainLock` + `meta.json` | File-lock + JSON registry |
+| Storage | `DomainLock` + `metadata.json` | File-lock + JSON registry |
 | Search | SQLite WAL mode | Persistent `search.db` |
 
 ### Error Handling Conventions
@@ -279,7 +279,7 @@ timeout = 10.0
 - **TUI protocol**: `EngineProtocol` enables fake engine for screen tests
 - **Provider tests**: Use `providers.base.Provider` ABC; test with captured HTML fixtures
 - **Storage tests**: Use temp dirs via `StorageManager(base_dir=tmp_path)`
-- **Project-wide suite**: 665 tests live in `tests/` (`uv run pytest`); `.tmp_pytest/` is scratch output only
+- **Project-wide suite**: 686 tests live in `tests/` (`uv run pytest`); `.tmp_pytest/` is scratch output only
 
 ---
 
@@ -337,7 +337,7 @@ class NewProvider(Provider):
 ├── search.db                # SQLite FTS5 index
 ├── docs/
 │   └── <domain>/
-│       ├── meta.json        # Registry: versions, snapshots, page count
+|       ├── metadata.json   # Registry: versions, snapshots, page count
 │       ├── pages/           # Page tree: <relpath>.md + frontmatter
 │       ├── docs.md          # Combined book (current version)
 │       ├── llms.txt         # Manifest for LLM ingestion
@@ -358,7 +358,8 @@ class NewProvider(Provider):
 - **v8**: GUI (PyWebView), MCP server, concept graph
 - **v9**: Search FTS5, provider auto-detect registry
 - **v10**: Config system (TOML + presets), splitter, export utilities
-- **v11.0.4**: Current — DocHarvest advanced MCP suite (12 tools), granular storage, AST topic extraction & UI polish
+- **v11.0.4**: DocHarvest advanced MCP suite (12 tools), granular storage, AST topic extraction & UI polish
+- **v11.0.5**: Current — MCP SDK as a base dependency (uvx `gitbook-downloader mcp` works out of the box), search-index hygiene + orphan filtering, identical-snapshot skip, showcase/GUI light-mode contrast & theme-toggle fixes
 
 ---
 
@@ -375,7 +376,7 @@ python -c "from gitbook_downloader.providers import detect_provider; from gitboo
 sqlite3 ~/.gitbook-downloader/search.db ".schema"
 
 # View storage metadata
-cat ~/.gitbook-downloader/docs/<domain>/meta.json | jq
+cat ~/.gitbook-downloader/docs/<domain>/metadata.json | jq
 
 # MCP debug (stdio)
 gitbook-dl mcp  # connect via Claude Desktop / Cursor
@@ -420,7 +421,7 @@ gitbook-dl mcp                      # MCP server (stdio)
 gitbook-dl gui                      # Desktop GUI
 gitbook-dl tui                      # Terminal UI
 
-# Run tests (665 tests in tests/)
+# Run tests (686 tests in tests/)
 uv run pytest                       # all tests
 uv run pytest tests/test_mcp_server.py -v
 uv run pytest tests/test_providers.py -v
@@ -430,7 +431,7 @@ uv run pytest -k "not slow"         # skip slow tests
 cd docs && npm install && npm run build  # static export to docs/out/
 
 # Generate release notes
-python scripts/generate_release_notes.py --tag v11.0.4
+python scripts/generate_release_notes.py --tag v11.0.5
 ```
 
 ---
@@ -528,7 +529,7 @@ def capture(url: str, options: CaptureOptions, *, progress=None) -> CaptureResul
 | TUI | `AppState` dataclass | Survives tab switches; `last_run: CaptureRun \| None` |
 | GUI | `ApiBridge` instance | Singleton per window; `threading.Event` for progress |
 | MCP | Module-level singletons | `_storage`, `_versioning`, `_search` (lazy init) |
-| Storage | `DomainLock` + `meta.json` | File-lock + JSON registry |
+| Storage | `DomainLock` + `metadata.json` | File-lock + JSON registry |
 | Search | SQLite WAL mode | Persistent `search.db` |
 
 ### Single Source of Truth
@@ -560,12 +561,13 @@ def capture(url: str, options: CaptureOptions, *, progress=None) -> CaptureResul
 
 **Required Dependencies** (in `pyproject.toml`):
 - `requests>=2.28`, `beautifulsoup4>=4.11`, `markdownify>=0.11`, `lxml>=4.9`
+- `mcp>=1.2.0` (MCP server — **base dependency** since v11.0.5)
 - `textual>=0.60` (TUI), `pyperclip>=1.8`
 - `pywebview>=6.2.1` (GUI — Edge WebView2 on Windows)
 - `fpdf2>=2.8.8` (PDF generation)
 
 **Optional Extras**:
-- `mcp` → `mcp>=1.2.0` (MCP server)
+- `mcp` → `mcp>=1.2.0` (backward-compat no-op — the SDK ships as a base dependency)
 - `render` / `js` → `playwright>=1.40` (SPA rendering)
 - `dev` → `pytest>=8.0`, `pytest-timeout`, `pytest-asyncio`, `pytest-cov`
 
@@ -576,7 +578,7 @@ def capture(url: str, options: CaptureOptions, *, progress=None) -> CaptureResul
 ### Test Framework
 - **pytest** with `pytest-asyncio`, `pytest-timeout`, `pytest-cov`
 - **Fixtures**: `conftest.py` provides `tmp_path`, `create_session`, mock HTML fixtures
-- **Project-wide suite**: 665 tests in `tests/` — `uv run pytest` (the `.tmp_pytest/` dir is scratch output, not test sources)
+- **Project-wide suite**: 686 tests in `tests/` — `uv run pytest` (the `.tmp_pytest/` dir is scratch output, not test sources)
 - **Key test modules**:
   - `tests/test_mcp_server.py` — MCP tool contracts
   - `tests/test_providers.py` — Provider extraction logic

@@ -37,8 +37,8 @@ def _api():
     except ImportError as exc:  # pragma: no cover - depends on Lane B landing
         raise RuntimeError(
             "The capture facade (gitbook_downloader.api) is not available yet. "
-            "v7 ships api.capture as the single entry point; update the package "
-            "or run the TUI through an injected engine."
+            "This package ships api.capture as the single entry point; update "
+            "the package or run the TUI through an injected engine."
         ) from exc
     return api
 
