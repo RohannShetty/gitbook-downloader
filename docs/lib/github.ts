@@ -168,7 +168,7 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.0.4
+### What's New in v11.0.5
 
 - find_docs: resolves library/framework names and aliases (e.g. "react") to locally indexed domains.
 - read_doc: AST-safe page and topic reads with token bounding, never truncating code fences.
