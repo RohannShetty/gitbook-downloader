@@ -36,7 +36,7 @@ const TOUR_STEPS: TourStep[] = [
     subtitle: "Turn Any Documentation Site into LLM-Ready Markdown & Vector Context",
     description: "DocHarvest is a local-first documentation harvester, AI context compiler, and FastMCP server. It cleans up to 89% of token-wasting navigation boilerplate and outputs structured knowledge corpora.",
     icon: Sparkles,
-    badge: "v11.0.3 Architecture",
+    badge: "v11.0.5 Architecture",
     tips: [
       "100% local, zero telemetry, zero cloud fees",
       "8 dedicated documentation platform providers",
@@ -81,7 +81,7 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     title: "🔌 Native FastMCP v2 Server",
-    subtitle: "Expose 10 Tools, Prompts & Resources to AI IDEs",
+    subtitle: "Expose 12 Tools, Prompts & Resources to AI IDEs",
     description: "Seamlessly connect Cursor, Claude Code, Windsurf, VS Code, Zed, and JetBrains. DocHarvest exposes tools like download_docs, search_docs, get_doc, and query_doc_graph over stdio with zero configuration.",
     icon: Cpu,
     badge: "MCP v2 Protocol",

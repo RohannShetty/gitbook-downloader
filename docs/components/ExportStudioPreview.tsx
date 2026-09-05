@@ -13,7 +13,7 @@ const PREVIEWS = {
 title: "OpenAlgo v2.0 Complete Developer Handbook"
 harvest_timestamp: "2026-08-30T00:00:00Z"
 total_pages: ${STATS.pagesCaptured}
-generator: "DocHarvest v11.0.3"
+generator: "DocHarvest v11.0.5"
 ---
 
 # Table of Contents

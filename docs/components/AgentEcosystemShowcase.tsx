@@ -50,7 +50,7 @@ export function AgentEcosystemShowcase() {
             Native FastMCP Server for {STATS.agentsShipped}+ Modern Coding Harnesses
           </h2>
           <p className="text-sm text-muted-foreground font-mono max-w-2xl">
-            Plug DocHarvest directly into Cursor, Claude Code, OpenCode, Pi, Windsurf, or Codex. Your agents gain 10 native tools to crawl, index, and query documentation on demand over stdio.
+            Plug DocHarvest directly into Cursor, Claude Code, OpenCode, Pi, Windsurf, or Codex. Your agents gain 12 native tools to crawl, index, and query documentation on demand over stdio.
           </p>
         </div>
 

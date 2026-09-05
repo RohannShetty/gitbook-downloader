@@ -83,7 +83,7 @@ export const InAppDocsView: React.FC = () => {
                 <Cpu className="h-4 w-4" /> Native FastMCP Server
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Exposes 8 native Model Context Protocol tools and resources to Cursor, Claude Code, Windsurf, Zed, and 10+ AI IDEs over stdio.
+                Exposes 12 native Model Context Protocol tools and resources to Cursor, Claude Code, Windsurf, Zed, and 10+ AI IDEs over stdio.
               </p>
             </div>
           </div>
@@ -332,13 +332,13 @@ docharvest --gui`}</pre>
               Model Context Protocol (MCP v2) Integration
             </h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              DocHarvest exposes 10 native tools, MCP Resources, and MCP Prompts over standard input/output (<code className="font-mono text-cyan-700 dark:text-cyan-400">stdio</code>). Directly compatible with Cursor, Claude Desktop, Claude Code, Oh My Pi (<code className="font-mono text-cyan-700 dark:text-cyan-400">omp.sh</code>), Windsurf, Zed, OpenCode, Kiro, and 10+ other harnesses.
+              DocHarvest exposes 12 native tools, MCP Resources, and MCP Prompts over standard input/output (<code className="font-mono text-cyan-700 dark:text-cyan-400">stdio</code>). Directly compatible with Cursor, Claude Desktop, Claude Code, Oh My Pi (<code className="font-mono text-cyan-700 dark:text-cyan-400">omp.sh</code>), Windsurf, Zed, OpenCode, Kiro, and 10+ other harnesses.
             </p>
           </div>
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold font-mono text-foreground">
-              All 10 Native MCP Tools
+              All 12 Native MCP Tools
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
               <div className="p-3 rounded-lg border border-border bg-card/60">
@@ -348,6 +348,14 @@ docharvest --gui`}</pre>
               <div className="p-3 rounded-lg border border-border bg-card/60">
                 <span className="text-cyan-700 dark:text-cyan-400 font-semibold">search_docs(query, domain, limit)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">BM25 SQLite FTS5 search across local indexed documentation.</p>
+              </div>
+              <div className="p-3 rounded-lg border border-border bg-card/60">
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">find_docs(query, limit)</span>
+                <p className="text-[11px] font-sans text-muted-foreground mt-1">Resolve a library/framework name to matching indexed domains.</p>
+              </div>
+              <div className="p-3 rounded-lg border border-border bg-card/60">
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">read_doc(domain, path, topic)</span>
+                <p className="text-[11px] font-sans text-muted-foreground mt-1">Read a page or topic excerpt with token bounding.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
                 <span className="text-cyan-700 dark:text-cyan-400 font-semibold">query_doc_graph(domain, query, limit)</span>

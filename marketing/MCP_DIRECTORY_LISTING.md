@@ -134,7 +134,7 @@ One-time setup. After that, just ask your agent: "Search the OpenAlgo docs for O
 ### PulseMCP (pulsemcp.com)
 - **Tagline:** the canonical one-liner.
 - **Category:** Documentation / Knowledge Management.
-- **Emphasis:** the 10-tool inventory + "works with Cursor & Claude Desktop" — PulseMCP readers scan tool counts and client compatibility first (Bandwagon: compatibility lists signal adoption).
+- **Emphasis:** the 12-tool inventory + "works with Cursor & Claude Desktop" — PulseMCP readers scan tool counts and client compatibility first (Bandwagon: compatibility lists signal adoption).
 
 ### mcp.so
 - **Fields:** name, description, GitHub link, install command.
