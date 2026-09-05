@@ -135,3 +135,18 @@ ruff_cache/
 
 # uv build output for PyPI uploads
 dist-pypi/
+
+# Internal working files (kept locally, not published)
+marketing/
+.agents/
+.codex/
+.cursor/
+.impeccable/
+skills-lock.json
+CONTEXT.md
+PRODUCT.md
+DESIGN.md
+PROJECT.md
+PROFILE_README.md
+docs/superpowers/
+docs/archive/
