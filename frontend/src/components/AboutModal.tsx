@@ -87,7 +87,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
         <div className="grid grid-cols-2 gap-2.5 mb-5 text-xs">
           <div className="p-3 rounded-xl border border-border/60 bg-muted/40 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <Cpu className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-600 dark:text-cyan-400" />
+              <Cpu className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
               <span>Engine Core</span>
             </div>
             <span className="font-mono text-[11px] font-semibold text-foreground truncate">
