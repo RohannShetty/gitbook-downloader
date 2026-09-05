@@ -149,8 +149,8 @@ export function AgentEcosystemShowcase() {
                   <span>1-Click FastMCP Configuration Snippet:</span>
                   <span>stdio protocol</span>
                 </div>
-                <div className="p-4 rounded-lg bg-card/95 border border-border/80 font-mono text-xs leading-relaxed overflow-x-auto text-cyan/10 shadow-inner">
-                  <pre className="!bg-transparent !p-0 !border-0 text-cyan/10"><code>{selectedAgent.configSnippet}</code></pre>
+                <div className="p-4 rounded-lg bg-card/95 border border-border/80 font-mono text-xs leading-relaxed overflow-x-auto shadow-inner">
+                  <pre><code>{selectedAgent.configSnippet}</code></pre>
                 </div>
               </div>
 
@@ -163,11 +163,11 @@ export function AgentEcosystemShowcase() {
                     className="text-primary hover:underline inline-flex items-center gap-1 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary font-semibold"
                     aria-label="Copy CLI command"
                   >
-                    {copiedCli ? <Check className="h-3 w-3 text-cyan/50" /> : <Copy className="h-3 w-3" />}
+                    {copiedCli ? <Check className="h-3 w-3 text-cyan" /> : <Copy className="h-3 w-3" />}
                     <span>{copiedCli ? 'Copied' : 'Copy CLI'}</span>
                   </button>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-card/95 border border-border/80 font-mono text-xs text-cyan/30 flex items-center justify-between overflow-x-auto">
+                <div className="px-3.5 py-2.5 rounded-lg bg-card/95 border border-border/80 font-mono text-xs text-foreground flex items-center justify-between overflow-x-auto">
                   <code>$ {selectedAgent.cliCommand}</code>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export function AgentEcosystemShowcase() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {selectedAgent.highlights.map((h, i) => (
                     <div key={i} className="p-2.5 rounded-lg border border-border/60 bg-background/50 font-mono text-[11px] text-foreground flex items-start gap-1.5">
-                      <Zap className="h-3.5 w-3.5 text-cyan/40 shrink-0 mt-0.5" />
+                      <Zap className="h-3.5 w-3.5 text-cyan shrink-0 mt-0.5" />
                       <span>{h}</span>
                     </div>
                   ))}

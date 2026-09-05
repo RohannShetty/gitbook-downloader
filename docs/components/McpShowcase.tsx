@@ -86,8 +86,8 @@ export function McpShowcase() {
         {/* Section Title */}
         <div className="space-y-3 mb-12">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-cyan/40 font-bold tracking-widest uppercase flex items-center gap-1.5">
-              <Bot className="h-4 w-4 text-cyan/40" />
+            <span className="font-mono text-xs text-muted-foreground font-bold tracking-widest uppercase flex items-center gap-1.5">
+              <Bot className="h-4 w-4 text-cyan" />
               <span>Model Context Protocol (FastMCP v2)</span>
             </span>
             <div className="h-px flex-1 bg-border/60" />
@@ -124,20 +124,20 @@ export function McpShowcase() {
 
             {/* Config Snippet Card */}
             <div className="border border-border/80 rounded-xl bg-card/95 shadow-xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/80 bg-card/90 font-mono text-[11px] text-cyan/40">
-                <span className="text-cyan/40 font-bold">{current.filename}</span>
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/80 bg-card/90 font-mono text-[11px] text-muted-foreground">
+                <span className="text-muted-foreground font-bold">{current.filename}</span>
                 <button
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-cyan/80 hover:bg-primary/20 hover:text-white transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary text-xs text-cyan/20 border border-border/70"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0ea5e9] hover:bg-[#38bdf8] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary text-xs text-[#082f49] border border-border/70"
                   aria-label="Copy MCP configuration"
                 >
-                  {copied ? <Check className="h-3 w-3 text-cyan/40" /> : <Copy className="h-3 w-3" />}
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                   <span>{copied ? 'Copied' : 'Copy JSON'}</span>
                 </button>
               </div>
 
               <div className="p-4 bg-card/95 font-mono text-xs leading-relaxed overflow-x-auto">
-                <pre className="!bg-transparent !p-0 !border-0 text-cyan/10">
+                <pre>
                   <code>{current.snippet}</code>
                 </pre>
               </div>

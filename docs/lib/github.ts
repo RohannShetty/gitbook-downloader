@@ -161,7 +161,19 @@ function getFallbackRelease(): ReleaseInfo {
     tag: `v${VERSION}`,
     name: `DocHarvest v${VERSION}`,
     publishedAt: '2026-08-30',
-    body: 'Showcase UI/UX overhaul with light/dark contrast fixes, live GitHub release markdown parsing, and centralized showcase version source of truth (docs/lib/version.ts).',
+    body: `## Highlights
+
+- Native FastMCP v2 server: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more).
+- Four-Part Output Contract: every capture yields a modular pages/ tree with SHA-256 YAML frontmatter, a consolidated book.md with TOC, a standardized llms.txt manifest, and search index records.
+- Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
+- Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
+
+### What's New in v11.0.4
+
+- find_docs: resolves library/framework names and aliases (e.g. "react") to locally indexed domains.
+- read_doc: AST-safe page and topic reads with token bounding, never truncating code fences.
+- AST-safe context chunking: fenced code blocks, tables, and callouts are never broken mid-element.
+- Granular storage loaders: load_page and list_pages retrieve individual pages without loading monolithic documents into memory.`,
     htmlUrl: `https://github.com/RohannShetty/gitbook-downloader/releases/tag/v${VERSION}`,
     assets: [
       {
