@@ -36,7 +36,7 @@ const TOUR_STEPS: TourStep[] = [
     subtitle: "Turn Any Documentation Site into LLM-Ready Markdown & Vector Context",
     description: "DocHarvest is a local-first documentation harvester, AI context compiler, and FastMCP server. It cleans up to 89% of token-wasting navigation boilerplate and outputs structured knowledge corpora.",
     icon: Sparkles,
-    badge: "v11.0.5 Architecture",
+    badge: "v11.0.6 Architecture",
     tips: [
       "100% local, zero telemetry, zero cloud fees",
       "8 dedicated documentation platform providers",

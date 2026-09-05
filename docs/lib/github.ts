@@ -168,12 +168,11 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.0.5
+### What's New in v11.0.6
 
-- find_docs: resolves library/framework names and aliases (e.g. "react") to locally indexed domains.
-- read_doc: AST-safe page and topic reads with token bounding, never truncating code fences.
-- AST-safe context chunking: fenced code blocks, tables, and callouts are never broken mid-element.
-- Granular storage loaders: load_page and list_pages retrieve individual pages without loading monolithic documents into memory.`,
+- FTS5-escaped search queries: dotted/special tokens (e.g. 2.0.0.9) match as quoted phrases instead of raising fts5 syntax errors.
+- read_doc topic extraction: exact heading matches now rank above sections that merely contain the phrase.
+- Zero-record JSONL exports fail explicitly with a re-capture hint instead of writing 0-byte files.`,
     htmlUrl: `https://github.com/RohannShetty/gitbook-downloader/releases/tag/v${VERSION}`,
     assets: [
       {

@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.6] - 2026-09-05
+
+### 🔍 Search Robustness, Topic Ranking & Export Correctness Patch
+
+Version 11.0.6 is a focused patch release for the MCP tool surface: user search queries are FTS5-escaped so dotted or special-character input can no longer crash search, `read_doc` topic extraction now prefers exact heading matches over sections that merely contain the phrase, and zero-record JSONL exports fail explicitly instead of writing empty files. Backwards compatible with 11.0.x.
+
+### Fixed
+
+- **FTS5-escaped search queries** (`src/gitbook_downloader/search/index.py`): user queries are escaped via the new `_fts_escape()` before reaching the FTS5 `MATCH` expression, so dotted/special tokens (e.g. `2.0.0.9`) are matched as quoted literal phrases **per token** instead of raising `fts5: syntax error`. Plain-word queries keep the implicit-AND behavior, valid `prefix*` queries still work, embedded double quotes are stripped, and orphaned `AND`/`OR`/`NOT` operators are dropped so malformed input degrades gracefully. All search paths (`search_docs`, CLI, GUI bridge) funnel through `SearchIndex.search()`, so they all inherit the escaping.
+- **`read_doc(topic=...)` exact-heading matches rank first** (`src/gitbook_downloader/mcp/server.py`): sections whose normalized heading equals the requested topic are selected before sections that merely contain the phrase in body or heading — single-page GitBook sites now return the real section instead of the Table of Contents.
+- **Zero-record JSONL exports fail explicitly** (`src/gitbook_downloader/mcp/server.py`, `src/gitbook_downloader/utils/export.py`): `export_to_jsonl()` now returns the record written count, and `export_docs` returns an explicit error telling the user to re-capture when a domain has no stored pages (captured before granular page storage) — no more silent 0-byte export files.
+
 ## [11.0.5] - 2026-09-05
 
 ### 🔧 MCP Out of the Box, Search-Index Hygiene & Theme-Consistency Patch

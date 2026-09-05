@@ -131,8 +131,8 @@ export const pyApi = {
     if (window.pywebview?.api?.get_system_info) return await window.pywebview.api.get_system_info()
     return {
       name: 'DocHarvest',
-      version: '11.0.5',
-      engine: 'DocHarvest Engine v11.0.5 (AST + FastMCP v2 + fpdf2)',
+      version: '11.0.6',
+      engine: 'DocHarvest Engine v11.0.6 (AST + FastMCP v2 + fpdf2)',
       platform: 'win32',
       library_dir: '~/.gitbook-downloader/docs'
     }
