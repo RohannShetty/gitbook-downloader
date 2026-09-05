@@ -132,3 +132,6 @@ local-artifacts/
 ruff_cache/
 .ruff_cache/
 .mypy_cache/
+
+# uv build output for PyPI uploads
+dist-pypi/

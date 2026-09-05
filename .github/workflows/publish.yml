@@ -1,0 +1,68 @@
+name: Publish to PyPI
+
+# Publishes the package to PyPI via Trusted Publishing (OIDC — no API token stored).
+#
+# ONE-TIME SETUP on PyPI (as account owner):
+#   pypi.org → Account settings → Publishing → "Add a pending publisher":
+#     PyPI project name:  gitbook-downloader
+#     Owner:              RohannShetty
+#     Repository:         gitbook-downloader
+#     Workflow filename:  publish.yml
+#     Environment:        pypi
+# After that, run this workflow (Actions → Publish to PyPI → Run workflow)
+# or publish any GitHub release — uploads authenticate via OIDC.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Validate distribution metadata
+        run: uvx twine check dist/*
+
+      - name: Smoke-test the wheel in a clean venv
+        run: |
+          uv venv .venv-smoke
+          uv pip install --python .venv-smoke --no-cache dist/*.whl
+          .venv-smoke/bin/gitbook-dl --version
+          uv run --no-project --python .venv-smoke/bin/python python -c "from gitbook_downloader.mcp import server; print('mcp server import OK')"
+          uv run --no-project --python .venv-smoke/bin/python python -c "
+          from importlib.metadata import requires
+          deps = requires('gitbook-downloader')
+          assert any(d.startswith('mcp>=') and 'extra' not in d for d in deps), 'mcp must be a base dependency'
+          print('mcp present in base dependencies OK')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi-dists
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pypi-dists
+          path: dist/
+
+      - name: Publish to PyPI (Trusted Publishing / OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
