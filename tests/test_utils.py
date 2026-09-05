@@ -544,15 +544,16 @@ class TestExportToJsonl:
             assert data["text"] == "Content here"
             assert data["metadata"]["domain"] == "example.com"
 
-    def test_empty_pages(self):
+    def test_empty_pages_writes_no_file(self):
+        """Zero records -> return 0 and no file (a 0-byte export is never
+        left behind; callers surface the empty page tree themselves)."""
         with tempfile.TemporaryDirectory() as tmp:
             mock_storage = MagicMock()
             mock_storage.get_pages.return_value = []
             output_path = Path(tmp) / "output.jsonl"
-            export_to_jsonl("example.com", mock_storage, str(output_path))
-            assert output_path.exists()
-            content = output_path.read_text(encoding="utf-8").strip()
-            assert content == ""
+            count = export_to_jsonl("example.com", mock_storage, str(output_path))
+            assert count == 0
+            assert not output_path.exists()
 
     def test_missing_get_pages_method(self):
         with tempfile.TemporaryDirectory() as tmp:

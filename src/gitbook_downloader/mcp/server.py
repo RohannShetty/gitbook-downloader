@@ -25,6 +25,7 @@ tool parameters onto ``CaptureOptions`` and reports ``CaptureResult`` fields.
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
@@ -120,6 +121,86 @@ def _path_or_none(p: Optional[Path]) -> Optional[str]:
     return str(p) if p is not None else None
 
 
+# ── Topic extraction (ISSUE-2: exact-heading match wins) ─────────────
+
+
+def _normalize_topic_text(text: str) -> str:
+    """Normalize a heading or topic for comparison.
+
+    Lower-cases, strips leading markdown heading markers (``#``), and
+    collapses all whitespace runs to single spaces so a topic matches the
+    heading it names regardless of casing, markers, or spacing.
+    """
+    normalized = (text or "").strip().lower()
+    normalized = re.sub(r"^#{1,6}\s*", "", normalized)
+    return " ".join(normalized.split())
+
+
+def _extract_topic_bounded(content: str, topic: Optional[str], max_tokens: int = 4000) -> str:
+    """Extract a topic's context from *content*, exact-heading match first.
+
+    Wraps :func:`gitbook_downloader.splitter.extract_topic_context` with one
+    ranking rule: when *topic* is given, sections whose normalized heading
+    equals the normalized topic are selected before any section that merely
+    contains the phrase in its heading or body (containment remains the
+    fallback, in the same relative document order as before). Without this,
+    a Table-of-Contents section whose body lists the topic crowds out the
+    actual release-notes section it names.
+
+    The section split, token budgeting, and no-match fallback (return the
+    whole bounded document) are identical to the splitter's behaviour.
+
+    Args:
+        content: Raw markdown text.
+        topic: Optional topic or section title to filter by.
+        max_tokens: Approximate token budget (1 token ≈ 4 characters).
+
+    Returns:
+        Bounded, clean markdown string.
+    """
+    from gitbook_downloader.splitter import extract_topic_context
+
+    if not content:
+        return ""
+    if not topic or not topic.strip():
+        return extract_topic_context(content, topic=None, max_tokens=max_tokens)
+
+    # Split into sections exactly like splitter.extract_topic_context does,
+    # so the ranking here lines up with its downstream budget assembly.
+    raw_sections = content.split("\n#")
+    sections: list[str] = []
+    for i, sec in enumerate(raw_sections):
+        if i > 0:
+            sec = "#" + sec
+        sections.append(sec)
+
+    topic_norm = _normalize_topic_text(topic)
+    # Containment keeps the splitter's raw-substring semantics; only the
+    # exact-heading comparison is normalized.
+    topic_lower = topic.strip().lower()
+
+    exact: list[str] = []
+    contains: list[str] = []
+    for sec in sections:
+        first_line = sec.split("\n", 1)[0]
+        if _normalize_topic_text(first_line) == topic_norm:
+            exact.append(sec)
+        elif topic_lower in sec.lower():
+            contains.append(sec)
+
+    if not exact and not contains:
+        # No match at all: preserve the splitter's fallback of returning the
+        # whole (bounded) document.
+        return extract_topic_context(content, topic=None, max_tokens=max_tokens)
+
+    # Exact-heading matches rank first; containment matches keep their
+    # document order after them. Sections start with '#' and contain no
+    # interior '\n#' (the split consumed those), so re-joining with '\n'
+    # restores the exact boundaries the splitter re-splits on.
+    ranked = exact + contains
+    return extract_topic_context("\n".join(ranked), topic=None, max_tokens=max_tokens)
+
+
 # ── Tools ────────────────────────────────────────────────────────────
 
 
@@ -205,7 +286,9 @@ async def search_docs(
     """Full-text search across downloaded documentation.
 
     Uses SQLite FTS5 with BM25 ranking when the search index is available.
-    Supports AND, OR, NOT, quoted phrases, and prefix* syntax.
+    Supports AND, OR, NOT, and prefix* syntax; tokens containing punctuation
+    (e.g. version numbers like 2.0.0.9) are escaped and matched as literal
+    phrases instead of raising an FTS5 syntax error.
 
     Args:
         query: Search query (e.g. "authentication" or "api rate limit").
@@ -305,8 +388,6 @@ async def read_doc(
         Dict with domain, path/topic, token_estimate, content, and found status.
     """
     try:
-        from gitbook_downloader.splitter import extract_topic_context
-
         # 1. If path is provided, attempt to load that specific page
         if path:
             clean_p = path.replace("\\", "/")
@@ -314,7 +395,7 @@ async def read_doc(
             if page_content is None and not clean_p.endswith(".md"):
                 page_content = _storage.load_page(domain, f"{clean_p}.md")
             if page_content is not None:
-                bounded = extract_topic_context(page_content, topic=topic, max_tokens=max_tokens)
+                bounded = _extract_topic_bounded(page_content, topic, max_tokens)
                 return {
                     "domain": domain,
                     "path": path,
@@ -337,7 +418,7 @@ async def read_doc(
                 "error": f"Documentation not found for domain '{domain}'",
             }
 
-        bounded = extract_topic_context(raw_content, topic=topic, max_tokens=max_tokens)
+        bounded = _extract_topic_bounded(raw_content, topic, max_tokens)
         return {
             "domain": domain,
             "path": path,
@@ -478,7 +559,23 @@ async def export_docs(
             # export_to_jsonl needs a get_pages() provider; wrap the raw
             # StorageManager (same adapter the CLI uses) so the file is
             # actually written instead of silently logging an error.
-            export_to_jsonl(domain, StoragePageSource(_storage, domain), str(export_path))
+            count = export_to_jsonl(domain, StoragePageSource(_storage, domain), str(export_path))
+            if count == 0:
+                # Legacy libraries (captured before granular page storage)
+                # have an empty pages/ tree. Never leave a 0-byte export
+                # behind or report silent success — tell the user to
+                # re-capture instead.
+                try:
+                    export_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                return {
+                    "error": (
+                        f"No page data for '{domain}'. The page tree is empty "
+                        "(captured before granular storage). Re-capture the domain "
+                        "to populate pages/, then export."
+                    )
+                }
             preview = ""
             try:
                 with open(export_path, encoding="utf-8") as fh:

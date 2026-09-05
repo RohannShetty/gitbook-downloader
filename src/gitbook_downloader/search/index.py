@@ -14,6 +14,49 @@ logger = logging.getLogger(__name__)
 
 SEARCH_DB_NAME = "search.db"
 
+_FTS_SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_]+$")
+_FTS_OPERATORS = frozenset({"AND", "OR", "NOT"})
+
+
+def _fts_escape(query: str) -> str:
+    """Escape a user query into a syntactically valid FTS5 ``MATCH`` expression.
+
+    FTS5 treats most punctuation (``.``, ``(``, ``:`` …) as query syntax, so a
+    bare token like ``2.0.0.9`` raises ``fts5: syntax error near "."``. Rules:
+
+    - Tokens that are already FTS5-safe (``[A-Za-z0-9_]+``) pass through
+      unchanged, preserving behaviour for plain multi-word queries (implicit
+      AND). A safe token with a trailing ``*`` (e.g. ``auth*``) also passes
+      through so prefix search keeps working.
+    - Upper-case bare ``AND`` / ``OR`` / ``NOT`` pass through as operators;
+      they are dropped when orphaned (leading, doubled, or trailing) so a
+      malformed query degrades instead of raising.
+    - Every other token is wrapped in double quotes as a literal phrase
+      (``2.0.0.9`` → ``"2.0.0.9"``) after removing embedded double quotes,
+      which would otherwise terminate the phrase early.
+    """
+    tokens: list[str] = []
+    for token in query.split():
+        if token in _FTS_OPERATORS or _FTS_SAFE_TOKEN.match(token):
+            tokens.append(token)
+            continue
+        if token.endswith("*") and len(token) > 1 and _FTS_SAFE_TOKEN.match(token[:-1]):
+            tokens.append(token)  # valid FTS5 prefix query, e.g. auth*
+            continue
+        cleaned = token.replace('"', "")
+        if cleaned:
+            tokens.append(f'"{cleaned}"')
+    # Drop orphaned operators so the expression always parses: an operator
+    # must sit between two terms.
+    result: list[str] = []
+    for token in tokens:
+        if token in _FTS_OPERATORS and (not result or result[-1] in _FTS_OPERATORS):
+            continue
+        result.append(token)
+    while result and result[-1] in _FTS_OPERATORS:
+        result.pop()
+    return " ".join(result)
+
 
 def _strip_unprintable(text: str) -> str:
     """Remove non-printable characters (zero-width marks, BOM, control chars).
@@ -241,12 +284,15 @@ class SearchIndex:
     def search(self, query: str, domain: Optional[str] = None, limit: int = 10) -> list:
         """Full-text search using FTS5 BM25 ranking.
 
-        Supports the full FTS5 query syntax: ``AND``, ``OR``, ``NOT``,
-        quoted phrases (``"exact match"``), prefix wildcards (``term*``),
-        and column filters (``title:query``).
+        The query is escaped via :func:`_fts_escape` before it reaches the
+        FTS5 ``MATCH`` expression: plain words keep the implicit-AND
+        behaviour, bare upper-case ``AND`` / ``OR`` / ``NOT`` act as
+        operators, and tokens containing punctuation (version numbers,
+        symbols) are matched as quoted literal phrases instead of raising
+        ``fts5: syntax error``.
 
         Args:
-            query: FTS5 search query.
+            query: User search query.
             domain: Restrict results to a specific domain.
             limit: Maximum number of results.
 
@@ -256,6 +302,12 @@ class SearchIndex:
             ``section_heading``, ``rank``.
         """
         if not query or not query.strip():
+            return []
+
+        match_expr = _fts_escape(query)
+        if not match_expr.strip():
+            # Every token was unusable (quotes/punctuation only) — nothing to
+            # match, but never a syntax error.
             return []
 
         conn = _get_connection(self.base_dir)
@@ -277,7 +329,7 @@ class SearchIndex:
                     ORDER BY pages_fts.rank
                     LIMIT ?
                 """
-                params: list = [query, domain, limit]
+                params: list = [match_expr, domain, limit]
             else:
                 sql = """
                     SELECT
@@ -293,7 +345,7 @@ class SearchIndex:
                     ORDER BY pages_fts.rank
                     LIMIT ?
                 """
-                params: list = [query, limit]
+                params: list = [match_expr, limit]
 
             cursor = conn.execute(sql, params)
             return [

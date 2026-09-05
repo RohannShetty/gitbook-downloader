@@ -100,7 +100,7 @@ def export_to_jsonl(
     domain: str,
     storage_manager: Any,
     output_path: str | Path,
-) -> None:
+) -> int:
     """Export all stored pages for *domain* to a JSONL file.
 
     Each line is a JSON object::
@@ -114,19 +114,39 @@ def export_to_jsonl(
                          ``content`` keys.  If it exposes a ``close()`` method
                          it will be called when done.
         output_path:    Destination file path for the JSONL output.
-    """
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    Returns:
+        The number of records written. When the page source yields zero
+        records, no file is created (a 0-byte export is never left behind)
+        and ``0`` is returned so callers can surface the condition — e.g. a
+        domain captured before granular page storage has an empty
+        ``pages/`` tree and should be re-captured instead of exported.
+    """
     count = 0
     try:
-        pages = storage_manager.get_pages(domain)
+        pages = list(storage_manager.get_pages(domain))
     except AttributeError:
         logger.error("storage_manager has no get_pages() method")
-        return
+        return 0
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to fetch pages for domain %s: %s", domain, exc)
-        return
+        return 0
+
+    # Cleanup if the storage_manager supports it
+    close_fn = getattr(storage_manager, "close", None)
+    if callable(close_fn):
+        close_fn()
+
+    if not pages:
+        logger.warning(
+            "No page data for domain %s (empty page tree); no JSONL written to %s",
+            domain,
+            output_path,
+        )
+        return 0
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, "w", encoding="utf-8") as fh:
         for page in pages:
@@ -142,12 +162,8 @@ def export_to_jsonl(
             fh.write(json.dumps(record, ensure_ascii=False) + "\n")
             count += 1
 
-    # Cleanup if the storage_manager supports it
-    close_fn = getattr(storage_manager, "close", None)
-    if callable(close_fn):
-        close_fn()
-
     logger.info("Exported %d pages to %s", count, output_path)
+    return count
 
 
 def export_to_pdf(md_path: str | Path, output_path: str | Path) -> str:

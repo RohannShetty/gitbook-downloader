@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from gitbook_downloader.search import SearchIndex
+from gitbook_downloader.search.index import _fts_escape
 
 
 class TestSearchIndexInit:
@@ -472,3 +473,110 @@ class TestSearchIndexInsertErrorLogging:
         domains = si.list_indexed_domains()
         assert [d["name"] for d in domains] == ["broken.com"]
         assert domains[0]["pages"] == 0
+
+
+class TestFtsEscape:
+    """Unit tests for the FTS5 MATCH escaping (ISSUE-1).
+
+    FTS5 treats ``.`` and most punctuation as query syntax, so a raw dotted
+    token like ``2.0.0.9`` used to raise ``fts5: syntax error near "."``.
+    """
+
+    def test_dotted_token_is_quoted_as_phrase(self):
+        assert _fts_escape("2.0.0.9") == '"2.0.0.9"'
+
+    def test_or_between_dotted_tokens_is_preserved(self):
+        assert _fts_escape("2.0.0.9 OR 2.0.0.10") == '"2.0.0.9" OR "2.0.0.10"'
+
+    def test_plain_words_pass_through_unchanged(self):
+        assert _fts_escape("changelog release notes") == "changelog release notes"
+
+    def test_safe_token_with_trailing_star_keeps_prefix_syntax(self):
+        assert _fts_escape("auth*") == "auth*"
+
+    def test_unsafe_prefix_stem_is_quoted(self):
+        # '2.0*' bare is a syntax error; quoted it is a literal phrase.
+        assert _fts_escape("2.0*") == '"2.0*"'
+
+    def test_embedded_double_quotes_are_stripped(self):
+        assert _fts_escape('a"b') == '"ab"'
+        assert _fts_escape('"') == ""  # quotes-only token carries nothing
+
+    def test_orphaned_operators_are_dropped_not_emitted(self):
+        # A lone/trailing/doubled operator would be a MATCH syntax error.
+        assert _fts_escape("AND") == ""
+        assert _fts_escape("release AND") == "release"
+        assert _fts_escape("AND release") == "release"
+        assert _fts_escape("release AND AND notes") == "release AND notes"
+
+    def test_totality_over_hostile_input(self):
+        for query in ["", "   ", '("', "!!!", '""', "\t\n", ":", "()"]:
+            assert isinstance(_fts_escape(query), str)
+
+
+class TestSearchSpecialTokens:
+    """ISSUE-1: user queries with dotted/special tokens must never raise.
+
+    Live repro: ``search_docs(query="2.0.0.9 OR 2.0.0.10")`` returned
+    ``{"error": "fts5: syntax error near \".\""}`` because the raw string was
+    passed to the FTS5 MATCH expression.
+    """
+
+    def test_dotted_version_token_finds_release_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain(
+                "releases.com",
+                "# Version 2.0.0.9 Released\n\nFull release notes body.\n\n"
+                "# Older\n\nVersion 1.9.0 shipped last year.",
+                domain_url="https://releases.com",
+            )
+            results = si.search("2.0.0.9")  # raised pre-fix
+            assert results, "dotted version token must match the release row"
+            assert all(r["domain"] == "releases.com" for r in results)
+            assert any("2.0.0.9" in r["section_heading"] for r in results)
+
+    def test_or_query_with_dotted_tokens_runs_without_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain(
+                "releases.com",
+                "# Version 2.0.0.9 Released\n\nFull release notes body.\n\n"
+                "# Version 2.0.0.10 Released\n\nPatch notes body.",
+                domain_url="https://releases.com",
+            )
+            results = si.search("2.0.0.9 OR 2.0.0.10")  # raised pre-fix
+            assert isinstance(results, list)
+            headings = {r["section_heading"] for r in results}
+            assert headings == {"Version 2.0.0.9 Released", "Version 2.0.0.10 Released"}
+
+    def test_plain_multi_word_query_behaviour_unchanged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain(
+                "docs.example.com",
+                "# Changelog\n\nchangelog release notes for the latest version.\n\n"
+                "# Guide\n\nHow to install the tool.",
+                domain_url="https://docs.example.com",
+            )
+            results = si.search("changelog release notes")
+            assert results, "plain multi-word query must keep matching (implicit AND)"
+            assert all(r["domain"] == "docs.example.com" for r in results)
+            assert any(r["section_heading"] == "Changelog" for r in results)
+
+    def test_hostile_queries_do_not_raise(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain("docs.example.com", "# Guide\n\nSome content.")
+            for query in ['("', 'a"b', "", "!!!", '""', "AND", "release AND", ":"]:
+                results = si.search(query)  # must not raise for any of these
+                assert isinstance(results, list)
+
+    def test_prefix_query_still_expands(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain("docs.example.com", "# Docs\n\nDocumentation tools guide.")
+            # 'docu*' is valid FTS5 prefix syntax and must keep working.
+            results = si.search("docu*")
+            assert results, "prefix wildcard must still match the stemmed token"
+            assert all(r["domain"] == "docs.example.com" for r in results)

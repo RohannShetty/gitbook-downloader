@@ -514,3 +514,188 @@ def test_query_doc_graph_and_related_concepts(tmp_path, monkeypatch):
     assert "primary_matches" in res_concepts
 
 
+# ── read_doc topic extraction: exact-heading match wins (ISSUE-2) ────
+
+# Mirrors the live repro: a single-page GitBook site captured as heading
+# sections, whose Table-of-Contents section body *lists* every release
+# (including the topic phrase) while the actual release-notes section is
+# titled with it. The TOC is large enough (>16k chars) that, ranked second,
+# it exhausts the default token budget — which is exactly why containment
+# ranking used to return the TOC and never the release notes.
+_BOOK_CONTENT = (
+    "# OpenAlgo Docs\n\nWelcome to the documentation.\n\n"
+    "## Table of Contents\n\n"
+    + "- [Version 2.0.2.2 Released](#version-2-0-2-2-released)\n" * 450
+    + "\n## Version 2.0.2.2 Released\n\nrelease notes content here\n"
+)
+
+
+def _seed_book_library(tmp_path, monkeypatch):
+    """Real storage + real search index holding _BOOK_CONTENT for a domain."""
+    from gitbook_downloader.search import SearchIndex
+    from gitbook_downloader.storage import StorageManager
+
+    domain = "docs.openalgo.test"
+    storage = StorageManager(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_storage", storage)
+    index = SearchIndex(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_search", index)
+
+    storage.save_doc(
+        domain=domain,
+        content=_BOOK_CONTENT,
+        url=f"https://{domain}/",
+        title="OpenAlgo",
+        pages=3,
+        provider="gitbook",
+    )
+    index.index_domain(domain, _BOOK_CONTENT, f"https://{domain}/")
+    return domain, storage
+
+
+def test_read_doc_topic_prefers_exact_heading_section(tmp_path, monkeypatch):
+    """`read_doc(topic=...)` must return the section TITLED with the topic,
+    not the earlier section that merely contains the phrase (ISSUE-2)."""
+    import sqlite3
+
+    domain, storage = _seed_book_library(tmp_path, monkeypatch)
+
+    # The index really holds the exact-heading section the topic names.
+    conn = sqlite3.connect(str(tmp_path / "search.db"))
+    try:
+        headings = {
+            row[0]
+            for row in conn.execute(
+                "SELECT section_heading FROM pages_meta WHERE domain = ?", (domain,)
+            ).fetchall()
+        }
+    finally:
+        conn.close()
+    assert "Version 2.0.2.2 Released" in headings
+    assert "Table of Contents" in headings
+
+    res = call_tool(server.read_doc, domain=domain, topic="Version 2.0.2.2 Released")
+
+    assert res["found"] is True
+    assert "error" not in res
+    # The release-notes section itself, not a TOC excerpt.
+    assert res["content"].startswith("## Version 2.0.2.2 Released")
+    assert "release notes content here" in res["content"]
+
+
+def test_read_doc_topic_matching_nothing_returns_bounded_full_book(tmp_path, monkeypatch):
+    """No-match topics keep today's contract: the whole (bounded) book."""
+    from gitbook_downloader.storage import StorageManager
+
+    domain = "docs.small.test"
+    storage = StorageManager(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_storage", storage)
+    book = (
+        "# Intro\n\nWelcome to the documentation.\n\n"
+        "## Version 2.0.2.2 Released\n\nrelease notes content here\n"
+    )
+    storage.save_doc(
+        domain=domain,
+        content=book,
+        url=f"https://{domain}/",
+        title="Small",
+        pages=2,
+        provider="gitbook",
+    )
+
+    res = call_tool(server.read_doc, domain=domain, topic="No Such Topic Anywhere")
+
+    assert res["found"] is True
+    assert "error" not in res
+    assert "Welcome to the documentation." in res["content"]
+    assert "release notes content here" in res["content"]
+
+
+def test_extract_topic_bounded_ranks_exact_heading_before_containment():
+    """Direct unit test of the ranking rule: an exact normalized heading
+    match is selected ahead of a section that only contains the phrase."""
+    content = (
+        "# Intro\n\nintro body\n\n"
+        "## Table of Contents\n\n- [Quickstart](#quickstart)\n- more toc lines\n\n"
+        "## Quickstart\n\nquickstart section body here\n"
+    )
+    out = server._extract_topic_bounded(content, "Quickstart", max_tokens=4000)
+
+    assert "quickstart section body here" in out
+    # Exact-heading section first; the TOC (containment) may follow in the
+    # leftover budget but never before it.
+    assert out.index("quickstart section body here") < out.index("Table of Contents")
+
+
+def test_extract_topic_bounded_normalizes_case_markers_and_whitespace():
+    """Topics match headings case-insensitively, modulo leading '#' markers
+    and collapsed whitespace. The exact-normalized match must outrank a
+    containment match, even though the raw (unnormalized) strings differ."""
+    content = (
+        "## Quick   Start\n\nsection one body here\n\n"
+        "# Other\n\nsee the quick start guide in this body\n"
+    )
+    out = server._extract_topic_bounded(content, "quick start", max_tokens=4000)
+
+    assert out.index("section one body here") < out.index("quick start guide")
+
+
+def test_extract_topic_bounded_no_topic_returns_full_content():
+    content = "# A\n\nalpha body.\n\n# B\n\nbeta body."
+    assert server._extract_topic_bounded(content, None, max_tokens=4000) == (
+        "# A\n\nalpha body.\n\n# B\n\nbeta body."
+    )
+    assert server._extract_topic_bounded("", "anything", max_tokens=4000) == ""
+
+
+# ── export_docs: empty page tree must not write a 0-byte file (ISSUE-3) ─
+
+
+def test_export_docs_jsonl_empty_page_tree_returns_error_and_writes_no_file(tmp_path, monkeypatch):
+    """Legacy library shape: docs.md exists but pages/ is empty (captured
+    before granular storage). The tool must report an explicit error and
+    leave no 0-byte export on disk (ISSUE-3)."""
+    from gitbook_downloader.storage import StorageManager
+
+    domain = "legacy.example.com"
+    storage = StorageManager(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_storage", storage)
+
+    storage.save_doc(
+        domain=domain,
+        content="# Legacy book\n\nCaptured before granular page storage.",
+        url=f"https://{domain}/",
+        title="Legacy",
+        pages=1,
+        provider="gitbook",
+    )
+    pages_dir = storage._domain_dir(domain) / "pages"
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    assert list(pages_dir.iterdir()) == []  # legacy shape: book but no page files
+
+    res = call_tool(server.export_docs, domain=domain, format="jsonl")
+
+    assert res == {
+        "error": (
+            f"No page data for '{domain}'. The page tree is empty "
+            "(captured before granular storage). Re-capture the domain "
+            "to populate pages/, then export."
+        )
+    }
+    assert not (storage._domain_dir(domain) / f"{domain}_export.jsonl").exists()
+
+
+def test_export_to_jsonl_zero_records_returns_zero_without_creating_file(tmp_path):
+    """``export_to_jsonl`` returns 0 for an empty page source and does not
+    create the output file (the caller decides how to surface it)."""
+    from gitbook_downloader.utils.export import export_to_jsonl
+
+    class EmptyPageSource:
+        def get_pages(self, domain):
+            return []
+
+    output_path = tmp_path / "out" / "export.jsonl"
+    count = export_to_jsonl("legacy.example.com", EmptyPageSource(), str(output_path))
+
+    assert count == 0
+    assert not output_path.exists()
