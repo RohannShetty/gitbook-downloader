@@ -6,6 +6,10 @@ launcher are monkeypatched.
 
 from __future__ import annotations
 
+import sys
+import types
+from pathlib import Path
+
 import pytest
 
 from gitbook_downloader import cli
@@ -279,3 +283,47 @@ class TestConsoleEncoding:
         assert fake_out.reconfigured_with == {"encoding": "utf-8", "errors": "replace"}
         assert fake_err.reconfigured_with == {"encoding": "utf-8", "errors": "replace"}
 
+
+# ── mcp subcommand ──────────────────────────────────────────────────────
+
+
+class TestMcpCommand:
+    def test_mcp_starts_server_main(self, monkeypatch):
+        """`gitbook-dl mcp` must delegate to gitbook_downloader.mcp.main()."""
+        calls = []
+        fake_module = types.ModuleType("gitbook_downloader.mcp")
+        fake_module.main = lambda: calls.append("main")
+        monkeypatch.setitem(sys.modules, "gitbook_downloader.mcp", fake_module)
+
+        assert cli.main(["mcp"]) == 0
+        assert calls == ["main"]
+
+    def test_mcp_missing_sdk_is_graceful(self, monkeypatch, capsys, tmp_path):
+        """Missing/broken 'mcp' SDK: server.py's module-level ``FastMCP(...)``
+        raises TypeError ('NoneType' object is not callable) at import. The
+        CLI must catch it and exit 1 with the friendly message — no traceback.
+
+        The test reproduces the real failure mode: the SDK is blocked by
+        removing EVERY cached ``mcp*`` entry from ``sys.modules`` (blocking
+        only ``'mcp'`` is not enough once another module has imported
+        ``mcp.server.fastmcp`` — ``from mcp.server.fastmcp import FastMCP``
+        is then served straight from the cache without touching the blocked
+        parent), and the server module is re-imported fresh, exactly as a
+        broken install would behave.
+        """
+        # Keep the fresh server import off the real home directory.
+        monkeypatch.setattr(Path, "home", lambda: tmp_path)
+        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path / "library"))
+        cached = [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]
+        for key in cached:
+            monkeypatch.delitem(sys.modules, key, raising=False)
+        monkeypatch.setitem(sys.modules, "mcp", None)  # blocks `import mcp`
+        monkeypatch.delitem(sys.modules, "gitbook_downloader.mcp", raising=False)
+        monkeypatch.delitem(sys.modules, "gitbook_downloader.mcp.server", raising=False)
+
+        rc = cli.main(["mcp"])
+
+        assert rc == 1
+        err = capsys.readouterr().err
+        assert "MCP functionality requires the 'mcp' package" in err
+        assert "gitbook-downloader[mcp]" in err

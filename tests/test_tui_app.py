@@ -138,6 +138,25 @@ def test_nav_bar_buttons_switch_surface_and_mark_active():
     run_async(scenario())
 
 
+def test_nav_bar_brand_shows_real_version():
+    """The brand badge must show the real package version — the hardcoded
+    ``v7`` predates the modular rewrite and never moved."""
+
+    async def scenario():
+        from gitbook_downloader import __version__
+
+        app, _engine, _opened = make_app()
+        async with app.run_test(size=(120, 42)) as pilot:
+            await pilot.pause()
+            navbar = app.query_one(NavBar)
+            brand = navbar.query_one("#brand")
+            text = str(brand.render())
+            assert f"v{__version__}" in text
+            assert "v7" not in text
+
+    run_async(scenario())
+
+
 def test_show_surface_refreshes_diagnostics_from_state():
     async def scenario():
         app, _engine, _opened = make_app()

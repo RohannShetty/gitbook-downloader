@@ -6,7 +6,10 @@ runs on plain pytest without browser dependencies).
 
 After Phase 3:
 - Hero.tsx: STATUS: and TIME: are collapsed into a single line.
-- InstallModal.tsx: install command renders at text-cyan/90 (readable).
+- InstallModal.tsx: install command renders via the token-driven code island
+  (``.light``-aware ``--code-bg``/``--code-fg`` in docs/app/globals.css,
+  >= 7:1 contrast in both themes); the known-broken dim cyan opacities
+  (/10, /20, /90) and ``!bg-transparent`` are prohibited.
 - CaptureStudio.tsx: Batch tab has a button with text "Run Batch".
 - DiffView.tsx: snapshot select lists only real snapshot IDs (no ["1.0.0"]
   hardcoded fallback; uses currentItem.snapshots from the bridge).
@@ -65,14 +68,31 @@ def test_hero_no_legacy_status_time_labels() -> None:
 
 
 def test_install_modal_command_uses_readable_cyan() -> None:
-    """The install command must be at text-cyan/90 (readable)."""
+    """The install command must render readable in both themes.
+
+    The readability anchor is now the token-driven code island
+    (``.light``-aware ``--code-bg``/``--code-fg`` in docs/app/globals.css,
+    measured >= 7:1 contrast), not a hard-coded ``text-cyan/90`` — the old
+    ``text-cyan/90`` + ``!bg-transparent`` pattern was the bug (dim cyan on
+    a stripped background). The known-broken dim patterns are prohibited,
+    and the install command block must still exist.
+    """
     text = _read_text(INSTALL_MODAL)
-    # The wrapping <div> and the <pre> on the install panel must use the
-    # readable token (>= /80 opacity).
-    assert "text-cyan/90" in text, (
-        f"{INSTALL_MODAL.name} should render the install command at "
-        f"text-cyan/90 — anything dimmer (e.g. text-cyan/10) is invisible."
+    # The known-broken patterns must never come back.
+    assert "!bg-transparent" not in text, (
+        f"{INSTALL_MODAL.name} uses !bg-transparent — the broken pattern that "
+        f"stripped the code island's background."
     )
+    for dim in ("text-cyan/10", "text-cyan/20", "text-cyan/90"):
+        assert dim not in text, (
+            f"{INSTALL_MODAL.name} uses {dim} — a dim cyan that is unreadable "
+            f"on the code island."
+        )
+    # The install command block must still exist and render the command.
+    assert "<pre>" in text, f"{INSTALL_MODAL.name} must keep the <pre> command block"
+    assert (
+        "activeTab.command" in text
+    ), f"{INSTALL_MODAL.name} must still render the active tab's install command"
 
 
 # ── CaptureStudio.tsx ────────────────────────────────────────────────────

@@ -4,13 +4,25 @@ Search database lives at ~/.gitbook-downloader/search.db.
 Uses FTS5 (bundled with stdlib sqlite3 since Python 3.6).
 """
 
+import logging
 import re
 import sqlite3
 from pathlib import Path
 from typing import Optional
 
+logger = logging.getLogger(__name__)
 
 SEARCH_DB_NAME = "search.db"
+
+
+def _strip_unprintable(text: str) -> str:
+    """Remove non-printable characters (zero-width marks, BOM, control chars).
+
+    Headings harvested from HTML often carry invisible characters such as
+    ``\\u200b``; without normalization, two visually identical headings
+    produce distinct ``section_heading`` values and duplicate section URLs.
+    """
+    return "".join(ch for ch in text if ch.isprintable())
 
 
 def _get_db_path(base_dir: Optional[Path] = None) -> Path:
@@ -119,13 +131,15 @@ class SearchIndex:
         conn = _get_connection(self.base_dir)
         try:
             sections = self._parse_sections(docs_content)
-            page_count = self._extract_page_count(docs_content)
 
             # Clear existing entries for this domain so a re-index is clean.
             conn.execute("DELETE FROM pages_meta WHERE domain = ?", (domain,))
             conn.execute("DELETE FROM domains WHERE name = ?", (domain,))
 
             for heading, content in sections:
+                # Normalize first so headings that differ only by invisible
+                # characters collapse onto one URL / section_heading.
+                heading = _strip_unprintable(heading)
                 # Derive a stable URL for each section.
                 if domain_url:
                     slug = heading.lower().replace(" ", "-") if heading else "home"
@@ -140,8 +154,22 @@ class SearchIndex:
                            VALUES (?, ?, ?, ?, ?)""",
                         (section_url, heading or domain, content[:100000], domain, heading or ""),
                     )
-                except Exception:
-                    pass  # Skip problematic entries
+                except Exception as exc:
+                    # One bad section must not abort the whole indexing pass,
+                    # but it must be visible in logs (url + error), not swallowed.
+                    logger.warning(
+                        "Failed to index section %r of domain %s: %s",
+                        section_url,
+                        domain,
+                        exc,
+                    )
+
+            # Page count = distinct section URLs actually indexed for this
+            # domain (dedupe by URL), not a marker count from docs.md.
+            page_count = conn.execute(
+                "SELECT COUNT(DISTINCT url) FROM pages_meta WHERE domain = ?",
+                (domain,),
+            ).fetchone()[0]
 
             # Rebuild the FTS5 index from the updated content table.
             conn.execute("INSERT INTO pages_fts(pages_fts) VALUES('rebuild')")
@@ -205,11 +233,6 @@ class SearchIndex:
             sections.insert(0, ("", preamble))
 
         return sections or [("", content)]
-
-    @staticmethod
-    def _extract_page_count(content: str) -> int:
-        """Approximate page count by counting ``Source:`` markers."""
-        return len(re.findall(r"^Source:\s*http", content, re.MULTILINE)) or 1
 
     # ------------------------------------------------------------------
     # Searching
@@ -310,8 +333,13 @@ class SearchIndex:
         finally:
             conn.close()
 
-    def delete_domain(self, domain: str):
-        """Remove a domain and all its sections from the search index."""
+    def remove_domain(self, domain: str) -> None:
+        """Remove a domain's rows from ``pages_meta`` and ``domains``.
+
+        Deletes every row for *domain* and rebuilds the FTS index. This is
+        the supported way to purge stale or orphaned domains (domains whose
+        ``docs/<domain>/`` directory no longer exists) from the index.
+        """
         conn = _get_connection(self.base_dir)
         try:
             conn.execute("DELETE FROM pages_meta WHERE domain = ?", (domain,))
@@ -320,6 +348,10 @@ class SearchIndex:
             conn.commit()
         finally:
             conn.close()
+
+    def delete_domain(self, domain: str):
+        """Backward-compatible alias for :meth:`remove_domain`."""
+        self.remove_domain(domain)
 
     def rename_domain(self, old_domain: str, new_domain: str):
         """Update domain name in the search index."""

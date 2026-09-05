@@ -13,6 +13,8 @@ from textual.containers import Horizontal, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Static
 
+from .. import __version__
+
 # Surfaces in shell order; keys 1..5 map onto these.
 SURFACES = (
     ("wizard", "Wizard"),
@@ -68,7 +70,7 @@ class NavBar(Horizontal):
 
     def compose(self) -> ComposeResult:
         yield Static(
-            "[b]gitbook-downloader[/b] [dim]v7[/dim]",
+            f"[b]gitbook-downloader[/b] [dim]v{__version__}[/dim]",
             id="brand",
             markup=True,
         )

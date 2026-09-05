@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import dataclasses
+import json
 from pathlib import Path
 from typing import Any, Optional
 from unittest.mock import MagicMock
@@ -252,6 +253,84 @@ def test_list_domains_success(monkeypatch):
     assert res[0]["name"] == "example.com"
 
 
+# ── list_domains: storage-existence filter (DATA-3) ──────────────────
+
+
+def test_list_domains_omits_domains_without_storage(tmp_path, monkeypatch):
+    """Domains kept only by stale index/registry rows — with no docs.md on
+    disk — must not surface through list_domains; a real domain stays listed.
+
+    Mirrors the live data: the search index holds a domain (6,963 rows) whose
+    ``docs/<domain>/`` directory no longer exists.
+    """
+    from gitbook_downloader.search import SearchIndex
+    from gitbook_downloader.storage import StorageManager
+
+    library = tmp_path / "library"
+    storage = StorageManager(base_dir=library)
+    monkeypatch.setattr(server, "_storage", storage)
+    monkeypatch.setattr(server, "_search", SearchIndex(base_dir=library))
+
+    # A real domain: book + metadata + index rows.
+    storage.save_doc(
+        domain="docs.real.com",
+        content="# Real\n\nReal content.",
+        url="https://docs.real.com/",
+        title="Real",
+        pages=2,
+        provider="gitbook",
+        new_pages=2,
+        size_kb=0.2,
+    )
+    SearchIndex(base_dir=library).index_domain(
+        "docs.real.com", "# Real\n\nReal content.", "https://docs.real.com/"
+    )
+
+    # Orphan A: search-index rows only, no storage directory at all.
+    SearchIndex(base_dir=library).index_domain(
+        "orphan-index.com",
+        "# Orphan\n\nRows without storage.",
+        "https://orphan-index.com/",
+    )
+
+    # Orphan B: a metadata registry entry whose docs.md is gone — the shape
+    # StorageManager.list_domains() can actually surface and must be filtered.
+    orphan_dir = storage._domain_dir("orphan-registry.com")
+    orphan_dir.mkdir(parents=True)
+    (orphan_dir / "metadata.json").write_text(
+        json.dumps(
+            {
+                "domain": "orphan-registry.com",
+                "title": "Orphan",
+                "total_pages": 5,
+                "latest_version": "1.0.0",
+                "versions": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    # Sanity: the orphan really does flow out of the raw storage listing.
+    raw_names = [m.get("domain") for m in storage.list_domains()]
+    assert "orphan-registry.com" in raw_names
+
+    out = call_tool(server.list_domains)
+    assert not any("error" in d for d in out)
+    names = [d.get("domain") for d in out]
+    assert "docs.real.com" in names
+    assert "orphan-registry.com" not in names
+    assert "orphan-index.com" not in names
+
+
+def test_docstring_lists_every_registered_tool():
+    """The module docstring must document exactly the registered tool set
+    (regression: it once listed only 8 of the 12 tools)."""
+    doc = server.__doc__ or ""
+    registered = {tool.name for tool in server.mcp._tool_manager.list_tools()}
+    assert len(registered) == 12
+    for name in registered:
+        assert name in doc, f"module docstring is missing tool {name!r}"
+
+
 def test_get_doc_success(monkeypatch):
     mock_storage = MagicMock()
     mock_storage.load_doc.return_value = "# Example Docs Content"
@@ -313,6 +392,81 @@ def test_export_docs_rag(monkeypatch):
     res = call_tool(server.export_docs, domain="example.com", format="rag")
     assert res["format"] == "rag"
     assert "domain: example.com" in res["content"]
+
+
+def test_export_docs_jsonl_writes_parseable_file(tmp_path, monkeypatch):
+    """``export_docs(format="jsonl")`` must actually write the JSONL file.
+
+    Regression: the tool passed the raw ``StorageManager`` to
+    ``export_to_jsonl``, which requires a ``get_pages(domain)`` provider —
+    the call hit the ``AttributeError`` path, logged an error, and silently
+    wrote no file. The tool now wraps storage in ``StoragePageSource`` (the
+    same adapter the CLI uses), so the JSONL lands on disk with one parseable
+    record per stored page and frontmatter stripped from the payloads.
+    """
+    from gitbook_downloader.storage import StorageManager
+    from gitbook_downloader.utils.export import StoragePageSource
+
+    domain = "docs.example.com"
+    storage = StorageManager(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_storage", storage)
+
+    storage.save_doc(
+        domain=domain,
+        content="# Example\n\nCombined book content.",
+        url="https://docs.example.com/",
+        title="Example",
+        pages=2,
+        provider="gitbook",
+    )
+    pages_dir = storage._domain_dir(domain) / "pages"
+    pages_dir.mkdir(parents=True)
+    (pages_dir / "index.md").write_text(
+        "---\n"
+        "title: Home\n"
+        "source_url: https://docs.example.com/\n"
+        "---\n"
+        "\n"
+        "# Home\n"
+        "\n"
+        "Welcome to the documentation home page.",
+        encoding="utf-8",
+    )
+    (pages_dir / "auth.md").write_text(
+        "---\n"
+        "title: Auth\n"
+        "source_url: https://docs.example.com/auth\n"
+        "---\n"
+        "\n"
+        "# Auth\n"
+        "\n"
+        "Authentication tokens and API keys.",
+        encoding="utf-8",
+    )
+    # Sanity: the adapter sees the seeded pages through the real storage.
+    assert len(StoragePageSource(storage, domain).get_pages(domain)) == 2
+
+    res = call_tool(server.export_docs, domain=domain, format="jsonl")
+
+    assert "error" not in res
+    assert res["format"] == "jsonl"
+    jsonl_path = Path(res["path"])
+    assert jsonl_path.exists(), f"JSONL not written at {jsonl_path}"
+    assert res["preview"], "preview must reflect the written file"
+
+    lines = jsonl_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    records = [json.loads(line) for line in lines]  # every line parses
+    assert {r["id"] for r in records} == {
+        "https://docs.example.com/",
+        "https://docs.example.com/auth",
+    }
+    for record in records:
+        assert record["title"]
+        assert record["text"].strip()
+        assert record["metadata"]["domain"] == domain
+        # Frontmatter must be stripped from the JSONL payload body.
+        assert not record["text"].startswith("---")
 
 
 def test_get_changelog_success(monkeypatch):

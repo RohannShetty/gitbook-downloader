@@ -16,6 +16,7 @@ v7 hardening (plan §5):
 """
 
 import difflib
+import logging
 import time
 
 from .manager import (
@@ -24,6 +25,8 @@ from .manager import (
     format_semver,
     parse_semver,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class VersioningError(Exception):
@@ -130,11 +133,18 @@ class VersionManager:
         ``latest_version``, and keeps bumping past any version file that
         already exists on disk (registry/disk desync protection).
 
+        If the content is byte-identical to the latest existing version
+        file, no new version file is created — the existing latest version
+        id is returned, so re-captures of unchanged sites cannot inflate
+        the version history. Content that differs (including rollback
+        safety snapshots) always produces a new version.
+
         Args:
             domain: Domain name.
 
         Returns:
-            str: The new version string, e.g. ``"v1.0.1"``.
+            str: The version string, e.g. ``"v1.0.1"`` — either the newly
+            created version, or the existing latest one when unchanged.
 
         Raises:
             VersioningError: If no current docs exist for the domain.
@@ -153,10 +163,36 @@ class VersionManager:
             self._highest_disk_version(domain) or "0.0.0",
         ]
         newest = max(candidates, key=self._parse_version)
-        new_version = self._next_version(newest)
 
         vdir = self._get_versions_dir(domain)
+
+        # Skip byte-identical re-snapshots: creating another copy of an
+        # unchanged docs.md only inflates the versions/ directory.
+        latest_file = vdir / f"v{str(newest).lstrip('v')}.md"
+        if latest_file.is_file():
+            try:
+                unchanged = latest_file.read_bytes() == content.encode("utf-8")
+            except OSError:
+                unchanged = False
+            if unchanged:
+                latest_clean = f"v{str(newest).lstrip('v')}"
+                logger.info(
+                    "Content of %s is unchanged; keeping version %s (no new snapshot)",
+                    domain,
+                    latest_clean,
+                )
+                # The early return must not strand a stale registry pointer:
+                # if the registry disagrees with the disk truth we just
+                # verified, heal latest_version before returning.
+                if meta.get("latest_version") != latest_clean:
+                    for v in meta["versions"]:
+                        v["is_latest"] = v.get("version") == latest_clean
+                    meta["latest_version"] = latest_clean
+                    self.storage._write_metadata(domain, meta)
+                return latest_clean
+
         vdir.mkdir(parents=True, exist_ok=True)
+        new_version = self._next_version(newest)
         vpath = vdir / f"{new_version}.md"
         while vpath.exists():  # paranoia: never overwrite a snapshot
             new_version = self._next_version(new_version)
