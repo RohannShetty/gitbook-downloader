@@ -146,7 +146,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
               </Badge>
             </div>
             <div className="flex items-center gap-3 font-mono text-xs">
-              <span className="text-emerald-500 font-semibold">+{diffResult.lines_added || 0} added</span>
+              <span className="text-emerald-700 dark:text-emerald-500 font-semibold">+{diffResult.lines_added || 0} added</span>
               <span className="text-destructive font-semibold">-{diffResult.lines_removed || 0} removed</span>
             </div>
           </div>
@@ -160,7 +160,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
                     <span>{c.url || c.file || "docs.md"}</span>
                   </div>
                   <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="text-emerald-500 font-semibold">+{c.lines_added || 0}</span>
+                    <span className="text-emerald-700 dark:text-emerald-500 font-semibold">+{c.lines_added || 0}</span>
                     <span className="text-destructive font-semibold">-{c.lines_removed || 0}</span>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library }) => {
                           <div
                             key={lIdx}
                             className={`px-1.5 py-0.5 rounded font-mono ${
-                              isAdd ? "bg-emerald-500/15 text-emerald-400" :
+                              isAdd ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" :
                               isDel ? "bg-destructive/15 text-destructive" :
                               isHdr ? "text-primary/80 font-bold bg-primary/5" :
                               "text-muted-foreground"

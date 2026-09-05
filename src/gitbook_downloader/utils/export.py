@@ -7,6 +7,7 @@ pages to JSONL, and converting markdown to PDF (with graceful fallback).
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +48,52 @@ def wrap_with_rag_metadata(
         f"headings: [{headings_str}] -->"
     )
     return f"{meta}\n{content}"
+
+
+class StoragePageSource:
+    """``get_pages()`` adapter over a domain's stored page tree.
+
+    :func:`export_to_jsonl` expects a storage object exposing
+    ``get_pages(domain)`` that yields dicts with ``url`` / ``title`` /
+    ``content`` keys; :class:`~gitbook_downloader.storage.StorageManager`
+    keeps the same data as frontmatter-ed files under ``pages/``.
+    Frontmatter is stripped so RAG payloads carry body text and real
+    source URLs only.
+    """
+
+    _FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+
+    def __init__(self, storage: Any, domain: str) -> None:
+        self._storage = storage
+        self._domain = domain
+
+    def get_pages(self, domain: str) -> list[dict[str, str]]:
+        pages: list[dict[str, str]] = []
+        for rel in self._storage.list_pages(domain):
+            raw = self._storage.load_page(domain, rel)
+            if not raw:
+                continue
+            fm_match = self._FRONTMATTER_RE.match(raw)
+            frontmatter = fm_match.group(1) if fm_match else ""
+            body = raw[fm_match.end() :] if fm_match else raw
+            pages.append(
+                {
+                    "url": self._frontmatter_value(frontmatter, "source_url"),
+                    "title": self._frontmatter_value(frontmatter, "title"),
+                    "content": body.strip(),
+                }
+            )
+        return pages
+
+    @staticmethod
+    def _frontmatter_value(frontmatter: str, key: str) -> str:
+        match = re.search(rf"^{re.escape(key)}:\s*(.*)$", frontmatter, re.MULTILINE)
+        if not match:
+            return ""
+        value = match.group(1).strip()
+        if len(value) >= 2 and value.startswith('"') and value.endswith('"'):
+            value = value[1:-1].replace('\\"', '"')
+        return value
 
 
 def export_to_jsonl(

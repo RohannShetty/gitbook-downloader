@@ -126,16 +126,16 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             <span>Terminal Command:</span>
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-1 text-cyan font-bold hover:underline cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+              className="inline-flex items-center gap-1 text-cyan [.light_&]:text-cyan-700 font-bold hover:underline cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
               aria-label="Copy install command"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-cyan/50" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-cyan" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied to Clipboard!' : 'Copy'}</span>
             </button>
           </div>
 
-          <div className="p-4 rounded-lg bg-card/95 border border-border/80 font-mono text-xs text-cyan/90 leading-relaxed overflow-x-auto shadow-inner">
-            <pre className="!bg-transparent !p-0 !border-0 text-cyan/90">
+          <div className="p-4 rounded-lg bg-card/95 border border-border/80 font-mono text-xs leading-relaxed overflow-x-auto shadow-inner">
+            <pre>
               <code>{activeTab.command}</code>
             </pre>
           </div>

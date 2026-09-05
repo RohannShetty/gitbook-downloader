@@ -72,7 +72,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       icon: FileSpreadsheet,
       desc: "Compiled single-file printable documentation handbook with structured headings, code syntax highlighting, and clean typography.",
       badge: "Handbook / Print",
-      badgeColor: "border-emerald-500/40 text-emerald-400 bg-emerald-500/10",
+      badgeColor: "border-emerald-500/40 text-emerald-700 bg-emerald-500/10 dark:text-emerald-400",
     },
     {
       id: "md" as const,
@@ -80,7 +80,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       icon: FileText,
       desc: "Concatenated Markdown handbook with relative internal link rewriting, preserved code blocks, and structured table of contents.",
       badge: "Unified Markdown",
-      badgeColor: "border-purple-500/40 text-purple-400 bg-purple-500/10",
+      badgeColor: "border-purple-500/40 text-purple-700 bg-purple-500/10 dark:text-purple-400",
     },
   ]
 
@@ -200,7 +200,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
         <Card className="border-emerald-500/40 bg-emerald-500/10 backdrop-blur-md shadow-sm p-4.5 animate-in fade-in-50 duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
+              <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div className="overflow-hidden">

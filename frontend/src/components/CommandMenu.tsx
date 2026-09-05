@@ -60,15 +60,15 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
         <CommandGroup heading="Global Shortcuts">
           <CommandItem disabled>
             <span className="text-muted-foreground text-xs">Open command palette</span>
-            <CommandShortcut className="text-cyan-400">{KEYBINDINGS["Open command palette"]}</CommandShortcut>
+            <CommandShortcut className="text-cyan-700 dark:text-cyan-400">{KEYBINDINGS["Open command palette"]}</CommandShortcut>
           </CommandItem>
           <CommandItem disabled>
             <span className="text-muted-foreground text-xs">Toggle theme</span>
-            <CommandShortcut className="text-cyan-400">{KEYBINDINGS["Toggle theme"]}</CommandShortcut>
+            <CommandShortcut className="text-cyan-700 dark:text-cyan-400">{KEYBINDINGS["Toggle theme"]}</CommandShortcut>
           </CommandItem>
           <CommandItem disabled>
             <span className="text-muted-foreground text-xs">Refresh diagnostics</span>
-            <CommandShortcut className="text-cyan-400">{KEYBINDINGS["Refresh diagnostics"]}</CommandShortcut>
+            <CommandShortcut className="text-cyan-700 dark:text-cyan-400">{KEYBINDINGS["Refresh diagnostics"]}</CommandShortcut>
           </CommandItem>
         </CommandGroup>
         <CommandGroup heading="Navigation">
@@ -78,7 +78,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <Download className="mr-2 h-4 w-4 text-cyan-400" />
+            <Download className="mr-2 h-4 w-4 text-cyan-600 dark:text-cyan-400" />
             <span>Capture Studio</span>
             <CommandShortcut>1</CommandShortcut>
           </CommandItem>
@@ -88,7 +88,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <Library className="mr-2 h-4 w-4 text-sky-400" />
+            <Library className="mr-2 h-4 w-4 text-sky-600 dark:text-sky-400" />
             <span>Document Library</span>
             <CommandShortcut>2</CommandShortcut>
           </CommandItem>
@@ -98,7 +98,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <Search className="mr-2 h-4 w-4 text-amber-400" />
+            <Search className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-400" />
             <span>Search Studio</span>
             <CommandShortcut>3</CommandShortcut>
           </CommandItem>
@@ -108,7 +108,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <GitCompare className="mr-2 h-4 w-4 text-purple-400" />
+            <GitCompare className="mr-2 h-4 w-4 text-purple-600 dark:text-purple-400" />
             <span>Snapshot Diff</span>
             <CommandShortcut>4</CommandShortcut>
           </CommandItem>
@@ -118,7 +118,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <FileUp className="mr-2 h-4 w-4 text-emerald-400" />
+            <FileUp className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             <span>Export Studio (RAG / PDF / JSONL)</span>
             <CommandShortcut>5</CommandShortcut>
           </CommandItem>
@@ -128,7 +128,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <Activity className="mr-2 h-4 w-4 text-rose-400" />
+            <Activity className="mr-2 h-4 w-4 text-rose-600 dark:text-rose-400" />
             <span>Diagnostics &amp; System</span>
           </CommandItem>
         </CommandGroup>
@@ -143,7 +143,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                   onOpenChange(false)
                 }}
               >
-                <Sparkles className="mr-2 h-4 w-4 text-cyan-400" />
+                <Sparkles className="mr-2 h-4 w-4 text-cyan-600 dark:text-cyan-400" />
                 <span className="font-mono text-xs">{item.domain}</span>
                 <span className="ml-2 text-xs text-muted-foreground">({item.pages || item.page_count || 0} pages)</span>
                 <CommandShortcut>Open Reader</CommandShortcut>
@@ -162,7 +162,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <FolderOpen className="mr-2 h-4 w-4 text-yellow-400" />
+            <FolderOpen className="mr-2 h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <span>Open Library Storage Folder in Explorer</span>
           </CommandItem>
 
@@ -173,7 +173,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                 onOpenChange(false)
               }}
             >
-              <Sparkles className="mr-2 h-4 w-4 text-rose-400" />
+              <Sparkles className="mr-2 h-4 w-4 text-rose-600 dark:text-rose-400" />
               <span>About DocHarvest &amp; Author (Rohan Shetty)</span>
             </CommandItem>
           )}

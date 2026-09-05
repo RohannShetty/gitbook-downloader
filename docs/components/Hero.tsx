@@ -67,7 +67,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border/50 bg-card/50 text-xs font-mono font-bold text-cyan"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border/50 bg-card/50 text-xs font-mono font-bold text-cyan [.light_&]:text-cyan-700"
             >
               <Sparkles className="h-3.5 w-3.5 text-cyan" />
               <span>DocHarvest v{VERSION} — Local-First AI AST Compiler</span>
@@ -90,7 +90,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground font-mono font-normal leading-relaxed"
             >
-              DocHarvest turns GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs into pure, LLM-ready context — one command, 83% less noise, 100% local. Connect via <code className="text-cyan font-bold">FastMCP v2</code> or read offline as PDF.
+              DocHarvest turns GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe &amp; JS SPAs into pure, LLM-ready context — one command, 83% less noise, 100% local. Connect via <code className="text-cyan [.light_&]:text-cyan-700 font-bold">FastMCP v2</code> or read offline as PDF.
             </motion.p>
 
             {/* Quick Agent Selector Pills */}
@@ -111,7 +111,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                     aria-pressed={selectedAgentId === agent.id}
                     className={`px-2.5 py-1 rounded-md border font-mono text-[0.70rem] font-semibold transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${
                       selectedAgentId === agent.id
-                        ? 'border-border/50 bg-card/50 text-cyan font-bold shadow-xs'
+                        ? 'border-border/50 bg-card/50 text-cyan [.light_&]:text-cyan-700 font-bold shadow-xs'
                         : 'border-border/80 bg-card text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -127,14 +127,14 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
                 className="rounded-lg border border-border/60 bg-card/60 p-2.5"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[10px] font-bold text-cyan">
+                  <span className="font-mono text-[10px] font-bold text-cyan [.light_&]:text-cyan-700">
                     {selectedAgent.name} · {selectedAgent.configPath}
                   </span>
                   <span className="font-mono text-[9px] text-muted-foreground whitespace-nowrap">
                     {selectedAgent.badge}
                   </span>
                 </div>
-                <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 font-mono text-[10px] leading-relaxed text-cyan/40">
+                <pre className="mt-1.5 font-mono text-[10px] leading-relaxed">
                   {selectedAgent.configSnippet}
                 </pre>
               </motion.div>
@@ -181,7 +181,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex items-center gap-2 px-3.5 py-2 rounded-md border border-border/80 bg-card/80 font-mono text-xs text-muted-foreground w-full"
             >
-              <span className="text-cyan">&gt;</span>
+              <span className="text-cyan [.light_&]:text-cyan-700">&gt;</span>
               <code className="flex-1 text-foreground font-semibold">pip install gitbook-downloader</code>
               <button
                 onClick={copyPipCommand}
@@ -197,7 +197,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 w-full font-mono text-xs border-t border-border/80">
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">THROUGHPUT</span>
-                <span className="font-bold text-cyan">37 pgs/sec</span>
+                <span className="font-bold text-cyan [.light_&]:text-cyan-700">37 pgs/sec</span>
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">TOKEN SAVINGS</span>
@@ -209,7 +209,7 @@ export function Hero({ onOpenInstallModal }: HeroProps) {
               </div>
               <div className="space-y-0.5">
                 <span className="text-muted-foreground text-[10px] block">AGENT MODELS</span>
-                <span className="font-bold text-cyan">{STATS.harnesses} Harnesses</span>
+                <span className="font-bold text-cyan [.light_&]:text-cyan-700">{STATS.harnesses} Harnesses</span>
               </div>
             </div>
 

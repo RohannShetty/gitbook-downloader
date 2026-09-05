@@ -5,6 +5,33 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.5] - 2026-09-05
+
+### 🔧 MCP Out of the Box, Search-Index Hygiene & Theme-Consistency Patch
+
+Version 11.0.5 is a focused patch release: it ships the MCP SDK as a base dependency so `uvx gitbook-downloader mcp` works with zero extras, lands search-index and snapshot hygiene fixes, and polishes light-mode contrast across the showcase and the GUI. Backwards compatible with 11.0.x.
+
+### Changed
+
+- **MCP SDK is now a base dependency** (`pyproject.toml`): `mcp>=1.2.0` installs with the core package, so `pip install gitbook-downloader` and `uvx gitbook-downloader mcp` both give a working MCP server out of the box. The `[mcp]` extra is kept as a backward-compatibility no-op so existing install instructions keep resolving.
+- **Search index hardening** (`src/gitbook_downloader/search/index.py`):
+  - Titles and headings are normalized before indexing (zero-width marks, BOM, and control characters stripped) so FTS5 queries match reliably.
+  - Insert errors are logged via `logger.warning` instead of failing silently.
+  - Per-domain page counts in the `domains` bookkeeping table are real `COUNT(DISTINCT url)` values.
+  - New `SearchIndex.remove_domain()` is the supported way to purge stale or orphaned domains from the index.
+- **Identical snapshots are skipped** (`src/gitbook_downloader/storage/versioning.py`): re-capturing an unchanged site no longer inflates `versions/` — `VersionManager.snapshot()` returns the existing latest version when the content is byte-identical.
+- **`list_domains` filters orphaned index entries** (`src/gitbook_downloader/mcp/server.py`): domains whose storage no longer exists on disk are omitted, so agents never surface phantom docsets.
+- **MCP module docstring corrected to list all 12 tools** (`src/gitbook_downloader/mcp/server.py`).
+- **Version consistency sweep to `11.0.5`**: `pyproject.toml`, `src/gitbook_downloader/__init__.py`, the CLI direct-script fallback, the GUI bundle (`frontend/`), the showcase (`docs/lib/version.ts`), the README badge, and the TUI header badge are all aligned.
+
+### Fixed
+
+- **CLI `--rag` now actually writes the JSONL export** (`src/gitbook_downloader/cli.py`): the post-capture RAG export produced no file; it now writes `<domain>_rag.jsonl` via `export_to_jsonl`.
+- **Graceful `mcp` failure handling** (`src/gitbook_downloader/cli.py`): `gitbook-dl mcp` with a missing MCP SDK prints a friendly install hint instead of a traceback.
+- **Showcase light-mode contrast** (`docs/app/globals.css`, `docs/components/`): Export Studio, MCP, Agent Ecosystem, and Install panels are readable in light mode — code islands render via `--code` tokens in both themes, copy buttons and labels got contrast fixes, and the `dark:` variant is re-keyed to the in-app theme toggle via `@custom-variant` instead of `prefers-color-scheme`.
+- **GUI Mermaid diagrams re-theme on toggle** (`frontend/src/components/MarkdownViewer.tsx`): diagrams re-render with the active theme, the theme choice persists across restarts (`docharvest_theme` in localStorage), and a conflicting dark-mode icon color was dropped for correct light-mode badge contrast.
+- **Stale TUI version badge** (`src/gitbook_downloader/tui/widgets.py`): the header now derives the version from `__version__` instead of a hardcoded literal.
+
 ## [11.0.4] - 2026-09-04
 
 ### 🚀 Advanced Agent MCP Suite, Granular Storage Loaders & AST-Safe Context Chunker

@@ -26,7 +26,7 @@ from pathlib import Path
 try:
     from . import __version__
 except ImportError:  # pragma: no cover - direct-script fallback
-    __version__ = "11.0.4"
+    __version__ = "11.0.5"
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ def _print_capture_result(result) -> None:
 
 def cmd_capture(args) -> int:
     """Capture a documentation site via the facade."""
-    from .api import LATEST_ONLY, CaptureError, capture
+    from .api import LATEST_ONLY, CaptureError, _default_storage, capture
     from .utils.config import capture_options_from_config, load_full_config
 
     cfg = load_full_config()
@@ -203,42 +203,61 @@ def cmd_capture(args) -> int:
 
     _print_capture_result(result)
 
-    # Post-capture exports if requested via flags
+    # Post-capture exports if requested via flags. The destination root is
+    # taken from the capture result, never from the CWD.
     if getattr(args, "rag", False) and result.pages_captured > 0:
         try:
             from urllib.parse import urlparse
-            from .storage import StorageManager
-            from .utils.export import export_to_jsonl
-            st = StorageManager()
-            parsed_u = urlparse(target)
-            domain = parsed_u.netloc.replace("www.", "")
+
+            from .utils.export import StoragePageSource, export_to_jsonl
+
+            storage = _default_storage()
+            domain = urlparse(target).netloc.replace("www.", "")
+            base_out = _export_root(result)
             exports_dir = base_out / "exports"
             if exports_dir.exists():
                 rag_dest = exports_dir / f"{domain}_rag.jsonl"
             else:
                 rag_dest = base_out / f"{domain}_rag.jsonl"
-            print(f"  📄 RAG JSONL:   {rag_dest}")
+            rag_dest.parent.mkdir(parents=True, exist_ok=True)
+            export_to_jsonl(domain, StoragePageSource(storage, domain), str(rag_dest))
+            if rag_dest.exists():
+                print(f"  📄 RAG JSONL:   {rag_dest}")
+            else:
+                print(f"  ⚠ RAG export wrote no pages for {domain}.", file=sys.stderr)
         except Exception as exc:
             print(f"  ⚠ RAG export failed: {exc}", file=sys.stderr)
 
     if getattr(args, "pdf", False) and result.pages_captured > 0 and result.book_file:
         try:
             from urllib.parse import urlparse
+
             from .utils.export import export_to_pdf
-            parsed_u = urlparse(target)
-            domain = parsed_u.netloc.replace("www.", "")
+
+            domain = urlparse(target).netloc.replace("www.", "")
+            base_out = _export_root(result)
             exports_dir = base_out / "exports"
             if exports_dir.exists():
                 pdf_dest = exports_dir / f"{domain}_handbook.pdf"
             else:
                 pdf_dest = base_out / f"{domain}_handbook.pdf"
-            print(f"  📑 PDF Book:    {pdf_path}")
+            pdf_dest.parent.mkdir(parents=True, exist_ok=True)
+            export_to_pdf(result.book_file, pdf_dest)
+            if pdf_dest.exists():
+                print(f"  📑 PDF Book:    {pdf_dest}")
+            else:
+                print("  ⚠ PDF export wrote no file.", file=sys.stderr)
         except Exception as exc:
             print(f"  ⚠ PDF export failed: {exc}", file=sys.stderr)
 
     if result.pages_captured == 0:
         return 1
     return 0
+
+
+def _export_root(result) -> Path:
+    """Return the output root a post-capture export should land in."""
+    return Path(result.local_path or result.library_path or Path.cwd())
 
 
 def cmd_search(args) -> int:
@@ -460,10 +479,13 @@ def cmd_mcp(args) -> int:
     """Start the MCP server for AI assistant integration."""
     try:
         from .mcp import main as mcp_main
-    except ImportError:
+    except Exception:
+        # A missing 'mcp' SDK surfaces as ImportError from the package import,
+        # but a broken install surfaces as TypeError from server.py's module
+        # level `FastMCP(...)` fallback ('NoneType' object is not callable);
+        # the CLI must degrade to the friendly message either way.
         print("MCP functionality requires the 'mcp' package.", file=sys.stderr)
-        print("Install it with: pip install gitbook-downloader[mcp]",
-              file=sys.stderr)
+        print("Install it with: pip install gitbook-downloader[mcp]", file=sys.stderr)
         return 1
     mcp_main()
     return 0

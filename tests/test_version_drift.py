@@ -1,6 +1,6 @@
 """Version drift regression.
 
-Single source of truth for DocHarvest version: ``11.0.4``.
+Single source of truth for DocHarvest version: ``11.0.5``.
 
 This test fails if any of the canonical reference files drift from that value.
 The list below is curated (not a grep over the whole tree) so that:
@@ -9,11 +9,11 @@ The list below is curated (not a grep over the whole tree) so that:
 - ``package-lock.json`` lockfile entries like ``@octokit/endpoint@11.0.4`` are
   not DocHarvest version literals (out of scope).
 - ``docs/lib/version.ts`` and ``src/gitbook_downloader/__init__.py`` are the
-  canonical sources and MUST equal ``11.0.4`` (we assert equality, not just
+  canonical sources and MUST equal ``11.0.5`` (we assert equality, not just
   presence).
-- ``frontend/index.html`` <title> must read ``DocHarvest v11.0.4``.
+- ``frontend/index.html`` <title> must read ``DocHarvest v11.0.5``.
 
-Drift signals (these MUST all read ``11.0.4`` after Phase 1 step 1):
+Drift signals (these MUST all read ``11.0.5`` after Phase 1 step 1):
 - README.md version badge.
 - src/gitbook_downloader/cli.py direct-script fallback.
 - src/gitbook_downloader/gui/bridge.py User-Agent (it must use
@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_VERSION = "11.0.4"
+CANONICAL_VERSION = "11.0.5"
 
 
 # Files where the value MUST literally equal CANONICAL_VERSION (not just
@@ -42,7 +42,7 @@ CANONICAL_SOURCE_FILES = [
 ]
 
 
-# Files where the file MUST contain the literal ``11.0.4`` somewhere.
+# Files where the file MUST contain the literal ``11.0.5`` somewhere.
 # (We grep, not assert exact match, because each file embeds it in different
 # surrounding text — a badge URL, a JS string, a User-Agent f-string, etc.)
 MUST_CONTAIN = [
@@ -111,11 +111,11 @@ def test_no_stale_version_literal(path: Path) -> None:
 
 
 def test_cli_version_fallback_uses_canonical_value() -> None:
-    """The direct-script fallback in cli.py MUST equal 11.0.4 (not 9.0.0b1)."""
+    """The direct-script fallback in cli.py MUST equal 11.0.5 (not 9.0.0b1)."""
     cli_text = _read_text(REPO_ROOT / "src" / "gitbook_downloader" / "cli.py")
     # The fallback literal is the value in the `except ImportError` branch.
-    assert "__version__ = \"11.0.4\"" in cli_text, (
-        "cli.py direct-script fallback should be 11.0.4, not 9.0.0b1"
+    assert "__version__ = \"11.0.5\"" in cli_text, (
+        "cli.py direct-script fallback should be 11.0.5, not 9.0.0b1"
     )
     assert "9.0.0b1" not in cli_text, (
         "cli.py still contains stale 9.0.0b1 fallback"
@@ -137,6 +137,6 @@ def test_bridge_user_agent_uses_version_constant() -> None:
 
 
 def test_python_version_importable() -> None:
-    """Smoke: the Python package exposes __version__ == 11.0.3."""
+    """Smoke: the Python package exposes __version__ == 11.0.5."""
     from gitbook_downloader import __version__
     assert __version__ == CANONICAL_VERSION

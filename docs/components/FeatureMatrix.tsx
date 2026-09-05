@@ -62,7 +62,7 @@ export function FeatureMatrix() {
                         <Check className="h-4 w-4" />
                       </div>
                     ) : (
-                      <X className="h-4 w-4 text-cyan/50 mx-auto" />
+                      <X className="h-4 w-4 text-muted-foreground mx-auto" />
                     )}
                   </td>
 
@@ -73,7 +73,7 @@ export function FeatureMatrix() {
                         <Check className="h-4 w-4" />
                       </div>
                     ) : (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-cyan/50">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-muted-foreground">
                         <X className="h-4 w-4" />
                       </div>
                     )}
@@ -86,7 +86,7 @@ export function FeatureMatrix() {
                         <Check className="h-4 w-4" />
                       </div>
                     ) : row.cloudApis === false ? (
-                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-cyan/50">
+                      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-card/50 text-muted-foreground">
                         <X className="h-4 w-4" />
                       </div>
                     ) : (

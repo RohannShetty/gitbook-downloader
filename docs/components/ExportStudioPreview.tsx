@@ -13,7 +13,7 @@ const PREVIEWS = {
 title: "OpenAlgo v2.0 Complete Developer Handbook"
 harvest_timestamp: "2026-08-30T00:00:00Z"
 total_pages: ${STATS.pagesCaptured}
-generator: "DocHarvest v11.0.3"
+generator: "DocHarvest v11.0.5"
 ---
 
 # Table of Contents
@@ -112,7 +112,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'markdown'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 }`}
               >
                 <FileText className="h-3.5 w-3.5" />
@@ -126,7 +126,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'rag'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 }`}
               >
                 <Database className="h-3.5 w-3.5" />
@@ -140,7 +140,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'llmstxt'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 }`}
               >
                 <FileCode className="h-3.5 w-3.5" />
@@ -154,7 +154,7 @@ export function ExportStudioPreview() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-primary transition-all ${
                   activeTab === 'fts5'
                     ? 'bg-primary/20 text-primary border border-primary/40'
-                    : 'text-cyan/40 hover:text-white hover:bg-cyan/80'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 }`}
               >
                 <Search className="h-3.5 w-3.5" />
@@ -164,15 +164,15 @@ export function ExportStudioPreview() {
 
             {/* Copy Artifact CTA */}
             <div className="flex items-center gap-4">
-              <span className="hidden sm:inline-block font-mono text-[10px] text-cyan/40">
+              <span className="hidden sm:inline-block font-mono text-[10px] text-muted-foreground">
                 {current.filename}
               </span>
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border/70 bg-cyan/80 text-xs font-mono text-cyan/20 hover:text-white hover:border-primary/60 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border/70 bg-[#0ea5e9] text-xs font-mono text-[#082f49] hover:bg-[#38bdf8] hover:border-primary/60 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
                 aria-label="Copy sample code"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-cyan/40" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy Sample'}</span>
               </button>
             </div>
@@ -180,15 +180,15 @@ export function ExportStudioPreview() {
 
           {/* Code Viewer Panel */}
           <div className="p-5 overflow-x-auto font-mono text-xs leading-relaxed bg-card/95">
-            <pre className="!bg-transparent !p-0 !border-0 text-cyan/10">
+            <pre>
               <code>{current.code}</code>
             </pre>
           </div>
 
           {/* Studio Footer */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/80 bg-card/90 font-mono text-[10px] text-cyan/40">
+          <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/80 bg-card/90 font-mono text-[10px] text-muted-foreground">
             <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan/40" />
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan" />
               <span>SYNTAX: {current.language.toUpperCase()}</span>
             </div>
             <span>ZERO CLIENT OVERHEAD</span>

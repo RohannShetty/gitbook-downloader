@@ -13,6 +13,8 @@ from textual.containers import Horizontal, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Static
 
+from .. import __version__
+
 # Surfaces in shell order; keys 1..5 map onto these.
 SURFACES = (
     ("wizard", "Wizard"),
@@ -28,8 +30,8 @@ class PasteInput(Input):
 
     Textual's stock Input paste reads the terminal's OSC-52 clipboard,
     which most Windows console hosts never populate — so pasting appeared
-    dead (v7.0.1 fix). This subclass overrides the binding and delegates
-    to the app's pyperclip-backed action.
+    dead (upstream limitation). This subclass overrides the binding and
+    delegates to the app's pyperclip-backed action.
     """
 
     BINDINGS = [
@@ -68,7 +70,7 @@ class NavBar(Horizontal):
 
     def compose(self) -> ComposeResult:
         yield Static(
-            "[b]gitbook-downloader[/b] [dim]v7[/dim]",
+            f"[b]gitbook-downloader[/b] [dim]v{__version__}[/dim]",
             id="brand",
             markup=True,
         )

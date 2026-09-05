@@ -4,6 +4,7 @@ All tests use a temporary directory for the database, never touching
 ~/.gitbook-downloader/search.db.
 """
 
+import sqlite3
 import tempfile
 from pathlib import Path
 
@@ -289,16 +290,185 @@ class TestSearchIndexSectionParsing:
         assert "Preamble text" in result[0][1]
 
 
-class TestSearchIndexPageCount:
-    """Tests for _extract_page_count static method."""
+class TestSearchIndexPageCounts:
+    """Tests for distinct-URL page counting (``domains.pages``).
 
-    def test_no_sources(self):
-        assert SearchIndex._extract_page_count("# Just text") == 1
+    The old implementation counted ``Source:`` markers in docs.md — always
+    1, because the book carries a single blockquote source header.
+    """
 
-    def test_with_sources(self):
-        content = "Source: https://example.com/p1\n\nContent\n\nSource: https://example.com/p2"
-        assert SearchIndex._extract_page_count(content) == 2
+    def test_page_count_equals_distinct_section_urls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            content = (
+                "# Intro\n\nIntro content.\n\n"
+                "## Setup\n\nSetup content.\n\n"
+                "## API Reference\n\nAPI content.\n"
+            )
+            si.index_domain(
+                "docs.example.com",
+                content,
+                domain_url="https://docs.example.com",
+            )
+            domains = si.list_indexed_domains()
+            assert domains[0]["pages"] == 3
 
-    def test_mixed_content(self):
-        content = "# Header\n\nSource: https://a.com\n\nText\n\nSource: https://b.com\n\nMore\n\nSource: https://c.com"
-        assert SearchIndex._extract_page_count(content) == 3
+    def test_page_count_is_real_for_multipage_fixture(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            content = "\n\n".join(
+                f"# Page {i}\n\nBody of page {i} about documentation." for i in range(4)
+            )
+            si.index_domain("multi.com", content)
+            pages = si.list_indexed_domains()[0]["pages"]
+            assert pages == 4
+            assert pages != 1
+
+    def test_page_count_matches_distinct_urls_in_pages_meta(self):
+        """The ``domains`` page count must equal the distinct URLs stored."""
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            content = "# A\n\nAlpha.\n\n# B\n\nBeta.\n\n" "## A-B\n\nDifferent slug from A alone.\n"
+            si.index_domain("check.com", content, domain_url="https://check.com")
+            conn = sqlite3.connect(str(Path(tmp) / "search.db"))
+            try:
+                distinct = conn.execute(
+                    "SELECT COUNT(DISTINCT url) FROM pages_meta WHERE domain = ?",
+                    ("check.com",),
+                ).fetchone()[0]
+            finally:
+                conn.close()
+            assert distinct == 3
+            assert si.list_indexed_domains()[0]["pages"] == distinct
+
+
+class TestSearchIndexSlugNormalization:
+    """Headings differing only by invisible characters must not collide."""
+
+    def test_zero_width_headings_do_not_duplicate_urls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            clean = "# Setup\n\nClean heading body."
+            zwsp = "# Set\u200bu\u200bp\n\nZero-width-space heading body."
+            bom = "# Setu\ufeffp\n\nBOM heading body."
+            si.index_domain(
+                "zw.com",
+                f"{clean}\n\n{zwsp}\n\n{bom}",
+                domain_url="https://zw.com",
+            )
+            conn = sqlite3.connect(str(Path(tmp) / "search.db"))
+            try:
+                rows = conn.execute(
+                    "SELECT url, section_heading FROM pages_meta WHERE domain = ?",
+                    ("zw.com",),
+                ).fetchall()
+            finally:
+                conn.close()
+
+            urls = [r[0] for r in rows]
+            assert len(urls) == len(set(urls)), f"duplicate section URLs: {urls}"
+            assert urls == ["https://zw.com#setup"]
+            # Neither the stored heading nor the URL may keep the invisibles.
+            assert all("\u200b" not in r[1] and "\ufeff" not in r[1] for r in rows)
+
+    def test_visible_headings_are_untouched(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            content = "# Getting Started\n\nBody.\n\n## API: v2 (advanced)\n\nBody.\n"
+            si.index_domain("ok.com", content, domain_url="https://ok.com")
+            conn = sqlite3.connect(str(Path(tmp) / "search.db"))
+            try:
+                urls = [
+                    r[0]
+                    for r in conn.execute(
+                        "SELECT url FROM pages_meta WHERE domain = ?", ("ok.com",)
+                    ).fetchall()
+                ]
+            finally:
+                conn.close()
+            assert "https://ok.com#getting-started" in urls
+            assert "https://ok.com#api:-v2-(advanced)" in urls
+
+
+class TestSearchIndexRemoveDomain:
+    """Tests for remove_domain (the supported stale-domain purge)."""
+
+    def test_remove_domain_deletes_all_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain("gone.com", "# Gone\n\nContent.", domain_url="https://gone.com")
+            si.index_domain("kept.com", "# Kept\n\nContent.", domain_url="https://kept.com")
+
+            si.remove_domain("gone.com")
+
+            names = [d["name"] for d in si.list_indexed_domains()]
+            assert "gone.com" not in names
+            assert "kept.com" in names
+            conn = sqlite3.connect(str(Path(tmp) / "search.db"))
+            try:
+                leftover = conn.execute(
+                    "SELECT COUNT(*) FROM pages_meta WHERE domain = ?", ("gone.com",)
+                ).fetchone()[0]
+                fts_rows = conn.execute(
+                    "SELECT COUNT(*) FROM pages_fts WHERE domain = ?", ("gone.com",)
+                ).fetchone()[0]
+            finally:
+                conn.close()
+            assert leftover == 0
+            assert fts_rows == 0
+
+    def test_remove_domain_of_unknown_domain_is_noop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.remove_domain("never-indexed.com")  # must not raise
+            assert si.list_indexed_domains() == []
+
+    def test_delete_domain_remains_supported_alias(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            si.index_domain("alias.com", "# Alias\n\nContent.")
+            si.delete_domain("alias.com")
+            assert si.list_indexed_domains() == []
+
+
+class TestSearchIndexInsertErrorLogging:
+    def test_failed_section_insert_is_logged_not_swallowed(self, tmp_path, monkeypatch, caplog):
+        """A failing section insert must log a warning (url + error), not
+        silently ``pass``."""
+        import gitbook_downloader.search.index as index_module
+
+        SearchIndex(base_dir=tmp_path)  # ensure schema exists
+        real_connect = index_module._get_connection
+
+        class FailingInsertConn:
+            def __init__(self, real):
+                self._real = real
+
+            def execute(self, sql, *args, **kwargs):
+                if "INSERT OR REPLACE INTO pages_meta" in sql:
+                    raise sqlite3.OperationalError("forced insert failure")
+                return self._real.execute(sql, *args, **kwargs)
+
+            def commit(self):
+                return self._real.commit()
+
+            def close(self):
+                return self._real.close()
+
+        def patched_connect(base_dir=None):
+            return FailingInsertConn(real_connect(base_dir))
+
+        monkeypatch.setattr(index_module, "_get_connection", patched_connect)
+
+        si = index_module.SearchIndex.__new__(index_module.SearchIndex)
+        si.base_dir = tmp_path
+        with caplog.at_level("WARNING", logger="gitbook_downloader.search.index"):
+            si.index_domain("broken.com", "# A\n\nAlpha.\n\n# B\n\nBeta.")
+
+        messages = "\n".join(record.getMessage() for record in caplog.records)
+        assert "forced insert failure" in messages
+        assert "broken.com" in messages  # the failing section's url/domain
+        # The pass must still complete and record the (empty) domain.
+        domains = si.list_indexed_domains()
+        assert [d["name"] for d in domains] == ["broken.com"]
+        assert domains[0]["pages"] == 0

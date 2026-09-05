@@ -25,10 +25,11 @@ import { MarkdownViewer } from "@/components/MarkdownViewer"
 
 interface DocReaderModalProps {
   domain: string | null
+  theme?: "dark" | "light"
   onClose: () => void
 }
 
-export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose }) => {
+export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, theme, onClose }) => {
   const [docData, setDocData] = useState<any>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [selectedFile, setSelectedFile] = useState<string>("book.md")
@@ -144,7 +145,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
               onClick={handleCopy}
               className="h-8 gap-1.5 text-xs border-border"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? "Copied" : "Copy Markdown"}</span>
             </Button>
           </div>
@@ -212,6 +213,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, onClose 
                 content={fileContent}
                 title={selectedFile}
                 domain={domain || undefined}
+                theme={theme}
                 onExportPdf={() => {
                   if (docData?.domain) {
                     pyApi.exportDoc(docData.domain, "pdf").then((res) => {

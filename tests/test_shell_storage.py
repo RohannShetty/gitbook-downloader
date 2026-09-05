@@ -138,11 +138,22 @@ class TestCorruptMetadataRecovery:
         seed_domain(sm)
         vm = VersionManager(sm)
         vm.snapshot("test.com")
+        # v1.0.2 exists because the content genuinely changed — identical
+        # re-snapshots collapse onto the existing version.
+        sm.latest_path("test.com").write_text("Changed", encoding="utf-8")
         vm.snapshot("test.com")  # v1.0.2
         sm.metadata_path("test.com").write_text("###", encoding="utf-8")
 
-        sm.save_doc(domain="test.com", content="New", url="u", title="T",
-                    pages=2, provider="generic", new_pages=2, size_kb=0.2)
+        sm.save_doc(
+            domain="test.com",
+            content="New",
+            url="u",
+            title="T",
+            pages=2,
+            provider="generic",
+            new_pages=2,
+            size_kb=0.2,
+        )
         meta = sm.get_metadata("test.com")
         assert meta["latest_version"] != "1.0.0"
         assert meta["latest_version"].startswith("v1.0.2")
@@ -190,20 +201,24 @@ class TestReconcileVersions:
         assert len(latest) == 1
         assert latest[0]["version"] == meta["latest_version"]
 
-    def test_snapshot_after_manual_file_loss_never_overwrites(
-            self, sm):
+    def test_snapshot_after_manual_file_loss_never_overwrites(self, sm):
         seed_domain(sm)
         vm = VersionManager(sm)
         vm.snapshot("test.com")  # v1.0.1
         # Simulate a lost registry pointing at an old version while disk
-        # already has v1.0.1.
+        # already has v1.0.1 holding identical content.
         meta = sm.get_metadata("test.com")
         meta["latest_version"] = "1.0.0"
         sm._write_metadata("test.com", meta)
 
         version = vm.snapshot("test.com")
-        assert version == "v1.0.2"  # bumped past the existing file
+        # Unchanged content collapses onto the existing latest version —
+        # no new file, and the existing v1.0.1.md is never overwritten.
+        assert version == "v1.0.1"
         assert (sm.versions_dir("test.com") / "v1.0.1.md").exists()
+        assert not (sm.versions_dir("test.com") / "v1.0.2.md").exists()
+        # The desynced registry pointer must be healed by the snapshot.
+        assert sm.get_metadata("test.com")["latest_version"] == "v1.0.1"
 
 
 # ── Per-domain lockfile ─────────────────────────────────────────────────
@@ -267,22 +282,25 @@ class TestRollbackNoInflation:
         meta = sm.get_metadata("test.com")
         assert meta["latest_version"] == "v1.0.1"
 
-    def test_rollback_to_different_content_takes_one_safety_snapshot(
-            self, sm):
+    def test_rollback_to_different_content_takes_one_safety_snapshot(self, sm):
         seed_domain(sm, content="V1")
         vm = VersionManager(sm)
-        vm.snapshot("test.com")                        # v1.0.1
+        vm.snapshot("test.com")  # v1.0.1
         sm.latest_path("test.com").write_text("V2", encoding="utf-8")
-        vm.snapshot("test.com")                        # v1.0.2
+        vm.snapshot("test.com")  # v1.0.2
+        # Unsaved change that no snapshot holds — the pre-rollback state
+        # must be safety-snapshotted exactly once.
+        sm.latest_path("test.com").write_text("V3-unsaved", encoding="utf-8")
 
         vm.rollback("test.com", "1.0.1")
-        files = sorted(p.name for p in
-                       sm.versions_dir("test.com").iterdir())
+        files = sorted(p.name for p in sm.versions_dir("test.com").iterdir())
         assert files == ["v1.0.1.md", "v1.0.2.md", "v1.0.3.md"]
+        assert (
+            sm.versions_dir("test.com") / "v1.0.3.md"
+        ).read_text(encoding="utf-8") == "V3-unsaved"
         # Exactly ONE safety snapshot, and repeated rollbacks don't add more.
         vm.rollback("test.com", "1.0.1")
-        files_again = sorted(p.name for p in
-                             sm.versions_dir("test.com").iterdir())
+        files_again = sorted(p.name for p in sm.versions_dir("test.com").iterdir())
         assert files_again == files
 
     def test_rollback_updates_latest_pointer(self, sm):

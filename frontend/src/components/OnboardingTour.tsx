@@ -36,7 +36,7 @@ const TOUR_STEPS: TourStep[] = [
     subtitle: "Turn Any Documentation Site into LLM-Ready Markdown & Vector Context",
     description: "DocHarvest is a local-first documentation harvester, AI context compiler, and FastMCP server. It cleans up to 89% of token-wasting navigation boilerplate and outputs structured knowledge corpora.",
     icon: Sparkles,
-    badge: "v11.0.3 Architecture",
+    badge: "v11.0.5 Architecture",
     tips: [
       "100% local, zero telemetry, zero cloud fees",
       "8 dedicated documentation platform providers",
@@ -81,7 +81,7 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     title: "🔌 Native FastMCP v2 Server",
-    subtitle: "Expose 10 Tools, Prompts & Resources to AI IDEs",
+    subtitle: "Expose 12 Tools, Prompts & Resources to AI IDEs",
     description: "Seamlessly connect Cursor, Claude Code, Windsurf, VS Code, Zed, and JetBrains. DocHarvest exposes tools like download_docs, search_docs, get_doc, and query_doc_graph over stdio with zero configuration.",
     icon: Cpu,
     badge: "MCP v2 Protocol",
@@ -166,7 +166,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
         {/* Content Body */}
         <div className="relative p-6 sm:p-8 space-y-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-400 shadow-md">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-700 shadow-md dark:text-cyan-400">
               <Icon className="h-6 w-6" />
             </div>
             <div className="space-y-1">
@@ -174,7 +174,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
                 <h3 className="text-lg font-bold tracking-tight text-foreground font-mono">
                   {step.title}
                 </h3>
-                <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-400 font-mono">
+                <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-700 dark:text-cyan-400 font-mono">
                   {step.badge}
                 </Badge>
               </div>
@@ -196,7 +196,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
             <div className="space-y-1.5">
               {step.tips.map((tip, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-xs text-foreground/90">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>{tip}</span>
                 </div>
               ))}

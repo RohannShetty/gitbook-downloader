@@ -1,4 +1,4 @@
-"""Design tokens — single source of truth for the v7 TUI look.
+"""Design tokens — single source of truth for the TUI look.
 
 Binding tokens (plan §6):
 

@@ -60,7 +60,7 @@ DocHarvest uses 8 dedicated AST extractors to isolate article content and probe 
 ```tweet
 DocHarvest runs a native FastMCP v2 server over stdio. 
 
-One config snippet gives your favorite agent 10 native tools to crawl, index, and query documentation on demand:
+One config snippet gives your favorite agent 12 native tools to crawl, index, and query documentation on demand:
 
 ⚡ @cursor_run
 ⚡ @ClaudeAI Code & Desktop

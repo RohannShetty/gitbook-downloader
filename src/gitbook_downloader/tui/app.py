@@ -1,4 +1,4 @@
-"""GitbookDownloaderApp — the v7 TUI shell.
+"""GitbookDownloaderApp — the TUI shell.
 
 Five surfaces stay mounted in a tabbed shell so a running capture keeps
 ticking while you browse the Library. Screens consume ONLY the injected

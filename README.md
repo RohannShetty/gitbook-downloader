@@ -8,7 +8,7 @@
 
 **Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
 
-[![Version: 11.0.4](https://img.shields.io/badge/version-11.0.4-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 11.0.5](https://img.shields.io/badge/version-11.0.5-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
@@ -173,7 +173,8 @@ pip install gitbook-downloader
 pip install "gitbook-downloader[render]"
 playwright install chromium
 
-# Optional FastMCP server support
+# MCP server: the FastMCP SDK ships in the base install — nothing extra needed.
+# (The [mcp] extra is a backward-compatibility no-op; this line still resolves.)
 pip install "gitbook-downloader[mcp]"
 
 # Launch desktop GUI:
@@ -232,6 +233,8 @@ docharvest --gui
 ## 🔌 AI Agent Integration: Native FastMCP v2 Server
 
 DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that exposes 12 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
+
+> **The `mcp` SDK ships in the base install.** `pip install gitbook-downloader` (or `uvx gitbook-downloader mcp`) is enough — no extras required. The `gitbook-downloader[mcp]` extra is still accepted for backward compatibility but is now a no-op.
 
 ### All 12 Native MCP Tools
 
@@ -476,7 +479,7 @@ print(f"Manifest:  {result.manifest_file}")
 
 DocHarvest is continuously tested across Windows, Linux, and macOS:
 
-- **665 Automated Tests**: 100% pass rate across engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, and MCP v2 tools (verified on this release).
+- **686 Automated Tests**: 100% pass rate across engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, and MCP v2 tools (verified on this release).
 - **73%+ Statement Coverage**: Rigorous test suites covering error recovery, invalid signatures, domain locks, and AST link normalization.
 - **Windows CRLF Safe**: All link and boilerplate stripping routines are cross-platform normalized against Windows CRLF and Unix LF linebreaks.
 

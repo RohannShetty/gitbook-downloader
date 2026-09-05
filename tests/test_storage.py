@@ -296,9 +296,37 @@ class TestVersionManagerSnapshot:
             sm.save_doc(domain="test.com", content="Content", url="u",
                         title="T", pages=1, provider="generic", new_pages=1, size_kb=0.1)
             v1 = vm.snapshot("test.com")
-            v2 = vm.snapshot("test.com")
             assert v1 == "v1.0.1"
+            # Changed content bumps the patch again.
+            sm.latest_path("test.com").write_text("New content", encoding="utf-8")
+            v2 = vm.snapshot("test.com")
             assert v2 == "v1.0.2"
+
+    def test_snapshot_identical_content_creates_no_second_version(self):
+        """Byte-identical re-snapshots must reuse the latest version id and
+        create no extra version file (live data once had 4 identical 3.3 MB
+        snapshots)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            vm = VersionManager(sm)
+            sm.save_doc(
+                domain="test.com",
+                content="Content",
+                url="u",
+                title="T",
+                pages=1,
+                provider="generic",
+                new_pages=1,
+                size_kb=0.1,
+            )
+            v1 = vm.snapshot("test.com")
+            v2 = vm.snapshot("test.com")  # byte-identical content
+            assert v1 == "v1.0.1"
+            assert v2 == v1
+            version_files = sorted(p.name for p in sm.versions_dir("test.com").iterdir())
+            assert version_files == ["v1.0.1.md"]
+            meta = sm.get_metadata("test.com")
+            assert meta["latest_version"] == "v1.0.1"
 
     def test_snapshot_raises_without_docs(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -323,9 +351,18 @@ class TestVersionManagerSnapshot:
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
             vm = VersionManager(sm)
-            sm.save_doc(domain="test.com", content="Content", url="u",
-                        title="T", pages=1, provider="generic", new_pages=1, size_kb=0.1)
+            sm.save_doc(
+                domain="test.com",
+                content="Content",
+                url="u",
+                title="T",
+                pages=1,
+                provider="generic",
+                new_pages=1,
+                size_kb=0.1,
+            )
             vm.snapshot("test.com")  # v1.0.1
+            sm.latest_path("test.com").write_text("Newer content", encoding="utf-8")
             vm.snapshot("test.com")  # v1.0.2
             meta = sm.get_metadata("test.com")
             latest_versions = [v for v in meta["versions"] if v["is_latest"]]
@@ -398,11 +435,20 @@ class TestVersionManagerDiff:
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
             vm = VersionManager(sm)
-            sm.save_doc(domain="test.com", content="Same", url="u",
-                        title="T", pages=1, provider="generic", new_pages=1, size_kb=0.1)
-            vm.snapshot("test.com")  # v1.0.1
-            vm.snapshot("test.com")  # v1.0.2
-            diff_text = vm.diff("test.com", "1.0.1", "1.0.2")
+            sm.save_doc(
+                domain="test.com",
+                content="Same",
+                url="u",
+                title="T",
+                pages=1,
+                provider="generic",
+                new_pages=1,
+                size_kb=0.1,
+            )
+            # Identical re-snapshots collapse onto one version (no v1.0.2).
+            assert vm.snapshot("test.com") == "v1.0.1"
+            assert vm.snapshot("test.com") == "v1.0.1"
+            diff_text = vm.diff("test.com", "1.0.1", "1.0.1")
             # No diff lines (only header)
             assert diff_text.count("\n+") <= 0 or diff_text.count("\n-") <= 0
 
@@ -434,21 +480,64 @@ class TestVersionManagerRollback:
             with pytest.raises(VersioningError, match="not found"):
                 vm.rollback("test.com", "99.0.0")
 
-    def test_rollback_snapshots_current_first(self):
+    def test_rollback_skips_safety_snapshot_when_current_already_snapshotted(self):
+        """Rolling back to an older version must NOT create a duplicate
+        snapshot of the current state when that state is already the latest
+        version file."""
         with tempfile.TemporaryDirectory() as tmp:
             sm = StorageManager(base_dir=tmp)
             vm = VersionManager(sm)
-            sm.save_doc(domain="test.com", content="V1", url="u",
-                        title="T", pages=1, provider="generic", new_pages=1, size_kb=0.1)
+            sm.save_doc(
+                domain="test.com",
+                content="V1",
+                url="u",
+                title="T",
+                pages=1,
+                provider="generic",
+                new_pages=1,
+                size_kb=0.1,
+            )
             vm.snapshot("test.com")  # v1.0.1
-            sm.save_doc(domain="test.com", content="V2", url="u",
-                        title="T", pages=1, provider="generic", new_pages=1, size_kb=0.1)
+            sm.save_doc(
+                domain="test.com",
+                content="V2",
+                url="u",
+                title="T",
+                pages=1,
+                provider="generic",
+                new_pages=1,
+                size_kb=0.1,
+            )
             vm.snapshot("test.com")  # v1.0.2
-            # Now rollback — should snapshot V2 before restoring V1
+            # Rollback — V2 is already snapshotted as v1.0.2, so no v1.0.3.
             vm.rollback("test.com", "1.0.1")
-            # There should now be a v1.0.3 (the auto-snapshot)
-            vpath = sm.versions_dir("test.com") / "v1.0.3.md"
-            assert vpath.exists()
+            assert not (sm.versions_dir("test.com") / "v1.0.3.md").exists()
+            assert "V1" in sm.load_doc("test.com")
+
+    def test_rollback_snapshots_unsaved_current_state(self):
+        """A pre-rollback state that no snapshot holds must still be
+        safety-snapshotted (content that differs is never skipped)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            vm = VersionManager(sm)
+            sm.save_doc(
+                domain="test.com",
+                content="V1",
+                url="u",
+                title="T",
+                pages=1,
+                provider="generic",
+                new_pages=1,
+                size_kb=0.1,
+            )
+            vm.snapshot("test.com")  # v1.0.1
+            # Current state changes WITHOUT a snapshot.
+            sm.latest_path("test.com").write_text("Unsaved V2", encoding="utf-8")
+            vm.rollback("test.com", "1.0.1")
+            safety = sm.versions_dir("test.com") / "v1.0.2.md"
+            assert safety.exists()
+            assert safety.read_text(encoding="utf-8") == "Unsaved V2"
+            assert "V1" in sm.load_doc("test.com")
 
 
 class TestVersionManagerChangelog:

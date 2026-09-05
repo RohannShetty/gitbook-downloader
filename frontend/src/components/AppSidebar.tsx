@@ -70,8 +70,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold tracking-tight text-foreground text-sm font-mono">DocHarvest</span>
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-cyan-500/30 text-cyan-400 bg-cyan-500/10 font-mono">
-                  v11.0.3
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-cyan-500/30 text-cyan-700 bg-cyan-500/10 dark:text-cyan-400 font-mono">
+                  v11.0.5
                 </Badge>
               </div>
               <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Harvester</span>
@@ -143,7 +143,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={onOpenTour}
-                className="h-8 w-8 text-muted-foreground hover:text-cyan-400"
+                className="h-8 w-8 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400"
                 title="Start Interactive Tour"
               >
                 <HelpCircle className="h-4 w-4" />
@@ -155,7 +155,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={onOpenAbout}
-                className="h-8 w-8 text-muted-foreground hover:text-cyan-400"
+                className="h-8 w-8 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400"
                 title="About DocHarvest & Author"
               >
                 <Heart className="h-3.5 w-3.5 text-rose-500/80 hover:text-rose-500" />

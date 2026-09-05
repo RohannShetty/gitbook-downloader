@@ -2,6 +2,10 @@
 
 @plugin "tailwindcss-animate";
 
+/* The site's theme is the `.light` class on <html> (default = dark).
+   Key the `dark:` variant to that toggle instead of prefers-color-scheme. */
+@custom-variant dark (&:not(.light *));
+
 :root {
   --background: #09090B;
   --foreground: #FAFAFA;
@@ -34,6 +38,12 @@
   --input: #22222A;
   --ring: #6366F1;
   --radius: 0.5rem;
+
+  /* Code island tokens — the themed `pre` stays dark in BOTH themes
+     (matches the terminal aesthetic and guarantees ≥ 4.5:1 code contrast). */
+  --code-bg: #0d0d12;
+  --code-fg: #f1f5f9;
+  --code-border: #27272a;
 }
 
 .light {
@@ -64,6 +74,12 @@
   --border: #E2E8F0;
   --input: #E2E8F0;
   --ring: #4F46E5;
+
+  /* Same values as :root — the code island intentionally stays dark in light
+     mode (see DocTypeSelector.tsx precedent); #f1f5f9 on #0d0d12 ≈ 15.9:1. */
+  --code-bg: #0d0d12;
+  --code-fg: #f1f5f9;
+  --code-border: #27272a;
 }
 
 @theme inline {
@@ -127,7 +143,7 @@ body {
 /* Custom selection utility */
 ::selection {
   background-color: rgba(99, 102, 241, 0.25);
-  color: #FAFAFA;
+  color: var(--foreground);
 }
 /* Glass depth system for polished glassmorphism */
 .glass-1 {
@@ -180,21 +196,19 @@ h1 { font-weight: 700; }
 h2 { font-weight: 600; }
 h3 { font-weight: 600; }
 
-/* Code block formatting with high contrast in both themes */
+/* Code block formatting with high contrast in both themes.
+   Unlayered rule on purpose: it must outrank Tailwind utility classes so a
+   stray low-opacity text color or bg-transparent override on a <pre> can
+   never regress the island back to unreadable (near-white text on white
+   cards in light mode). */
 pre {
-  background-color: #0d0d12;
-  color: #f1f5f9;
-  border: 1px solid #27272a;
+  background-color: var(--code-bg);
+  color: var(--code-fg);
+  border: 1px solid var(--code-border);
   border-radius: var(--radius);
   padding: 1rem;
   overflow-x: auto;
   font-family: var(--font-mono);
-}
-
-.light pre {
-  background-color: #0f172a;
-  color: #f8fafc;
-  border-color: #cbd5e1;
 }
 
 code {

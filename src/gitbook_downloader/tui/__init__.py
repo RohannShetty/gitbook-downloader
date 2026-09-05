@@ -1,4 +1,4 @@
-"""gitbook-downloader v7 TUI.
+"""gitbook-downloader TUI.
 
 Import this package without textual installed and nothing breaks —
 textual is only imported when you actually build the app.

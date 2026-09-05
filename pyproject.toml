@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "11.0.4"
+version = "11.0.5"
 description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}
@@ -32,6 +32,7 @@ dependencies = [
     "beautifulsoup4>=4.11.0",
     "markdownify>=0.11.0",
     "lxml>=4.9.0",
+    "mcp>=1.2.0",
     "textual>=0.60",
     "pyperclip>=1.8.0",
     "pywebview>=6.2.1",
@@ -39,6 +40,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# The `mcp` extra is a backward-compat no-op kept so existing
+# `pip install "gitbook-downloader[mcp]"` instructions keep resolving;
+# the SDK ships as a base dependency because `uvx gitbook-downloader mcp`
+# installs no extras.
 mcp = ["mcp>=1.2.0"]
 render = ["playwright>=1.40.0"]
 js = ["playwright>=1.40.0"]

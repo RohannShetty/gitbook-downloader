@@ -121,11 +121,11 @@ export function OutputContract() {
               <div className="w-full max-w-sm border border-border/80 rounded-xl bg-card/95 p-5 font-mono text-xs space-y-3 shadow-inner">
                 <div className="flex items-center justify-between border-b border-border/80 pb-2 text-[10px] text-muted-foreground">
                   <span>TARGET: {selectedFormat.fileExt}</span>
-                  <span className="text-cyan/40 font-bold">READY</span>
+                  <span className="text-muted-foreground font-bold">READY</span>
                 </div>
-                <div className="text-cyan/10 text-[11px] leading-relaxed space-y-2">
-                  <div className="text-cyan/40 font-bold">$ docharvest export --format {selectedFormat.id}</div>
-                  <div className="text-cyan/40 text-[10px]">
+                <div className="text-[11px] leading-relaxed space-y-2">
+                  <div className="text-foreground font-bold">$ docharvest export --format {selectedFormat.id}</div>
+                  <div className="text-muted-foreground text-[10px]">
                     ✓ Synthesized AST nodes into uniform format.<br/>
                     ✓ Injected SHA-256 cryptographic hashes.<br/>
                     ✓ Output written to disk in 0.4s.

@@ -2,15 +2,19 @@
 
 Transport: stdio (for Claude Desktop, Cursor, Windsurf, etc.)
 
-Tools:
-    download_docs   – Download a documentation site (via the capture facade)
-    search_docs     – Full-text search across downloaded docs
-    list_domains    – List all downloaded documentation domains
-    get_doc         – Get full doc content for a domain
-    diff_versions   – Diff two versions of a domain
-    list_versions   – List all available versions
-    export_docs     – Export in markdown / JSONL / RAG format
-    get_changelog   – Auto-generate changelog from version diffs
+Tools (in registration order):
+    download_docs        – Download a documentation site (via the capture facade)
+    search_docs          – Full-text search across downloaded docs
+    list_domains         – List all downloaded documentation domains
+    find_docs            – Find documentation domains matching a query
+    read_doc             – Read a page or topic excerpt with token bounding
+    get_doc              – Get doc content (length + preview) for a domain
+    diff_versions        – Diff two versions of a domain
+    list_versions        – List all available versions
+    export_docs          – Export in markdown / JSONL / RAG format
+    get_changelog        – Auto-generate changelog from version diffs
+    query_doc_graph      – Query the semantic concept graph of a domain
+    get_related_concepts – Retrieve concepts related to a given concept
 
 ``download_docs`` delegates the entire capture lifecycle (provider detection,
 snapshotting, page-tree + book + manifest writing, library storage) to
@@ -237,9 +241,14 @@ async def list_domains() -> list[dict]:
 
     Returns metadata for each domain including name, url, pages, size,
     provider, last scraped timestamp, and available versions.
+
+    Domains whose storage no longer exists on disk (e.g. the library was
+    moved or partially deleted while the search index kept their rows) are
+    omitted so agents never surface phantom docsets.
     """
     try:
-        return _storage.list_domains()
+        domains = _storage.list_domains()
+        return [d for d in domains if _storage.domain_exists(d.get("domain", ""))]
     except Exception as exc:
         return [{"error": str(exc)}]
 
@@ -464,9 +473,12 @@ async def export_docs(
 
         if format == "jsonl":
             export_path = _storage._domain_dir(domain) / f"{domain}_export.jsonl"
-            from gitbook_downloader.utils.export import export_to_jsonl
+            from gitbook_downloader.utils.export import StoragePageSource, export_to_jsonl
 
-            export_to_jsonl(domain, _storage, str(export_path))
+            # export_to_jsonl needs a get_pages() provider; wrap the raw
+            # StorageManager (same adapter the CLI uses) so the file is
+            # actually written instead of silently logging an error.
+            export_to_jsonl(domain, StoragePageSource(_storage, domain), str(export_path))
             preview = ""
             try:
                 with open(export_path, encoding="utf-8") as fh:

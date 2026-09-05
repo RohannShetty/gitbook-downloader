@@ -126,3 +126,9 @@ docs/dist/
 .opencode/
 .superpowers/
 .impeccable/
+
+# Local (non-repo) artifacts: captured docs, scratch output
+local-artifacts/
+ruff_cache/
+.ruff_cache/
+.mypy_cache/

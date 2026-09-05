@@ -14,10 +14,31 @@ import { OnboardingTour } from "@/components/OnboardingTour"
 import { Toaster } from "@/components/ui/sonner"
 import { pyApi } from "@/lib/bridge"
 
+const THEME_STORAGE_KEY = "docharvest_theme"
+
+// Read the persisted theme; fall back to dark when absent, invalid, or when
+// localStorage itself throws (restricted webviews).
+function readStoredTheme(): "dark" | "light" {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark"
+  } catch {
+    return "dark"
+  }
+}
+
+// Persist the theme; non-fatal when storage is unavailable.
+function persistTheme(theme: "dark" | "light"): void {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme)
+  } catch {
+    // Theme preference simply won't survive a restart.
+  }
+}
+
 export function App() {
   const [activeTab, setActiveTab] = useState<TabId>("capture")
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
-  const [theme, setTheme] = useState<"dark" | "light">("dark")
+  const [theme, setTheme] = useState<"dark" | "light">(() => readStoredTheme())
   const [cmdMenuOpen, setCmdMenuOpen] = useState<boolean>(false)
   const [aboutOpen, setAboutOpen] = useState<boolean>(false)
   const [tourOpen, setTourOpen] = useState<boolean>(false)
@@ -60,10 +81,14 @@ export function App() {
     loadLibrary()
   }, [activeTab])
 
-  // Set default theme class on document element
+  // Keep the documentElement class in sync with the theme state. This also
+  // covers the initial mount, correcting index.html's "dark" default when a
+  // light theme was persisted.
   useEffect(() => {
-    document.documentElement.classList.add("dark")
-  }, [])
+    const root = document.documentElement
+    root.classList.toggle("dark", theme === "dark")
+    root.classList.toggle("light", theme === "light")
+  }, [theme])
 
   // Global Ctrl+K / Cmd+K listener
   useEffect(() => {
@@ -81,13 +106,7 @@ export function App() {
   const handleToggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark"
     setTheme(next)
-    if (next === "dark") {
-      document.documentElement.classList.add("dark")
-      document.documentElement.classList.remove("light")
-    } else {
-      document.documentElement.classList.add("light")
-      document.documentElement.classList.remove("dark")
-    }
+    persistTheme(next)
   }
 
   const handleSelectExport = (domain: string) => {
@@ -160,6 +179,7 @@ export function App() {
       {/* Split-View Markdown Reader Modal */}
       <DocReaderModal
         domain={readerDomain}
+        theme={theme}
         onClose={() => setReaderDomain(null)}
       />
 

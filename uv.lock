@@ -679,13 +679,14 @@ wheels = [
 
 [[package]]
 name = "gitbook-downloader"
-version = "11.0.4"
+version = "11.0.5"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "fpdf2" },
     { name = "lxml" },
     { name = "markdownify" },
+    { name = "mcp" },
     { name = "pyperclip" },
     { name = "pywebview" },
     { name = "requests" },
@@ -724,6 +725,7 @@ requires-dist = [
     { name = "fpdf2", specifier = ">=2.8.8" },
     { name = "lxml", specifier = ">=4.9.0" },
     { name = "markdownify", specifier = ">=0.11.0" },
+    { name = "mcp", specifier = ">=1.2.0" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.2.0" },
     { name = "playwright", marker = "extra == 'js'", specifier = ">=1.40.0" },
     { name = "playwright", marker = "extra == 'render'", specifier = ">=1.40.0" },
