@@ -412,7 +412,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               <Download className="h-6 w-6 text-primary" />
               <span>Capture Studio</span>
             </h1>
-            <Badge variant="outline" className="text-xs font-mono font-medium border-cyan-500/30 text-cyan-400 bg-cyan-500/10">
+            <Badge variant="outline" className="text-xs font-mono font-medium border-cyan-500/30 text-cyan-700 bg-cyan-500/10 dark:text-cyan-400">
               v11.0 Engine
             </Badge>
           </div>
@@ -440,7 +440,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             className="h-9 gap-1.5 text-xs border-border/80 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
             title="Force clear active locks and background threads"
           >
-            <Zap className="h-3.5 w-3.5 text-amber-500" />
+            <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-500" />
             <span className="hidden sm:inline">Force Reset</span>
           </Button>
         </div>
@@ -451,7 +451,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
         <Card className="border-amber-500/40 bg-amber-500/10 backdrop-blur-md shadow-sm animate-in slide-in-from-top-2 duration-300">
           <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/30">
+              <div className="h-9 w-9 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/30">
                 <Lock className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
@@ -459,7 +459,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   <h3 className="text-sm font-semibold text-foreground">
                     Active Storage Lock Detected
                   </h3>
-                  <Badge variant="outline" className="text-[10px] border-amber-500/40 text-amber-500 bg-amber-500/5 font-mono">
+                  <Badge variant="outline" className="text-[10px] border-amber-500/40 text-amber-700 bg-amber-500/5 dark:text-amber-500 font-mono">
                     {activeLockList.length} Lock{activeLockList.length > 1 ? "s" : ""}
                   </Badge>
                 </div>
@@ -624,7 +624,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
             {/* Smart SPA Hint Banner */}
             {url.includes("omp.sh") && !renderSpa && (
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-300 animate-in fade-in-50">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-700 dark:text-cyan-300 animate-in fade-in-50">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
                   <span><strong>SPA Detected:</strong> <code>omp.sh</code> is a client-rendered JavaScript SPA. Enable Headless SPA mode for complete rendering.</span>
@@ -820,7 +820,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       strokeDashoffset={251.2 - (251.2 * progressPercent) / 100}
                       strokeLinecap="round"
                       className={`transition-all duration-500 ${
-                        isComplete ? "text-emerald-500" : captureError ? "text-destructive" : "text-primary"
+                        isComplete ? "text-emerald-600 dark:text-emerald-500" : captureError ? "text-destructive" : "text-primary"
                       }`}
                       fill="transparent"
                     />
@@ -867,7 +867,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Card className="glass-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Downloaded Pages</CardTitle>
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-500">
                   <FileCheck className="h-4 w-4" />
                 </div>
               </CardHeader>
@@ -881,7 +881,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Card className="glass-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Elapsed Time</CardTitle>
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-500">
                   <Clock className="h-4 w-4" />
                 </div>
               </CardHeader>
@@ -899,7 +899,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Card className="border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-sm animate-in fade-in-50 duration-300">
               <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                  <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
                   <div>
@@ -991,7 +991,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   variant={logFilter === "downloaded" ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setLogFilter("downloaded")}
-                  className="h-6 text-[11px] px-2 rounded-md font-medium text-emerald-500"
+                  className="h-6 text-[11px] px-2 rounded-md font-medium text-emerald-700 dark:text-emerald-500"
                 >
                   Downloaded ({logs.filter(l => l.level === "downloaded").length})
                 </Button>
@@ -1037,7 +1037,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   className="h-7 px-2.5 text-xs border-border/70 interactive-scale"
                   title="Copy terminal logs"
                 >
-                  {copiedLogs ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                  {copiedLogs ? <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-500" /> : <Copy className="h-3 w-3" />}
                 </Button>
                 <Button
                   variant="outline"
@@ -1067,7 +1067,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   <div key={log.id} className="flex items-start gap-2 py-0.5 border-b border-border/20 last:border-none">
                     <span className="text-muted-foreground/70 text-[10px] select-none shrink-0 pt-0.5">[{log.time}]</span>
                     {log.level === "downloaded" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/40 text-emerald-500 bg-emerald-500/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/40 text-emerald-700 bg-emerald-500/10 dark:text-emerald-500 shrink-0 font-mono">
                         DOWNLOADED
                       </Badge>
                     )}
@@ -1082,7 +1082,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       </Badge>
                     )}
                     {log.level === "written" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-400/40 text-emerald-400 bg-emerald-400/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-400/40 text-emerald-700 bg-emerald-400/10 dark:text-emerald-400 shrink-0 font-mono">
                         WRITTEN
                       </Badge>
                     )}

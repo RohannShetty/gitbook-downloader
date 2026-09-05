@@ -55,13 +55,13 @@ export const InAppDocsView: React.FC = () => {
               What is DocHarvest?
             </h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              DocHarvest (package: <code className="font-mono text-cyan-400">gitbook-downloader</code>) is a high-performance, local-first documentation compiler and AI context platform. It transforms full documentation portals into pristine, LLM-optimized Markdown, vector RAG datasets, and styled offline PDF handbooks.
+              DocHarvest (package: <code className="font-mono text-cyan-700 dark:text-cyan-400">gitbook-downloader</code>) is a high-performance, local-first documentation compiler and AI context platform. It transforms full documentation portals into pristine, LLM-optimized Markdown, vector RAG datasets, and styled offline PDF handbooks.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-2">
-              <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-semibold">
+              <div className="flex items-center gap-2 text-cyan-700 dark:text-cyan-400 font-mono text-xs font-semibold">
                 <Globe className="h-4 w-4" /> Zero-Noise Extraction
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -70,7 +70,7 @@ export const InAppDocsView: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-2">
-              <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-semibold">
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-mono text-xs font-semibold">
                 <Boxes className="h-4 w-4" /> 4-Part Output Contract
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -79,7 +79,7 @@ export const InAppDocsView: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-2">
-              <div className="flex items-center gap-2 text-purple-400 font-mono text-xs font-semibold">
+              <div className="flex items-center gap-2 text-purple-700 dark:text-purple-400 font-mono text-xs font-semibold">
                 <Cpu className="h-4 w-4" /> Native FastMCP Server
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -138,49 +138,49 @@ export const InAppDocsView: React.FC = () => {
               <tbody className="divide-y divide-border/60 text-muted-foreground">
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">GitBook</td>
-                  <td className="p-3 font-mono text-cyan-400">100</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">100</td>
                   <td className="p-3">.md endpoint probing & space discovery</td>
                   <td className="p-3 font-mono text-[11px]">.page-inner, article</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">Mintlify</td>
-                  <td className="p-3 font-mono text-cyan-400">90</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">90</td>
                   <td className="p-3">mintlify.json & CDN asset anchors</td>
                   <td className="p-3 font-mono text-[11px]">#content, article</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">Docusaurus</td>
-                  <td className="p-3 font-mono text-cyan-400">80</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">80</td>
                   <td className="p-3">sitemap.xml & docusaurus.config</td>
                   <td className="p-3 font-mono text-[11px]">article, .markdown</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">Nextra</td>
-                  <td className="p-3 font-mono text-cyan-400">75</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">75</td>
                   <td className="p-3">Next.js routes & nextra scripts</td>
                   <td className="p-3 font-mono text-[11px]">main.nextra-content</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">VitePress</td>
-                  <td className="p-3 font-mono text-cyan-400">72</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">72</td>
                   <td className="p-3">VitePress theme anchors & route index</td>
                   <td className="p-3 font-mono text-[11px]">div.vp-doc, div.VPContent</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">MkDocs</td>
-                  <td className="p-3 font-mono text-cyan-400">70</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">70</td>
                   <td className="p-3">search_index.json & Material theme</td>
                   <td className="p-3 font-mono text-[11px]">article.md-content__inner</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">ReadMe.io</td>
-                  <td className="p-3 font-mono text-cyan-400">65</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">65</td>
                   <td className="p-3">sitemap.xml, llms.txt & hub routes</td>
                   <td className="p-3 font-mono text-[11px]">div.rm-Article, div.rm-Markdown</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="p-3 font-semibold text-foreground">ReadTheDocs</td>
-                  <td className="p-3 font-mono text-cyan-400">60</td>
+                  <td className="p-3 font-mono text-cyan-700 dark:text-cyan-400">60</td>
                   <td className="p-3">Sphinx sitemap & sphinxsidebar</td>
                   <td className="p-3 font-mono text-[11px]">div.document[role="main"]</td>
                 </tr>
@@ -208,7 +208,7 @@ export const InAppDocsView: React.FC = () => {
               Dynamic JavaScript SPAs & Anti-Bot Handling
             </h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              Certain documentation portals (such as client-rendered React/Vue SPAs like <code className="font-mono text-cyan-400">omp.sh/docs</code>) return an empty skeletal shell when fetched over plain HTTP. DocHarvest provides loud diagnostics and an optional Playwright headless renderer.
+              Certain documentation portals (such as client-rendered React/Vue SPAs like <code className="font-mono text-cyan-700 dark:text-cyan-400">omp.sh/docs</code>) return an empty skeletal shell when fetched over plain HTTP. DocHarvest provides loud diagnostics and an optional Playwright headless renderer.
             </p>
           </div>
 
@@ -258,7 +258,7 @@ docharvest crawl https://omp.sh/docs --render`}</pre>
               Command Line Interface Reference
             </h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              DocHarvest provides a comprehensive CLI accessible via <code className="font-mono text-cyan-400">docharvest</code> or <code className="font-mono text-cyan-400">gitbook-dl</code>:
+              DocHarvest provides a comprehensive CLI accessible via <code className="font-mono text-cyan-700 dark:text-cyan-400">docharvest</code> or <code className="font-mono text-cyan-700 dark:text-cyan-400">gitbook-dl</code>:
             </p>
           </div>
 
@@ -332,7 +332,7 @@ docharvest --gui`}</pre>
               Model Context Protocol (MCP v2) Integration
             </h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              DocHarvest exposes 10 native tools, MCP Resources, and MCP Prompts over standard input/output (<code className="font-mono text-cyan-400">stdio</code>). Directly compatible with Cursor, Claude Desktop, Claude Code, Oh My Pi (<code className="font-mono text-cyan-400">omp.sh</code>), Windsurf, Zed, OpenCode, Kiro, and 10+ other harnesses.
+              DocHarvest exposes 10 native tools, MCP Resources, and MCP Prompts over standard input/output (<code className="font-mono text-cyan-700 dark:text-cyan-400">stdio</code>). Directly compatible with Cursor, Claude Desktop, Claude Code, Oh My Pi (<code className="font-mono text-cyan-700 dark:text-cyan-400">omp.sh</code>), Windsurf, Zed, OpenCode, Kiro, and 10+ other harnesses.
             </p>
           </div>
 
@@ -342,43 +342,43 @@ docharvest --gui`}</pre>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">download_docs(url, ...)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">download_docs(url, ...)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Crawl & extract any documentation site into Markdown & llms.txt.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">search_docs(query, domain, limit)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">search_docs(query, domain, limit)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">BM25 SQLite FTS5 search across local indexed documentation.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">query_doc_graph(domain, query, limit)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">query_doc_graph(domain, query, limit)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Traverse semantic entity & concept graph for non-linear lookups.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">get_related_concepts(domain, concept)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">get_related_concepts(domain, concept)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Retrieve connected concepts, symbols & API endpoints.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">get_doc(domain, version)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">get_doc(domain, version)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Read full compiled documentation handbook or preview.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">list_domains()</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">list_domains()</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">List all harvested documentation portals in local library.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">diff_versions(domain, v1, v2)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">diff_versions(domain, v1, v2)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Compute unified diffs and line stats between two snapshots.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">list_versions(domain)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">list_versions(domain)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">List available captured snapshots for a domain.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">export_docs(domain, format)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">export_docs(domain, format)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Export docset to Markdown, JSONL, or RAG formats.</p>
               </div>
               <div className="p-3 rounded-lg border border-border bg-card/60">
-                <span className="text-cyan-400 font-semibold">get_changelog(domain)</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-semibold">get_changelog(domain)</span>
                 <p className="text-[11px] font-sans text-muted-foreground mt-1">Auto-generate version changelogs across captured iterations.</p>
               </div>
             </div>
@@ -386,12 +386,12 @@ docharvest --gui`}</pre>
 
           {/* MCP Resources & Prompts */}
           <div className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 space-y-2 text-xs">
-            <h4 className="font-semibold text-cyan-400 font-mono">⚡ MCP v2 Resources & Prompts Available</h4>
+            <h4 className="font-semibold text-cyan-700 dark:text-cyan-400 font-mono">⚡ MCP v2 Resources & Prompts Available</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-muted-foreground font-mono text-[11px]">
-              <div><strong className="text-foreground">Resource:</strong> <code className="text-cyan-300">docs://&#123;domain&#125;/book</code></div>
-              <div><strong className="text-foreground">Resource:</strong> <code className="text-cyan-300">docs://&#123;domain&#125;/manifest</code></div>
-              <div><strong className="text-foreground">Prompt:</strong> <code className="text-amber-300">search_docset</code></div>
-              <div><strong className="text-foreground">Prompt:</strong> <code className="text-amber-300">summarize_library</code></div>
+              <div><strong className="text-foreground">Resource:</strong> <code className="text-cyan-700 dark:text-cyan-300">docs://&#123;domain&#125;/book</code></div>
+              <div><strong className="text-foreground">Resource:</strong> <code className="text-cyan-700 dark:text-cyan-300">docs://&#123;domain&#125;/manifest</code></div>
+              <div><strong className="text-foreground">Prompt:</strong> <code className="text-amber-700 dark:text-amber-300">search_docset</code></div>
+              <div><strong className="text-foreground">Prompt:</strong> <code className="text-amber-700 dark:text-amber-300">summarize_library</code></div>
             </div>
           </div>
 
@@ -402,7 +402,7 @@ docharvest --gui`}</pre>
 
             {/* Oh My Pi / Pi */}
             <div className="space-y-2">
-              <span className="font-mono text-xs font-semibold text-amber-400">Oh My Pi (`omp.sh`) / Pi (`~/.omp/config.json`)</span>
+              <span className="font-mono text-xs font-semibold text-amber-700 dark:text-amber-400">Oh My Pi (`omp.sh`) / Pi (`~/.omp/config.json`)</span>
               <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
                 <button
                   onClick={() => handleCopyCode("mcp_omp", JSON.stringify({
@@ -430,7 +430,7 @@ docharvest --gui`}</pre>
 
             {/* Claude Code */}
             <div className="space-y-2">
-              <span className="font-mono text-xs font-semibold text-cyan-400">Claude Code CLI</span>
+              <span className="font-mono text-xs font-semibold text-cyan-700 dark:text-cyan-400">Claude Code CLI</span>
               <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
                 <button
                   onClick={() => handleCopyCode("mcp_claude_cli", "claude mcp add docharvest docharvest mcp")}
@@ -444,7 +444,7 @@ docharvest --gui`}</pre>
 
             {/* Cursor */}
             <div className="space-y-2">
-              <span className="font-mono text-xs font-semibold text-cyan-400">Cursor (`.cursor/mcp.json`)</span>
+              <span className="font-mono text-xs font-semibold text-cyan-700 dark:text-cyan-400">Cursor (`.cursor/mcp.json`)</span>
               <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
                 <button
                   onClick={() => handleCopyCode("mcp_cursor", JSON.stringify({
@@ -472,7 +472,7 @@ docharvest --gui`}</pre>
 
             {/* OpenCode */}
             <div className="space-y-2">
-              <span className="font-mono text-xs font-semibold text-cyan-400">OpenCode (`opencode.json`)</span>
+              <span className="font-mono text-xs font-semibold text-cyan-700 dark:text-cyan-400">OpenCode (`opencode.json`)</span>
               <div className="relative rounded-xl border border-border bg-[#090d16] p-3 text-xs font-mono text-slate-300">
                 <button
                   onClick={() => handleCopyCode("mcp_opencode", JSON.stringify({

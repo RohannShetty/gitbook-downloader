@@ -4,11 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DocHarvest v11.0.4</title>
+    <script>
+      // Apply the persisted theme before first paint (avoids a dark flash for
+      // users who saved the light theme). Falls back to the "dark" default.
+      try {
+        if (localStorage.getItem("docharvest_theme") === "light") {
+          document.documentElement.classList.remove("dark")
+          document.documentElement.classList.add("light")
+        }
+      } catch (e) { /* storage unavailable: keep dark default */ }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-background text-foreground antialiased selection:bg-cyan-500/20 selection:text-cyan-400 overflow-hidden font-sans">
+  <body class="bg-background text-foreground antialiased selection:bg-cyan-500/20 selection:text-cyan-700 dark:selection:text-cyan-300 overflow-hidden font-sans">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

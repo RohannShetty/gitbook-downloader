@@ -129,7 +129,7 @@ export const DiagnosticsView: React.FC = () => {
         <Card className="glass-card shadow-sm">
           <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Lock className="h-4 w-4 text-amber-500" />
+              <Lock className="h-4 w-4 text-amber-600 dark:text-amber-500" />
               <span>Storage Locks Inspector</span>
             </CardTitle>
             {activeLocks.length > 0 && (
@@ -146,7 +146,7 @@ export const DiagnosticsView: React.FC = () => {
           </CardHeader>
           <CardContent className="p-5 pt-0 space-y-2 text-xs">
             {activeLocks.length === 0 ? (
-              <div className="flex items-center gap-2 py-4 text-emerald-500 justify-center font-medium bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <div className="flex items-center gap-2 py-4 text-emerald-700 dark:text-emerald-500 justify-center font-medium bg-emerald-500/10 rounded-lg border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>All storage domains unlocked and healthy</span>
               </div>
@@ -160,7 +160,7 @@ export const DiagnosticsView: React.FC = () => {
                         PID: {l.pid || "?"} | Age: {l.age_seconds || 0}s | {l.is_stale ? "Stale / Orphaned" : "Active Lock"}
                       </div>
                     </div>
-                    <Badge variant="outline" className={`text-[10px] ${l.is_stale ? "text-destructive border-destructive/40" : "text-amber-500 border-amber-500/40"}`}>
+                    <Badge variant="outline" className={`text-[10px] ${l.is_stale ? "text-destructive border-destructive/40" : "text-amber-700 border-amber-500/40 dark:text-amber-500"}`}>
                       {l.is_stale ? "Stale" : "Active"}
                     </Badge>
                   </div>
@@ -199,7 +199,7 @@ export const DiagnosticsView: React.FC = () => {
               </div>
               <div className="p-3 rounded-lg bg-background/60 border border-border/50">
                 <span className="text-muted-foreground block text-[11px] mb-1">Pages Captured</span>
-                <span className="font-mono text-emerald-500 font-semibold">{diagnostics.pages_captured || 0} pages ({diagnostics.duration_s || 0}s)</span>
+                <span className="font-mono text-emerald-700 dark:text-emerald-500 font-semibold">{diagnostics.pages_captured || 0} pages ({diagnostics.duration_s || 0}s)</span>
               </div>
             </div>
           )}

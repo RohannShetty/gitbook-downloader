@@ -130,11 +130,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   const getProviderBadgeStyle = (provider: string) => {
     const p = (provider || "").toLowerCase()
-    if (p.includes("gitbook")) return "border-sky-500/30 text-sky-400 bg-sky-500/10"
-    if (p.includes("mintlify")) return "border-teal-500/30 text-teal-400 bg-teal-500/10"
-    if (p.includes("docusaurus")) return "border-emerald-500/30 text-emerald-400 bg-emerald-500/10"
-    if (p.includes("readthedocs")) return "border-blue-500/30 text-blue-400 bg-blue-500/10"
-    return "border-purple-500/30 text-purple-400 bg-purple-500/10"
+    if (p.includes("gitbook")) return "border-sky-500/30 text-sky-700 bg-sky-500/10 dark:text-sky-400"
+    if (p.includes("mintlify")) return "border-teal-500/30 text-teal-700 bg-teal-500/10 dark:text-teal-400"
+    if (p.includes("docusaurus")) return "border-emerald-500/30 text-emerald-700 bg-emerald-500/10 dark:text-emerald-400"
+    if (p.includes("readthedocs")) return "border-blue-500/30 text-blue-700 bg-blue-500/10 dark:text-blue-400"
+    return "border-purple-500/30 text-purple-700 bg-purple-500/10 dark:text-purple-400"
   }
 
   return (

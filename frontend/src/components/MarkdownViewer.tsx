@@ -24,6 +24,7 @@ interface MarkdownViewerProps {
   content: string
   title?: string
   domain?: string
+  theme?: "dark" | "light"
   onClose?: () => void
   onExportPdf?: () => void
 }
@@ -34,26 +35,58 @@ interface TocItem {
   level: number
 }
 
-// Initialize mermaid with dark/light dynamic theme
-mermaid.initialize({
-  startOnLoad: false,
-  theme: "dark",
-  themeVariables: {
-    darkMode: true,
-    background: "#090d16",
-    primaryColor: "#06b6d4",
-    primaryTextColor: "#f8fafc",
-    lineColor: "#38bdf8",
-    secondaryColor: "#10b981",
-    tertiaryColor: "#6366f1"
-  },
-  securityLevel: "loose"
-})
+// Theme-aware, re-runnable Mermaid initialization. The dark palette is pinned
+// (must not regress); the light palette uses a near-white background with dark
+// strokes/text so diagrams stay readable on light glass cards.
+let activeMermaidTheme: "dark" | "light" | null = null
+
+export function initMermaid(theme: "dark" | "light"): void {
+  if (activeMermaidTheme === theme) return
+  if (theme === "dark") {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "dark",
+      themeVariables: {
+        darkMode: true,
+        background: "#090d16",
+        primaryColor: "#06b6d4",
+        primaryTextColor: "#f8fafc",
+        lineColor: "#38bdf8",
+        secondaryColor: "#10b981",
+        tertiaryColor: "#6366f1"
+      },
+      securityLevel: "loose"
+    })
+  } else {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "default",
+      themeVariables: {
+        darkMode: false,
+        background: "#ffffff",
+        primaryColor: "#e0f2fe",
+        primaryTextColor: "#0f172a",
+        primaryBorderColor: "#0369a1",
+        lineColor: "#475569",
+        secondaryColor: "#d1fae5",
+        tertiaryColor: "#e0e7ff",
+        textColor: "#0f172a",
+        edgeLabelBackground: "#ffffff"
+      },
+      securityLevel: "loose"
+    })
+  }
+  activeMermaidTheme = theme
+}
+
+// Initial configuration (the app boots in dark mode; see index.html).
+initMermaid("dark")
 
 export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   content,
   title,
   domain,
+  theme,
   onClose,
   onExportPdf
 }) => {
@@ -64,6 +97,11 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
 
   const contentRef = useRef<HTMLDivElement>(null)
+
+  // Effective theme: explicit prop wins; otherwise read the class App.tsx
+  // toggles on <html>. Re-rendering diagrams is keyed on this value.
+  const resolvedTheme: "dark" | "light" =
+    theme ?? (document.documentElement.classList.contains("dark") ? "dark" : "light")
 
   // Metrics computation
   const stats = useMemo(() => {
@@ -91,24 +129,42 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
     return items
   }, [content])
 
-  // Render Mermaid diagrams whenever content changes
+  // Render Mermaid diagrams whenever the content or the theme changes. Every
+  // block is reset to its raw source first, so a theme switch always regenerates
+  // the SVGs with the active palette and never leaves stale dark SVGs behind.
   useEffect(() => {
     if (!contentRef.current) return
 
+    initMermaid(resolvedTheme)
+
     const mermaidBlocks = contentRef.current.querySelectorAll("pre.mermaid-block")
-    mermaidBlocks.forEach(async (el, index) => {
+    mermaidBlocks.forEach((el) => {
+      const code = el.getAttribute("data-code") || ""
+      el.classList.remove("mermaid-rendered")
+      if (code) el.textContent = code
+    })
+
+    let cancelled = false
+    mermaidBlocks.forEach((el, index) => {
       const code = el.getAttribute("data-code") || el.textContent || ""
       if (!code) return
-      try {
-        const id = `mermaid-svg-${Date.now()}-${index}`
-        const { svg } = await mermaid.render(id, code)
-        el.innerHTML = svg
-        el.classList.add("mermaid-rendered")
-      } catch (err) {
-        console.warn("Mermaid rendering error:", err)
-      }
+      void (async () => {
+        try {
+          const id = `mermaid-svg-${Date.now()}-${index}`
+          const { svg } = await mermaid.render(id, code)
+          if (cancelled) return
+          el.innerHTML = svg
+          el.classList.add("mermaid-rendered")
+        } catch (err) {
+          console.warn("Mermaid rendering error:", err)
+        }
+      })()
     })
-  }, [content])
+
+    return () => {
+      cancelled = true
+    }
+  }, [content, resolvedTheme])
 
   // Scrollspy observer for active heading
   useEffect(() => {
@@ -173,9 +229,9 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
 
           if (isMermaid) {
             elements.push(
-              <div key={`mermaid-${index}`} className="my-6 rounded-xl border border-cyan-500/20 bg-background/80 p-4 shadow-sm">
+              <div key={`mermaid-${index}-${resolvedTheme}`} className="my-6 rounded-xl border border-cyan-500/20 bg-background/80 p-4 shadow-sm">
                 <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3 text-xs text-muted-foreground font-mono">
-                  <span className="flex items-center gap-1.5 text-cyan-400">
+                  <span className="flex items-center gap-1.5 text-cyan-700 dark:text-cyan-400">
                     <Sparkles className="h-3.5 w-3.5" /> Mermaid Architecture Diagram
                   </span>
                 </div>
@@ -401,7 +457,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             className="h-8 gap-1.5 text-xs"
             title="Copy Raw Markdown"
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
             <span className="hidden md:inline">{copied ? "Copied" : "Copy MD"}</span>
           </Button>
 
@@ -410,7 +466,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               variant="outline"
               size="sm"
               onClick={onExportPdf}
-              className="h-8 gap-1.5 text-xs border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+              className="h-8 gap-1.5 text-xs border-cyan-500/30 text-cyan-700 hover:bg-cyan-500/10 dark:text-cyan-400"
               title="Export as Pure-Python PDF Handbook"
             >
               <Download className="h-3.5 w-3.5" />
@@ -476,7 +532,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         {/* Main Formatted Markdown Body */}
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto p-6 md:p-8 font-sans antialiased text-foreground selection:bg-cyan-500/20 selection:text-cyan-300"
+          className="flex-1 overflow-y-auto p-6 md:p-8 font-sans antialiased text-foreground selection:bg-cyan-500/20 selection:text-cyan-700 dark:selection:text-cyan-300"
         >
           <div className="max-w-4xl mx-auto">
             {renderFormattedContent()}
